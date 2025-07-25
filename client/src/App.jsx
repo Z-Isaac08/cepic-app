@@ -5,6 +5,7 @@ import Layout from "./components/layout/Layout";
 
 // Pages dynamiques
 const HomePage = lazy(() => import("@pages/HomePage"));
+const LibraryPage = lazy(() => import("@pages/LibraryPage"));
 
 const AppContent = () => {
   return (
@@ -19,6 +20,7 @@ const AppContent = () => {
         <Layout>
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/librairie" element={<LibraryPage />} />
           </Routes>
         </Layout>
       </Suspense>

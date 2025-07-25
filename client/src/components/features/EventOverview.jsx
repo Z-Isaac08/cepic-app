@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { motion } from "framer-motion";
 import { Award, Calendar, Clock, Coffee, MapPin, Users } from "lucide-react";
-import { useEventStore } from "@stores/eventStore";
+import { useEventStore } from "../../stores/eventStore";
 
 const EventOverview = () => {
   const { event } = useEventStore();
