@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { authAPI } from "../services/api";
 
 export const useAuthStore = create((set, get) => ({
   // États d'authentification
@@ -19,40 +20,23 @@ export const useAuthStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      // Simulation d'appel API
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Validation basique (simulation)
-      if (!email || !password) {
-        throw new Error("Email et mot de passe requis");
-      }
-
-      if (password.length < 6) {
-        throw new Error("Mot de passe trop court");
-      }
-
-      // Simulation de génération de token temporaire
-      const tempToken = `temp_${Date.now()}_${Math.random()
-        .toString(36)
-        .substr(2, 9)}`;
-
-      // Simulation d'envoi de code 2FA par email
-      console.log(`Code 2FA envoyé à ${email}: 123456`); // En réalité, serait envoyé par email
-
+      const response = await authAPI.loginExistingUser(email, password);
+      
       set({
         authState: "awaiting_2fa",
         userEmail: email,
-        tempToken,
+        tempToken: response.data.tempToken,
         loading: false,
       });
 
       return {
         success: true,
-        message: "Code de vérification envoyé par email",
+        message: response.message || "Code de vérification envoyé par email",
       };
     } catch (error) {
-      set({ error: error.message, loading: false });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || "Erreur de connexion";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
     }
   },
 
@@ -60,47 +44,49 @@ export const useAuthStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Ici tu pourrais ajouter une vérification du mot de passe
-      if (password.length < 6) {
-        throw new Error("Mot de passe invalide");
-      }
-
+      const response = await authAPI.loginExistingUser(email, password);
+      
       set({
-        user: { email, name: email.split("@")[0] },
-        authState: "logged_in",
+        authState: "awaiting_2fa",
+        userEmail: email,
+        tempToken: response.data.tempToken,
         loading: false,
       });
+
+      return response;
     } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message || "Email ou mot de passe incorrect";
       set({
-        error: "Email ou mot de passe incorrect",
+        error: errorMessage,
         loading: false,
       });
-      throw error;
+      throw new Error(errorMessage);
     }
   },
 
-  registerNewUser: async ({ email, firstName, lastName }) => {
+  registerNewUser: async ({ email, firstName, lastName, password }) => {
     set({ loading: true, error: null });
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Simule la création d'un compte utilisateur
-      const fakeUser = {
-        email,
-        name: `${firstName} ${lastName}`,
-      };
+      const response = await authAPI.registerNewUser({ 
+        email, 
+        firstName, 
+        lastName, 
+        password 
+      });
 
       set({
-        user: fakeUser,
-        authState: "awaiting_2fa", // Étape suivante : saisie du code 2FA
+        authState: "awaiting_2fa",
+        userEmail: email,
+        tempToken: response.data.tempToken,
         loading: false,
       });
+
+      return response;
     } catch (error) {
-      set({ error: "Erreur lors de la création du compte", loading: false });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || "Erreur lors de la création du compte";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
     }
   },
 
@@ -108,15 +94,9 @@ export const useAuthStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await authAPI.checkEmail(email);
 
-      const existingEmails = [
-        "admin@test.com",
-        "user@test.com",
-        "demo@example.com",
-      ];
-
-      if (existingEmails.includes(email)) {
+      if (response.data.exists) {
         set({
           authState: "existing_user_login",
           userEmail: email,
@@ -129,9 +109,12 @@ export const useAuthStore = create((set, get) => ({
           loading: false,
         });
       }
+
+      return response;
     } catch (error) {
-      set({ error: "Erreur lors de la vérification", loading: false });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || "Erreur lors de la vérification";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
     }
   },
 
@@ -140,65 +123,67 @@ export const useAuthStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      // Simulation d'appel API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const tempToken = get().tempToken;
+      const response = await authAPI.verify2FA(tempToken, code);
 
-      // Validation du code (simulation - en réalité serait vérifié côté serveur)
-      if (code !== "123456") {
-        throw new Error("Code de vérification incorrect");
+      // Store token in localStorage
+      if (response.token) {
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
       }
-
-      // Création de l'utilisateur connecté
-      const user = {
-        id: `user_${Date.now()}`,
-        email: get().userEmail,
-        name: get().userEmail.split("@")[0],
-        loginTime: new Date().toISOString(),
-        role: "participant",
-      };
 
       set({
         authState: "logged_in",
-        user,
+        user: response.data.user,
         loading: false,
         tempToken: "", // Clear temp token
       });
 
-      return { success: true, message: "Connexion réussie" };
+      return { success: true, message: response.message || "Connexion réussie" };
     } catch (error) {
-      set({ error: error.message, loading: false });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || "Code de vérification incorrect";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
     }
   },
 
   // Déconnexion
-  logout: () => {
-    set({
-      authState: "logged_out",
-      userEmail: "",
-      tempToken: "",
-      user: null,
-      error: null,
-    });
+  logout: async () => {
+    try {
+      await authAPI.logout();
+    } catch (error) {
+      console.log('Logout error:', error);
+    } finally {
+      // Always clear local state and storage
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      set({
+        authState: "logged_out",
+        userEmail: "",
+        tempToken: "",
+        user: null,
+        error: null,
+      });
+    }
   },
 
   // Resend 2FA code
   resend2FA: async () => {
-    const email = get().userEmail;
-    if (!email) return;
+    const tempToken = get().tempToken;
+    if (!tempToken) return;
 
     set({ loading: true, error: null });
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      console.log(`Nouveau code 2FA envoyé à ${email}: 123456`);
+      const response = await authAPI.resend2FA(tempToken);
 
       set({ loading: false });
-      return { success: true, message: "Nouveau code envoyé" };
+      return { success: true, message: response.message || "Nouveau code envoyé" };
     } catch (error) {
-      set({ error: error.message, loading: false });
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || "Erreur lors du renvoi";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
     }
   },
 
