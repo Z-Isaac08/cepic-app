@@ -1,5 +1,4 @@
 const express = require('express');
-const { body } = require('express-validator');
 const {
   checkEmail,
   loginExistingUser,
@@ -7,62 +6,128 @@ const {
   verify2FA,
   resend2FA,
   getCurrentUser,
-  logout
+  logout,
+  refreshToken
 } = require('../controllers/authController');
-const { protect, authRateLimit } = require('../middleware/auth');
+const { protect, requireVerified, cleanupExpiredSessions } = require('../middleware/auth');
+const { validate } = require('../middleware/validation');
+const { authLimiter, strictAuthLimiter } = require('../middleware/security');
+const {
+  checkEmailSchema,
+  loginSchema,
+  registerSchema,
+  verify2FASchema,
+  resend2FASchema
+} = require('../schemas/authSchemas');
 
 const router = express.Router();
 
-// Validation rules
-const emailValidation = [
-  body('email')
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('Please provide a valid email')
-];
+// Cleanup expired sessions occasionally
+router.use(cleanupExpiredSessions);
 
-const loginValidation = [
-  ...emailValidation,
-  body('password')
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters long')
-];
+// Public routes (with rate limiting and validation)
+router.post('/check-email', 
+  authLimiter, 
+  validate(checkEmailSchema), 
+  checkEmail
+);
 
-const registerValidation = [
-  ...emailValidation,
-  body('firstName')
-    .trim()
-    .isLength({ min: 2 })
-    .withMessage('First name must be at least 2 characters long'),
-  body('lastName')
-    .trim()
-    .isLength({ min: 2 })
-    .withMessage('Last name must be at least 2 characters long'),
-  body('password')
-    .isLength({ min: 8 })
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, and one number')
-];
+router.post('/login', 
+  authLimiter, 
+  validate(loginSchema), 
+  loginExistingUser
+);
 
-const verify2FAValidation = [
-  body('tempToken')
-    .notEmpty()
-    .withMessage('Temporary token is required'),
-  body('code')
-    .isLength({ min: 6, max: 6 })
-    .isNumeric()
-    .withMessage('Verification code must be 6 digits')
-];
+router.post('/register', 
+  strictAuthLimiter, 
+  validate(registerSchema), 
+  registerNewUser
+);
 
-// Public routes (with rate limiting)
-router.post('/check-email', authRateLimit, emailValidation, checkEmail);
-router.post('/login', authRateLimit, loginValidation, loginExistingUser);
-router.post('/register', authRateLimit, registerValidation, registerNewUser);
-router.post('/verify-2fa', authRateLimit, verify2FAValidation, verify2FA);
-router.post('/resend-2fa', authRateLimit, resend2FA);
+router.post('/verify-2fa', 
+  strictAuthLimiter, 
+  validate(verify2FASchema), 
+  verify2FA
+);
+
+router.post('/resend-2fa', 
+  authLimiter, 
+  validate(resend2FASchema), 
+  resend2FA
+);
+
+router.post('/refresh', 
+  authLimiter, 
+  refreshToken
+);
 
 // Protected routes
-router.get('/me', protect, getCurrentUser);
-router.post('/logout', protect, logout);
+router.get('/me', 
+  protect, 
+  getCurrentUser
+);
+
+router.post('/logout', 
+  protect, 
+  logout
+);
+
+// Admin only routes (example)
+router.get('/sessions', 
+  protect, 
+  requireVerified,
+  // restrictTo('ADMIN'), // Uncomment when needed
+  async (req, res) => {
+    // Get user's active sessions
+    const sessions = await require('../lib/prisma').session.findMany({
+      where: {
+        userId: req.user.id,
+        isRevoked: false,
+        expiresAt: { gt: new Date() }
+      },
+      select: {
+        id: true,
+        createdAt: true,
+        userAgent: true,
+        ipAddress: true,
+        expiresAt: true
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    res.json({
+      success: true,
+      data: { sessions }
+    });
+  }
+);
+
+router.delete('/sessions/:sessionId', 
+  protect, 
+  requireVerified,
+  async (req, res) => {
+    const { sessionId } = req.params;
+    
+    try {
+      await require('../lib/prisma').session.update({
+        where: {
+          id: sessionId,
+          userId: req.user.id // Ensure user can only revoke their own sessions
+        },
+        data: { isRevoked: true }
+      });
+
+      res.json({
+        success: true,
+        message: 'Session revoked successfully'
+      });
+    } catch (error) {
+      res.status(404).json({
+        success: false,
+        error: 'Session not found'
+      });
+    }
+  }
+);
 
 module.exports = router;

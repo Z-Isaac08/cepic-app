@@ -2,16 +2,36 @@ const nodemailer = require('nodemailer');
 
 class EmailService {
   constructor() {
-    this.transporter = nodemailer.createTransport({
-      service: process.env.EMAIL_SERVICE || 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    // In development, we'll use console logging instead of real emails
+    if (process.env.NODE_ENV === 'production' && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      this.transporter = nodemailer.createTransport({
+        service: process.env.EMAIL_SERVICE || 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+      this.isConfigured = true;
+    } else {
+      this.transporter = null;
+      this.isConfigured = false;
+      console.log('📧 Email Service: Development mode - emails will be logged to console');
+    }
   }
 
   async send2FACode(email, code, name = '') {
+    // In development mode, just log to console
+    if (!this.isConfigured) {
+      console.log('\n🔐 2FA CODE EMAIL SIMULATION');
+      console.log('='.repeat(50));
+      console.log(`📧 To: ${email}`);
+      console.log(`👤 Name: ${name || 'User'}`);
+      console.log(`🔑 2FA Code: ${code}`);
+      console.log(`⏰ Expires: 10 minutes`);
+      console.log('='.repeat(50));
+      return { success: true };
+    }
+
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
@@ -42,6 +62,17 @@ class EmailService {
   }
 
   async sendWelcomeEmail(email, name) {
+    // In development mode, just log to console
+    if (!this.isConfigured) {
+      console.log('\n🎉 WELCOME EMAIL SIMULATION');
+      console.log('='.repeat(50));
+      console.log(`📧 To: ${email}`);
+      console.log(`👤 Name: ${name}`);
+      console.log(`📄 Subject: Welcome to ProjectMoney!`);
+      console.log('='.repeat(50));
+      return { success: true };
+    }
+
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
