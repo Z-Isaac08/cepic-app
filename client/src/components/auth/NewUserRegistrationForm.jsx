@@ -70,38 +70,93 @@ const NewUserRegistrationForm = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Champs texte */}
-        {[
-          { name: "firstName", label: "Prénom" },
-          { name: "lastName", label: "Nom" },
-          { name: "password", label: "Mot de passe", type: "password" },
-          {
-            name: "confirmPassword",
-            label: "Confirmation du mot de passe",
-            type: "password",
-          },
-        ].map((field) => (
-          <div key={field.name}>
-            <label className="block text-sm font-medium text-white mb-1">
-              {field.label}
-            </label>
-            <input
-              type={field.type || "text"}
-              value={form[field.name] || ""}
-              onChange={(e) => handleChange(field.name, e.target.value)}
-              className={`w-full p-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-white ${
-                formErrors[field.name] ? "border-red-400 ring-red-400" : ""
-              }`}
-              placeholder={field.label}
-              disabled={loading}
-            />
-            {formErrors[field.name] && (
-              <p className="text-red-300 text-sm mt-1">
-                {formErrors[field.name]}
-              </p>
-            )}
-          </div>
-        ))}
+        {/* Prénom */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-1">
+            Prénom
+          </label>
+          <input
+            type="text"
+            value={form.firstName || ""}
+            onChange={(e) => handleChange("firstName", e.target.value)}
+            className={`w-full p-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-white ${
+              formErrors.firstName ? "border-red-400 ring-red-400" : ""
+            }`}
+            placeholder="Prénom"
+            disabled={loading}
+          />
+          {formErrors.firstName && (
+            <p className="text-red-300 text-sm mt-1">
+              {formErrors.firstName}
+            </p>
+          )}
+        </div>
+
+        {/* Nom */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-1">
+            Nom
+          </label>
+          <input
+            type="text"
+            value={form.lastName || ""}
+            onChange={(e) => handleChange("lastName", e.target.value)}
+            className={`w-full p-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-white ${
+              formErrors.lastName ? "border-red-400 ring-red-400" : ""
+            }`}
+            placeholder="Nom"
+            disabled={loading}
+          />
+          {formErrors.lastName && (
+            <p className="text-red-300 text-sm mt-1">
+              {formErrors.lastName}
+            </p>
+          )}
+        </div>
+
+        {/* Mot de passe */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-1">
+            Mot de passe
+          </label>
+          <input
+            type="password"
+            value={form.password || ""}
+            onChange={(e) => handleChange("password", e.target.value)}
+            className={`w-full p-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-white ${
+              formErrors.password ? "border-red-400 ring-red-400" : ""
+            }`}
+            placeholder="Mot de passe"
+            disabled={loading}
+          />
+          {formErrors.password && (
+            <p className="text-red-300 text-sm mt-1">
+              {formErrors.password}
+            </p>
+          )}
+        </div>
+
+        {/* Confirmation du mot de passe */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-1">
+            Confirmation du mot de passe
+          </label>
+          <input
+            type="password"
+            value={form.confirmPassword || ""}
+            onChange={(e) => handleChange("confirmPassword", e.target.value)}
+            className={`w-full p-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-white ${
+              formErrors.confirmPassword ? "border-red-400 ring-red-400" : ""
+            }`}
+            placeholder="Confirmation du mot de passe"
+            disabled={loading}
+          />
+          {formErrors.confirmPassword && (
+            <p className="text-red-300 text-sm mt-1">
+              {formErrors.confirmPassword}
+            </p>
+          )}
+        </div>
 
         {/* Erreur globale */}
         {error && (

@@ -1,24 +1,23 @@
 /* eslint-disable no-unused-vars */
 import { useEventStore } from "@stores/eventStore";
+import { useAuthStore } from "@stores/authStore";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft,
-  ArrowRight,
   Check,
   CreditCard,
   Lock,
   Mail,
   Phone,
-  User,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "../ui/Button";
 
 const RegistrationSteps = ({ onComplete }) => {
   const { event, registerForEvent, processPayment, loading } = useEventStore();
-  const [currentStep, setCurrentStep] = useState(1);
+  const { user } = useAuthStore();
+  const [currentStep, setCurrentStep] = useState(2); // Skip step 1 since user is authenticated
   const [formData, setFormData] = useState({
-    // Étape 1 - Informations personnelles
+    // Étape 1 - Informations personnelles (prefilled from auth)
     firstName: "",
     lastName: "",
     email: "",
@@ -41,23 +40,24 @@ const RegistrationSteps = ({ onComplete }) => {
   const [errors, setErrors] = useState({});
   const [isSuccess, setIsSuccess] = useState(false);
 
+  // Prefill user data from authentication
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        // Set default cardName to user's full name
+        cardName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+      }));
+    }
+  }, [user]);
+
   const formatPrice = (price) => {
     return new Intl.NumberFormat("fr-FR").format(price);
   };
 
-  const validateStep1 = () => {
-    const newErrors = {};
-
-    if (!formData.firstName.trim()) newErrors.firstName = "Prénom requis";
-    if (!formData.lastName.trim()) newErrors.lastName = "Nom requis";
-    if (!formData.email.trim()) newErrors.email = "Email requis";
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
-      newErrors.email = "Email invalide";
-    if (!formData.phone.trim()) newErrors.phone = "Téléphone requis";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   const validateStep2 = () => {
     const newErrors = {};
@@ -83,15 +83,6 @@ const RegistrationSteps = ({ onComplete }) => {
     }
   };
 
-  const handleNextStep = () => {
-    if (validateStep1()) {
-      setCurrentStep(2);
-    }
-  };
-
-  const handlePrevStep = () => {
-    setCurrentStep(1);
-  };
 
   const handleSubmit = async () => {
     if (!validateStep2()) return;
@@ -132,33 +123,28 @@ const RegistrationSteps = ({ onComplete }) => {
         {!isSuccess && (
           <>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              {currentStep === 1 ? "Vos informations" : "Paiement sécurisé"}
+              Paiement sécurisé
             </h2>
             <p className="text-gray-300 mb-6">
-              {currentStep === 1
-                ? "Quelques détails pour finaliser votre inscription"
-                : "Dernière étape pour sécuriser votre place"}
+              Finalisez votre inscription pour {event.title}
             </p>
 
             {/* Progress Bar */}
             <div className="max-w-md mx-auto">
               <div className="flex items-center justify-between text-sm mb-2 text-white">
-                <span
-                  className={currentStep >= 1 ? "opacity-100" : "opacity-50"}
-                >
-                  Informations
+                <span className="opacity-100 flex items-center">
+                  <Check className="w-4 h-4 mr-1" />
+                  Connecté
                 </span>
-                <span
-                  className={currentStep >= 2 ? "opacity-100" : "opacity-50"}
-                >
+                <span className="opacity-100">
                   Paiement
                 </span>
               </div>
               <div className="w-full bg-white/20 rounded-full h-2">
                 <motion.div
                   className="bg-white h-2 rounded-full"
-                  initial={{ width: "0%" }}
-                  animate={{ width: `${(currentStep / 2) * 100}%` }}
+                  initial={{ width: "50%" }}
+                  animate={{ width: "100%" }}
                   transition={{ duration: 0.3 }}
                 />
               </div>
@@ -171,21 +157,13 @@ const RegistrationSteps = ({ onComplete }) => {
       <div className="bg-white/10 backdrop-blur-md m-7 rounded-2xl p-5 md:p-12">
         {isSuccess ? (
           <SuccessStep event={event} onComplete={onComplete} />
-        ) : currentStep === 1 ? (
-          <Step1PersonalInfo
-            formData={formData}
-            errors={errors}
-            onChange={handleInputChange}
-            onNext={handleNextStep}
-            loading={loading}
-          />
         ) : (
           <Step2Payment
             formData={formData}
             errors={errors}
             event={event}
+            user={user}
             onChange={handleInputChange}
-            onPrev={handlePrevStep}
             onSubmit={handleSubmit}
             loading={loading}
           />
@@ -195,122 +173,6 @@ const RegistrationSteps = ({ onComplete }) => {
   );
 };
 
-// ===============================
-// Étape 1 - Informations personnelles
-// ===============================
-const Step1PersonalInfo = ({ formData, errors, onChange, onNext, loading }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="space-y-6"
-    >
-      <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-          <User className="w-8 h-8 text-white" />
-        </div>
-        <h3 className="text-xl font-semibold text-white mb-2">
-          Parlez-nous de vous
-        </h3>
-        <p className="text-gray-300">
-          Ces informations nous permettront de personnaliser votre expérience
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-white mb-2">
-            Prénom *
-          </label>
-          <input
-            type="text"
-            value={formData.firstName}
-            onChange={(e) => onChange("firstName", e.target.value)}
-            className={`w-full p-4 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-white focus:border-transparent transition-all ${
-              errors.firstName ? "border-red-400" : ""
-            }`}
-            placeholder="Votre prénom"
-          />
-          {errors.firstName && (
-            <p className="text-red-300 text-sm mt-1">{errors.firstName}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-white mb-2">
-            Nom *
-          </label>
-          <input
-            type="text"
-            value={formData.lastName}
-            onChange={(e) => onChange("lastName", e.target.value)}
-            className={`w-full p-4 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-white focus:border-transparent transition-all ${
-              errors.lastName ? "border-red-400" : ""
-            }`}
-            placeholder="Votre nom"
-          />
-          {errors.lastName && (
-            <p className="text-red-300 text-sm mt-1">{errors.lastName}</p>
-          )}
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-white mb-2">
-          <Mail className="w-4 h-4 inline mr-2" />
-          Email *
-        </label>
-        <input
-          type="email"
-          value={formData.email}
-          onChange={(e) => onChange("email", e.target.value)}
-          className={`w-full p-4 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-white focus:border-transparent transition-all ${
-            errors.email ? "border-red-400" : ""
-          }`}
-          placeholder="votre@email.com"
-        />
-        {errors.email && (
-          <p className="text-red-300 text-sm mt-1">{errors.email}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-white mb-2">
-          <Phone className="w-4 h-4 inline mr-2" />
-          Téléphone *
-        </label>
-        <input
-          type="tel"
-          value={formData.phone}
-          onChange={(e) => onChange("phone", e.target.value)}
-          className={`w-full p-4 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-white focus:border-transparent transition-all ${
-            errors.phone ? "border-red-400" : ""
-          }`}
-          placeholder="+225 XX XX XX XX XX"
-        />
-        {errors.phone && (
-          <p className="text-red-300 text-sm mt-1">{errors.phone}</p>
-        )}
-      </div>
-
-      <div className="flex justify-end pt-6">
-        <Button
-          variant="primary"
-          size="lg"
-          onClick={onNext}
-          disabled={loading}
-          className="min-w-[160px] bg-white text-dark-900 hover:bg-gray-100"
-        >
-          <span className="flex items-center">
-            Continuer
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </span>
-        </Button>
-      </div>
-    </motion.div>
-  );
-};
 
 // ===============================
 // Étape 2 - Paiement
@@ -319,8 +181,8 @@ const Step2Payment = ({
   formData,
   errors,
   event,
+  user,
   onChange,
-  onPrev,
   onSubmit,
   loading,
 }) => {
@@ -358,7 +220,13 @@ const Step2Payment = ({
           <div className="flex justify-between text-gray-300">
             <span>Participant</span>
             <span className="font-medium text-white">
-              {formData.firstName} {formData.lastName}
+              {user?.firstName} {user?.lastName}
+            </span>
+          </div>
+          <div className="flex justify-between text-gray-300">
+            <span>Email</span>
+            <span className="font-medium text-white">
+              {user?.email}
             </span>
           </div>
           <div className="flex justify-between text-gray-300">
@@ -527,20 +395,7 @@ const Step2Payment = ({
       </div>
 
       {/* Actions */}
-      <div className="flex justify-between pt-6">
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={onPrev}
-          disabled={loading}
-          className="border-white text-white hover:bg-white hover:text-dark-900"
-        >
-          <span className="flex items-center">
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Retour
-          </span>
-        </Button>
-
+      <div className="flex justify-end pt-6">
         <Button
           variant="primary"
           size="lg"

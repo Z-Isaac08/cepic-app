@@ -1,24 +1,277 @@
+# ================================
+# GITIGNORE FRONTEND REACT/VITE
+# ================================
+
+# Dépendances npm/yarn
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Cache npm et yarn
+.npm
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Cache ESLint
+.eslintcache
+
+# Dossier de couverture de code
+coverage/
+*.lcov
+
+# ================================
+# BUILD ET DISTRIBUTION
+# ================================
+
+# Fichiers de build générés par Vite
+dist/
+build/
+
+# Fichiers de build temporaires
+.vite/
+.tmp/
+
+# Fichiers de bundle générés
+bundle/
+public/build/
+
+# ================================
+# VARIABLES D'ENVIRONNEMENT
+# ================================
+
+# Fichiers d'environnement (peuvent contenir des clés API)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+
+# ================================
+# LOGS ET FICHIERS TEMPORAIRES
+# ================================
+
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Données d'exécution
+*.pid
+*.seed
+*.pid.lock
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# Dossiers temporaires
+.tmp/
+.temp/
+tmp/
+temp/
+
+# ================================
+# OUTILS DE DÉVELOPPEMENT
+# ================================
+
+# Éditeurs et IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Configuration spécifique aux éditeurs
+.settings/
+.project
+.classpath
+
+# ================================
+# TESTS ET COVERAGE
+# ================================
+
+# Rapports de test
+test-results/
+coverage-reports/
+junit.xml
+
+# Screenshots des tests
+screenshots/
+test-screenshots/
+
+# Rapports de tests visuels
+__diff_output__/
+__image_snapshots__/
+
+# ================================
+# ASSETS ET UPLOADS
+# ================================
+
+# Uploads utilisateur (si applicable)
+public/uploads/
+src/assets/uploads/
+
+# Images temporaires et cache
+.cache/
+cache/
+temp-images/
+
+# Fichiers générés par les outils d'optimisation
+optimized/
+compressed/
+
+# ================================
+# BUNDLERS ET OUTILS DE BUILD
+# ================================
+
+# Webpack
+.webpack/
+webpack-stats.json
+
+# Parcel
+.parcel-cache/
+
+# Rollup
+.rollup.cache/
+
+# Next.js (si utilisé)
+.next/
+next-env.d.ts
+
+# Nuxt.js (si utilisé)
+.nuxt/
+
+# Gatsby (si utilisé)
+.cache/
+public
+
+# ================================
+# STORYBOOK
+# ================================
+
+# Storybook build outputs
+storybook-static/
+.storybook/build/
+
+# ================================
+# PWA ET SERVICE WORKERS
+# ================================
+
+# Workbox
+workbox-*.js
+sw.js
+service-worker.js
+
+# ================================
+# DÉPLOIEMENT
+# ================================
+
+# Fichiers de déploiement
+deploy/
+deployment/
+
+# Scripts de déploiement sensibles
+deploy.sh
+production-deploy.sh
+
+# Certificats SSL
+*.pem
+*.crt
+*.key
+
+# ================================
+# SYSTÈME D'EXPLOITATION
+# ================================
+
+# macOS
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.nfs*
+
+# ================================
+# MONITORING ET ANALYTICS
+# ================================
+
+# Logs de performance
+performance/
+lighthouse-reports/
+
+# Rapports d'analyse
+analysis/
+bundle-analyzer/
+
+# ================================
+# DOCKER
+# ================================
+
+# Fichiers Docker de développement
+docker-compose.override.yml
+.docker/
+
+# ================================
+# OUTILS SPÉCIFIQUES
+# ================================
+
+# Chromatic (tests visuels)
+chromatic-build/
+
+# TypeScript
+*.tsbuildinfo
+
+# Turbo
+.turbo/
+
+# Microbundle
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# JSPM
+jspm_packages/
+
+# ================================
+# SÉCURITÉ
+# ================================
+
+# Clés et tokens
+*.key
+*.pem
+client-secret.json
+oauth-config.json
+
+# Fichiers de configuration sensibles
+firebase-config.js
+aws-config.js

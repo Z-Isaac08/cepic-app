@@ -9,6 +9,7 @@ export const useAuthStore = create((set, get) => ({
   user: null,
   loading: false,
   error: null,
+  initialized: false, // Track if auth has been initialized
 
   // Actions
   setLoading: (loading) => set({ loading }),
@@ -21,7 +22,7 @@ export const useAuthStore = create((set, get) => ({
 
     try {
       const response = await authAPI.loginExistingUser(email, password);
-      
+
       set({
         authState: "awaiting_2fa",
         userEmail: email,
@@ -34,7 +35,8 @@ export const useAuthStore = create((set, get) => ({
         message: response.message || "Code de vérification envoyé par email",
       };
     } catch (error) {
-      const errorMessage = error.response?.data?.error || error.message || "Erreur de connexion";
+      const errorMessage =
+        error.response?.data?.error || error.message || "Erreur de connexion";
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
@@ -45,7 +47,7 @@ export const useAuthStore = create((set, get) => ({
 
     try {
       const response = await authAPI.loginExistingUser(email, password);
-      
+
       set({
         authState: "awaiting_2fa",
         userEmail: email,
@@ -55,7 +57,10 @@ export const useAuthStore = create((set, get) => ({
 
       return response;
     } catch (error) {
-      const errorMessage = error.response?.data?.error || error.message || "Email ou mot de passe incorrect";
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Email ou mot de passe incorrect";
       set({
         error: errorMessage,
         loading: false,
@@ -68,11 +73,11 @@ export const useAuthStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const response = await authAPI.registerNewUser({ 
-        email, 
-        firstName, 
-        lastName, 
-        password 
+      const response = await authAPI.registerNewUser({
+        email,
+        firstName,
+        lastName,
+        password,
       });
 
       set({
@@ -84,7 +89,20 @@ export const useAuthStore = create((set, get) => ({
 
       return response;
     } catch (error) {
-      const errorMessage = error.response?.data?.error || error.message || "Erreur lors de la création du compte";
+      console.error('Registration error:', error);
+      let errorMessage = "Erreur lors de la création du compte";
+      
+      if (error.response?.data) {
+        // Handle validation errors with details
+        if (error.response.data.details && Array.isArray(error.response.data.details)) {
+          errorMessage = error.response.data.details.map(detail => detail.message).join(', ');
+        } else if (error.response.data.error) {
+          errorMessage = error.response.data.error;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
@@ -112,7 +130,10 @@ export const useAuthStore = create((set, get) => ({
 
       return response;
     } catch (error) {
-      const errorMessage = error.response?.data?.error || error.message || "Erreur lors de la vérification";
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Erreur lors de la vérification";
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
@@ -126,11 +147,8 @@ export const useAuthStore = create((set, get) => ({
       const tempToken = get().tempToken;
       const response = await authAPI.verify2FA(tempToken, code);
 
-      // Store token in localStorage
-      if (response.token) {
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-      }
+      // No need to store token - it's in HTTP-only cookies
+      // Just store user data for UI purposes if needed
 
       set({
         authState: "logged_in",
@@ -139,9 +157,15 @@ export const useAuthStore = create((set, get) => ({
         tempToken: "", // Clear temp token
       });
 
-      return { success: true, message: response.message || "Connexion réussie" };
+      return {
+        success: true,
+        message: response.message || "Connexion réussie",
+      };
     } catch (error) {
-      const errorMessage = error.response?.data?.error || error.message || "Code de vérification incorrect";
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Code de vérification incorrect";
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
@@ -152,12 +176,9 @@ export const useAuthStore = create((set, get) => ({
     try {
       await authAPI.logout();
     } catch (error) {
-      console.log('Logout error:', error);
+      console.log("Logout error:", error);
     } finally {
-      // Always clear local state and storage
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      
+      // Always clear local state (cookies are cleared by server)
       set({
         authState: "logged_out",
         userEmail: "",
@@ -179,9 +200,13 @@ export const useAuthStore = create((set, get) => ({
       const response = await authAPI.resend2FA(tempToken);
 
       set({ loading: false });
-      return { success: true, message: response.message || "Nouveau code envoyé" };
+      return {
+        success: true,
+        message: response.message || "Nouveau code envoyé",
+      };
     } catch (error) {
-      const errorMessage = error.response?.data?.error || error.message || "Erreur lors du renvoi";
+      const errorMessage =
+        error.response?.data?.error || error.message || "Erreur lors du renvoi";
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
@@ -195,6 +220,53 @@ export const useAuthStore = create((set, get) => ({
       tempToken: "",
       error: null,
     });
+  },
+
+  // Check authentication status on app startup
+  checkAuthStatus: async () => {
+    try {
+      const response = await authAPI.getCurrentUser();
+
+      set({
+        authState: "logged_in",
+        user: response.data.user,
+        loading: false,
+        error: null,
+      });
+
+      return response.data.user;
+    } catch {
+      // Not authenticated or session expired
+      set({
+        authState: "logged_out",
+        user: null,
+        loading: false,
+        error: null,
+      });
+      return null;
+    }
+  },
+
+  // Initialize auth state
+  initAuth: async () => {
+    // Prevent multiple initialization attempts
+    if (get().initialized) {
+      return;
+    }
+    
+    set({ loading: true, initialized: true });
+    try {
+      await get().checkAuthStatus();
+    } catch (error) {
+      // Silently fail on initialization - don't throw errors
+      console.log('Auth initialization: No valid session found', error);
+      set({
+        authState: "logged_out",
+        user: null,
+        loading: false,
+        error: null,
+      });
+    }
   },
 
   // Helpers

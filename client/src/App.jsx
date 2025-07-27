@@ -1,13 +1,30 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Route, Routes } from "react-router";
 import ErrorBoundary from "./components/errorboundary/ErrorBoundary";
 import Layout from "./components/layout/Layout";
+import { useAuthStore } from "./stores/authStore";
 
 // Pages dynamiques
 const HomePage = lazy(() => import("@pages/HomePage"));
 const LibraryPage = lazy(() => import("@pages/LibraryPage"));
 
 const AppContent = () => {
+  const { initAuth, loading } = useAuthStore();
+
+  useEffect(() => {
+    // Initialize authentication on app startup
+    initAuth();
+  }, [initAuth]);
+
+  // Show loading spinner while checking auth status
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="w-8 h-8 border-4 border-normal-blue border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <ErrorBoundary>
       <Suspense

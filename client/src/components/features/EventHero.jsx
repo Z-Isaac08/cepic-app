@@ -148,7 +148,7 @@ const EventHero = () => {
               <div className="flex items-center space-x-3">
                 {/* Nom de l'utilisateur */}
                 <span className="text-white/80 text-sm hidden sm:block">
-                  Bonjour, <span className="font-medium">{user?.name}</span>
+                  Bonjour, <span className="font-medium">{user?.lastName}</span>
                 </span>
 
                 {/* Bouton déconnexion */}
