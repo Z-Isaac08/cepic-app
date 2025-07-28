@@ -99,6 +99,8 @@ app.get('/api/status', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', require('./routers/adminRoutes'));
+app.use('/api/library', require('./routers/libraryRoutes'));
 
 // Catch all for API routes
 app.use('/api/*', (req, res) => {

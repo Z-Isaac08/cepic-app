@@ -99,4 +99,106 @@ export const authAPI = {
   },
 };
 
+// Services d'administration
+export const adminAPI = {
+  getDashboardStats: () => api.get('/admin/dashboard'),
+  getUserStats: () => api.get('/admin/users/stats'),
+  getUsers: (filters) => api.get('/admin/users', { params: filters }),
+  updateUserStatus: (userId, status) => api.patch(`/admin/users/${userId}/status`, status),
+  deleteUser: (userId) => api.delete(`/admin/users/${userId}`),
+  getSecurityLogs: (filters) => api.get('/admin/security/logs', { params: filters }),
+  getSystemHealth: () => api.get('/admin/system/health'),
+  getAnalytics: (timeRange, metric) => api.get('/admin/analytics', { 
+    params: { timeRange, metric } 
+  }),
+  getEventStats: () => api.get('/admin/events/stats'),
+  getLibraryStats: () => api.get('/admin/library/stats'),
+  getFinancialStats: () => api.get('/admin/financial/stats'),
+  updateSystemConfig: (config) => api.patch('/admin/system/config', config),
+  sendNotification: (notification) => api.post('/admin/notifications', notification),
+  createBackup: () => api.post('/admin/system/backup'),
+  restoreBackup: (backupId) => api.post(`/admin/system/restore/${backupId}`),
+  generateReport: (type, period) => api.post('/admin/reports/generate', { type, period })
+};
+
+// Library API functions
+export const libraryAPI = {
+  // Categories
+  getCategories: (includeInactive = false) => 
+    api.get('/library/categories', { params: { includeInactive } }),
+  
+  createCategory: (categoryData) => 
+    api.post('/library/categories', categoryData),
+  
+  updateCategory: (categoryId, updateData) => 
+    api.put(`/library/categories/${categoryId}`, updateData),
+  
+  deleteCategory: (categoryId) => 
+    api.delete(`/library/categories/${categoryId}`),
+
+  // Books
+  getBooks: (filters = {}) => 
+    api.get('/library/books', { params: filters }),
+  
+  getBookById: (bookId) => 
+    api.get(`/library/books/${bookId}`),
+  
+  createBook: (bookData) => 
+    api.post('/library/books', bookData),
+  
+  updateBook: (bookId, updateData) => 
+    api.put(`/library/books/${bookId}`, updateData),
+  
+  deleteBook: (bookId) => 
+    api.delete(`/library/books/${bookId}`),
+  
+  // Admin - get all books including private
+  getAllBooks: (filters = {}) => 
+    api.get('/library/admin/books', { params: filters }),
+
+  // Bookmarks
+  getUserBookmarks: (page = 1, limit = 20) => 
+    api.get('/library/bookmarks', { params: { page, limit } }),
+  
+  toggleBookmark: (bookId) => 
+    api.post(`/library/books/${bookId}/bookmark`),
+
+  // Reviews
+  getBookReviews: (bookId, page = 1, limit = 10) => 
+    api.get(`/library/books/${bookId}/reviews`, { params: { page, limit } }),
+  
+  addReview: (bookId, reviewData) => 
+    api.post(`/library/books/${bookId}/reviews`, reviewData),
+  
+  updateReview: (bookId, reviewData) => 
+    api.post(`/library/books/${bookId}/reviews`, reviewData),
+  
+  deleteReview: (bookId) => 
+    api.delete(`/library/books/${bookId}/reviews`),
+
+  // Downloads
+  downloadBook: (bookId) => 
+    api.get(`/library/books/${bookId}/download`),
+
+  // Statistics
+  getLibraryStats: () => 
+    api.get('/library/stats'),
+
+  // Search and filters
+  searchBooks: (query, filters = {}) => 
+    api.get('/library/books', { params: { search: query, ...filters } }),
+  
+  getBooksByCategory: (categoryId, filters = {}) => 
+    api.get('/library/books', { params: { categoryId, ...filters } }),
+  
+  getBooksByAuthor: (author, filters = {}) => 
+    api.get('/library/books', { params: { author, ...filters } }),
+  
+  getBooksByLanguage: (language, filters = {}) => 
+    api.get('/library/books', { params: { language, ...filters } }),
+  
+  getBooksByFileType: (fileType, filters = {}) => 
+    api.get('/library/books', { params: { fileType, ...filters } })
+};
+
 export default api;
