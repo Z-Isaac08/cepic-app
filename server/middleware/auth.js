@@ -167,10 +167,44 @@ const cleanupExpiredSessions = async (req, res, next) => {
   }
 };
 
+// Middleware pour vérifier les privilèges administrateur
+const requireAdmin = async (req, res, next) => {
+  try {
+    // Vérifier que l'utilisateur est connecté
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Authentification requise'
+      });
+    }
+
+    // Vérifier que l'utilisateur a le rôle ADMIN
+    if (req.user.role !== 'ADMIN') {
+      return res.status(403).json({
+        success: false,
+        error: 'Privilèges administrateur requis'
+      });
+    }
+
+    // Vérifier que le compte admin est actif et vérifié
+    if (!req.user.isActive || !req.user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        error: 'Compte administrateur inactif ou non vérifié'
+      });
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   protect,
   optionalAuth,
   restrictTo,
   requireVerified,
+  requireAdmin,
   cleanupExpiredSessions
 };

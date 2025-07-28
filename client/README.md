@@ -1,6 +1,6 @@
 # 🎨 Frontend Client - ProjectMoney
 
-Interface utilisateur moderne construite avec React 18, Vite et Zustand pour une expérience utilisateur fluide et responsive.
+Interface utilisateur moderne construite avec React 19, Vite et Zustand pour une expérience utilisateur fluide et responsive.
 
 ## 📋 Table des Matières
 
@@ -30,7 +30,7 @@ Le frontend de ProjectMoney est une application React moderne qui offre :
 ## 🛠️ Technologies
 
 ### Core Framework
-- **React 18** - Bibliothèque UI avec Concurrent Features
+- **React 19** - Bibliothèque UI avec Concurrent Features
 - **Vite** - Build tool ultra-rapide avec HMR
 - **JavaScript ES6+** - Syntaxe moderne et fonctionnelle
 

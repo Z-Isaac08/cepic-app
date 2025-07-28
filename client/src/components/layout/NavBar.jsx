@@ -1,13 +1,15 @@
 /* eslint-disable no-unused-vars */
 import { AnimatePresence, motion } from "framer-motion";
-import { Calendar, Clock, Info, Users } from "lucide-react";
+import { Calendar, Clock, Info, Users, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
+import { useAuthStore } from "../../stores/authStore";
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const location = useLocation();
+  const { user } = useAuthStore();
 
   const navigation = [
     { name: "Accueil", href: "/", icon: Calendar },
@@ -47,11 +49,11 @@ const NavBar = () => {
           className="fixed w-full z-50 bg-white/95 backdrop-blur-sm shadow-lg"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-center items-center h-16">
+            <div className="flex justify-between items-center h-16 w-full">
               {/* Logo */}
               <Link
                 to="/"
-                className="flex items-center justify-center space-x-2"
+                className="flex items-center space-x-2"
               >
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -61,13 +63,39 @@ const NavBar = () => {
                 </motion.div>
                 <div className="flex flex-col">
                   <span className="text-lg font-bold text-gradient">
-                    Lorem Ipsum Conf
+                    ProjectMoney
                   </span>
                   <span className="text-xs text-gray-500 hidden sm:block">
-                    15 Septembre 2025
+                    Gestion Financière
                   </span>
                 </div>
               </Link>
+
+              {/* Navigation et Admin */}
+              <div className="flex items-center space-x-4">
+                {/* Lien Admin pour les administrateurs */}
+                {user && user.role === 'ADMIN' && (
+                  <Link
+                    to="/admin"
+                    className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span className="hidden sm:inline">Admin</span>
+                  </Link>
+                )}
+
+                {/* Informations utilisateur */}
+                {user && (
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <span className="hidden md:inline">
+                      {user.firstName} {user.lastName}
+                    </span>
+                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                      {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </motion.nav>

@@ -7,6 +7,7 @@ import { useAuthStore } from "./stores/authStore";
 // Pages dynamiques
 const HomePage = lazy(() => import("@pages/HomePage"));
 const LibraryPage = lazy(() => import("@pages/LibraryPage"));
+const AdminDashboard = lazy(() => import("@pages/AdminDashboard"));
 
 const AppContent = () => {
   const { initAuth, loading } = useAuthStore();
@@ -34,12 +35,14 @@ const AppContent = () => {
           </div>
         }
       >
-        <Layout>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/librairie" element={<LibraryPage />} />
-          </Routes>
-        </Layout>
+        <Routes>
+          {/* Routes avec layout */}
+          <Route path="/" element={<Layout><HomePage /></Layout>} />
+          <Route path="/librairie" element={<Layout><LibraryPage /></Layout>} />
+          
+          {/* Route admin sans layout */}
+          <Route path="/admin/*" element={<AdminDashboard />} />
+        </Routes>
       </Suspense>
     </ErrorBoundary>
   );
