@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    platform: linux/amd64
+    environment:
+      POSTGRES_DB: projectmoney
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d projectmoney"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: zcook08/projectmoney-backend:latest
+    platform: linux/amd64
+    environment:
+      - DATABASE_URL=postgresql://postgres:password123@postgres:5432/projectmoney
+      - JWT_SECRET=test-secret-key
+      - JWT_EXPIRES_IN=7d
+      - JWT_REFRESH_EXPIRES_IN=30d
+      - JWT_REFRESH_SECRET=test-refresh-key
+      - CLIENT_URL=http://localhost:5173
+      - PORT=3001
+      - NODE_ENV=development
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    image: zcook08/projectmoney-frontend:latest
+    platform: linux/amd64
+    environment:
+      - VITE_API_BASE_URL=http://localhost:3001/api
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
