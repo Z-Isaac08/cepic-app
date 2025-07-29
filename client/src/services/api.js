@@ -137,8 +137,8 @@ export const libraryAPI = {
     api.delete(`/library/categories/${categoryId}`),
 
   // Books
-  getBooks: (filters = {}) => 
-    api.get('/library/books', { params: filters }),
+  getBooks: (filters = {}, config = {}) => 
+    api.get('/library/books', { params: filters, ...config }),
   
   getBookById: (bookId) => 
     api.get(`/library/books/${bookId}`),
@@ -198,7 +198,23 @@ export const libraryAPI = {
     api.get('/library/books', { params: { language, ...filters } }),
   
   getBooksByFileType: (fileType, filters = {}) => 
-    api.get('/library/books', { params: { fileType, ...filters } })
+    api.get('/library/books', { params: { fileType, ...filters } }),
+
+  // Orders and Payments
+  createOrder: (orderData) => 
+    api.post('/library/orders', orderData),
+  
+  getUserOrders: (page = 1, limit = 20) => 
+    api.get('/library/orders', { params: { page, limit } }),
+  
+  getOrderById: (orderId) => 
+    api.get(`/library/orders/${orderId}`),
+  
+  processPayment: (orderId, paymentData) => 
+    api.post(`/library/orders/${orderId}/payment`, paymentData),
+  
+  getPaymentStatus: (orderId) => 
+    api.get(`/library/orders/${orderId}/payment/status`)
 };
 
 export default api;

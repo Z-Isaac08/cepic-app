@@ -63,10 +63,10 @@ const NavBar = () => {
                 </motion.div>
                 <div className="flex flex-col">
                   <span className="text-lg font-bold text-gradient">
-                    ProjectMoney
+                    Conférence des daniels
                   </span>
                   <span className="text-xs text-gray-500 hidden sm:block">
-                    Gestion Financière
+                    Lorem Ipsum
                   </span>
                 </div>
               </Link>

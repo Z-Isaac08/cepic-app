@@ -1,19 +1,16 @@
-// eslint-disable-next-line no-unused-vars
+/* eslint-disable no-unused-vars */
 import { motion } from "framer-motion";
-import { Check, Eye, Heart, ShoppingCart, Star } from "lucide-react";
+import { BookOpen, Check, ShoppingCart, Star } from "lucide-react";
 import { useState } from "react";
 import { useBookStore } from "../../stores/bookStore";
 
-const BookCard = ({ book, index, viewMode = "grid" }) => {
-  const { selectedBooks, addBook, removeBook } = useBookStore();
+const BookCard = ({ book, index }) => {
+  const { selectedBooks, addToCart, removeFromCart } = useBookStore();
   const [isHovered, setIsHovered] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
 
   const isSelected = selectedBooks.some((b) => b.id === book.id);
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat("fr-FR").format(price);
-  };
+  const formatPrice = (price) => new Intl.NumberFormat("fr-FR").format(price);
 
   const getDiscountPercentage = () => {
     if (book.originalPrice > book.price) {
@@ -26,207 +23,106 @@ const BookCard = ({ book, index, viewMode = "grid" }) => {
 
   const handleToggleSelection = (e) => {
     e.stopPropagation();
-    if (isSelected) {
-      removeBook(book.id);
-    } else {
-      addBook(book);
-    }
+    isSelected ? removeFromCart(book.id) : addToCart(book);
   };
-
-  if (viewMode === "list") {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.05 }}
-        className="bg-gray-800 rounded-lg p-4 hover:bg-gray-750 transition-all cursor-pointer"
-        onClick={() => setShowPreview(true)}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <div className="flex items-center space-x-4">
-          {/* Image */}
-          <div className="relative">
-            <img
-              src={book.cover}
-              alt={book.title}
-              className="w-16 h-24 object-cover rounded"
-            />
-            {book.bestseller && (
-              <span className="absolute -top-1 -right-1 bg-yellow-500 text-xs font-bold px-1 py-0.5 rounded text-black">
-                ⭐
-              </span>
-            )}
-          </div>
-
-          {/* Informations */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="font-semibold text-white text-lg truncate">
-                  {book.title}
-                </h3>
-                <p className="text-gray-400 text-sm">{book.author}</p>
-                <p className="text-gray-500 text-xs">
-                  {book.category} • {book.pages} pages
-                </p>
-              </div>
-
-              <div className="text-right">
-                <div className="flex items-center space-x-2 mb-1">
-                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                  <span className="text-sm text-gray-300">{book.rating}</span>
-                  <span className="text-xs text-gray-500">
-                    ({book.reviews})
-                  </span>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  {getDiscountPercentage() > 0 && (
-                    <span className="text-xs text-gray-400 line-through">
-                      {formatPrice(book.originalPrice)} FCFA
-                    </span>
-                  )}
-                  <span className="text-lg font-bold text-primary-400">
-                    {formatPrice(book.price)} FCFA
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={handleToggleSelection}
-              className={`p-2 rounded-full transition-all ${
-                isSelected
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-700 text-gray-400 hover:bg-primary-500 hover:text-white"
-              }`}
-            >
-              {isSelected ? (
-                <Check className="w-4 h-4" />
-              ) : (
-                <ShoppingCart className="w-4 h-4" />
-              )}
-            </button>
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="relative group cursor-pointer"
-      onClick={() => setShowPreview(true)}
+      className="group cursor-pointer w-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Image Container */}
-      <div className="relative overflow-hidden rounded-lg">
-        <img
-          src={book.cover}
-          alt={book.title}
-          className="w-full h-72 object-cover transition-transform duration-300 group-hover:scale-110"
-        />
+      <div className="bg-gray-900/40 rounded-2xl border border-gray-800 hover:border-gray-700 transition-all duration-300 overflow-hidden hover:shadow-xl">
+        {/* Image section */}
+        <div className="relative">
+          <img
+            src={book.coverImage || book.cover}
+            alt={book.title}
+            className="w-full h-48 object-cover"
+          />
 
-        {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-        {/* Badges */}
-        <div className="absolute top-2 left-2 space-y-1">
-          <span className="bg-black/70 text-white text-lg font-bold px-2 py-1 rounded">
-            {index + 1}
-          </span>
-          {book.bestseller && (
-            <div className="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">
-              BESTSELLER
-            </div>
-          )}
-          {book.newRelease && (
-            <div className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
-              NOUVEAU
-            </div>
+          {book.isFree && (
+            <span className="absolute top-2 left-2 bg-green-500 text-xs font-bold px-3 py-1 rounded-full shadow">
+              GRATUIT
+            </span>
           )}
           {getDiscountPercentage() > 0 && (
-            <div className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+            <span className="absolute top-2 right-2 bg-red-500 text-xs font-bold px-3 py-1 rounded-full shadow">
               -{getDiscountPercentage()}%
-            </div>
+            </span>
           )}
         </div>
 
-        {/* Actions au hover */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 20 }}
-          transition={{ duration: 0.2 }}
-          className="absolute bottom-4 left-4 right-4 space-y-2"
-        >
+        {/* Info section */}
+        <div className="p-4 space-y-3">
+          <h3 className="text-white font-bold text-lg leading-tight line-clamp-2 hover:text-primary-400 transition">
+            {book.title}
+          </h3>
+          <p className="text-sm text-gray-400 font-medium">{book.author}</p>
+
+          <div className="flex items-center justify-between text-sm text-gray-300">
+            <div className="flex items-center space-x-2">
+              <Star className="w-5 h-5 text-yellow-400" />
+              <span className="font-medium">{book.rating?.toFixed(1) || "0.0"}</span>
+            </div>
+            <span>({book._count?.reviews || 0} avis)</span>
+          </div>
+
+          <div className="flex justify-between items-center text-sm">
+            <span className="bg-primary-500/20 text-primary-300 px-4 py-2 rounded-full font-medium">
+              {book.category?.name || "Catégorie"}
+            </span>
+            {book.fileType && (
+              <span className="bg-gray-800 px-3 py-2 rounded-lg text-gray-300 font-medium">
+                {book.fileType}
+              </span>
+            )}
+          </div>
+
+          <div className="text-center py-4">
+            {book.isFree ? (
+              <span className="text-green-400 font-bold text-xl">GRATUIT</span>
+            ) : (
+              <div>
+                {getDiscountPercentage() > 0 && (
+                  <div className="text-sm line-through text-gray-500 mb-1">
+                    {formatPrice(book.originalPrice)} FCFA
+                  </div>
+                )}
+                <div className="text-primary-400 font-bold text-xl">
+                  {formatPrice(book.price)} FCFA
+                </div>
+              </div>
+            )}
+          </div>
+
+          {book.pages && (
+            <div className="flex items-center justify-center text-sm text-gray-500 py-2">
+              <BookOpen className="w-5 h-5 mr-2" />
+              <span className="font-medium">{book.pages} pages</span>
+            </div>
+          )}
+
           <button
             onClick={handleToggleSelection}
-            className={`w-full py-2 px-4 rounded-lg font-semibold transition-all ${
+            className={`w-full py-3 mt-3 rounded-2xl font-bold text-base flex items-center justify-center space-x-3 transition-all duration-300 shadow-lg ${
               isSelected
-                ? "bg-green-500 text-white"
-                : "bg-white text-black hover:bg-gray-200"
+                ? "bg-green-500 text-white hover:bg-green-600 shadow-green-500/25"
+                : "bg-white text-black hover:bg-gray-100 shadow-xl"
             }`}
           >
             {isSelected ? (
-              <span className="flex items-center justify-center">
-                <Check className="w-4 h-4 mr-2" />
-                Ajouté
-              </span>
+              <Check className="w-6 h-6" />
             ) : (
-              <span className="flex items-center justify-center">
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Ajouter
-              </span>
+              <ShoppingCart className="w-6 h-6" />
             )}
+            <span>{isSelected ? "Ajouté au panier" : "Ajouter au panier"}</span>
           </button>
-
-          <div className="flex space-x-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowPreview(true);
-              }}
-              className="flex-1 py-2 px-3 bg-black/70 text-white rounded-lg hover:bg-black/90 transition-all"
-            >
-              <Eye className="w-4 h-4 mx-auto" />
-            </button>
-            <button className="flex-1 py-2 px-3 bg-black/70 text-white rounded-lg hover:bg-black/90 transition-all">
-              <Heart className="w-4 h-4 mx-auto" />
-            </button>
-          </div>
-        </motion.div>
-
-        {/* État sélectionné */}
-        {isSelected && !isHovered && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-            <div className="bg-green-500 text-white font-bold text-lg px-4 py-2 rounded-lg flex items-center">
-              <Check className="w-5 h-5 mr-2" />
-              Ajouté
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Informations du livre */}
-      <div className="mt-3 space-y-2">
-        <h3 className="font-semibold text-white text-lg leading-tight line-clamp-2">
-          {book.title}
-        </h3>
-
-        <p className="text-gray-400 text-sm">{book.author}</p>
-
-        <div className="flex items-center space-x-2">
-          <Star className="w-4 h-4 text-yellow-400 fill-current" />
-          <span className="text-sm text-gray-300">{book.rating}</span>
-          <span className="text-xs text-gray-500">({book.reviews} avis)</span>
         </div>
       </div>
     </motion.div>

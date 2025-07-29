@@ -1,262 +1,262 @@
 import { create } from "zustand";
-
-// Données des livres enrichies
-const books = [
-  {
-    id: 1,
-    title: "Le Royaume Perdu",
-    author: "Alexandra Martin",
-    category: "Fantasy",
-    price: 15000,
-    originalPrice: 18000,
-    rating: 4.8,
-    reviews: 234,
-    pages: 387,
-    language: "Français",
-    publishYear: 2023,
-    description:
-      "Une épopée fantastique dans un monde où la magie et la technologie se mélangent pour créer des aventures extraordinaires.",
-    tags: ["Fantasy", "Aventure", "Magie"],
-    bestseller: true,
-    newRelease: false,
-    cover:
-      "https://images.unsplash.com/photo-1544717305-2782549b5136?fit=crop&w=400&h=600",
-  },
-  {
-    id: 2,
-    title: "Ombres et Secrets",
-    author: "Jean-Pierre Dubois",
-    category: "Thriller",
-    price: 12000,
-    originalPrice: 12000,
-    rating: 4.5,
-    reviews: 156,
-    pages: 298,
-    language: "Français",
-    publishYear: 2024,
-    description:
-      "Un thriller psychologique haletant qui vous tiendra en haleine jusqu'à la dernière page.",
-    tags: ["Thriller", "Mystère", "Suspense"],
-    bestseller: false,
-    newRelease: true,
-    cover:
-      "https://images.unsplash.com/photo-1528207776546-365bb710ee93?fit=crop&w=400&h=600",
-  },
-  {
-    id: 3,
-    title: "Les Chroniques du Feu",
-    author: "Marie Lecomte",
-    category: "Science-Fiction",
-    price: 16500,
-    originalPrice: 20000,
-    rating: 4.9,
-    reviews: 445,
-    pages: 512,
-    language: "Français",
-    publishYear: 2023,
-    description:
-      "Dans un futur dystopique, une héroïne lutte pour sauver l'humanité des flammes de la destruction.",
-    tags: ["Sci-Fi", "Dystopie", "Action"],
-    bestseller: true,
-    newRelease: false,
-    cover:
-      "https://images.unsplash.com/photo-1553729784-e91953dec042?fit=crop&w=400&h=600",
-  },
-  {
-    id: 4,
-    title: "Mystère à Ravenhill",
-    author: "Thomas Anderson",
-    category: "Policier",
-    price: 13500,
-    originalPrice: 13500,
-    rating: 4.3,
-    reviews: 89,
-    pages: 276,
-    language: "Français",
-    publishYear: 2024,
-    description:
-      "Une enquête palpitante dans une petite ville où les secrets du passé refont surface.",
-    tags: ["Policier", "Enquête", "Mystère"],
-    bestseller: false,
-    newRelease: true,
-    cover:
-      "https://images.unsplash.com/photo-1512820790803-83ca734da794?fit=crop&w=400&h=600",
-  },
-  {
-    id: 5,
-    title: "L'Énigme de Minuit",
-    author: "Sophie Moreau",
-    category: "Romance",
-    price: 11000,
-    originalPrice: 14000,
-    rating: 4.6,
-    reviews: 178,
-    pages: 324,
-    language: "Français",
-    publishYear: 2023,
-    description:
-      "Une romance mystérieuse qui se déroule dans les rues nocturnes de Paris.",
-    tags: ["Romance", "Mystère", "Paris"],
-    bestseller: false,
-    newRelease: false,
-    cover:
-      "https://images.unsplash.com/photo-1544938678-92d2e31d5dc0?fit=crop&w=400&h=600",
-  },
-  {
-    id: 6,
-    title: "L'Héritage Interdit",
-    author: "Pierre Vasseur",
-    category: "Historique",
-    price: 17000,
-    originalPrice: 17000,
-    rating: 4.7,
-    reviews: 267,
-    pages: 456,
-    language: "Français",
-    publishYear: 2022,
-    description:
-      "Un récit historique captivant sur les secrets cachés d'une famille noble française.",
-    tags: ["Historique", "Famille", "Secrets"],
-    bestseller: true,
-    newRelease: false,
-    cover:
-      "https://images.unsplash.com/photo-1524578271613-ebd02d8fdb9d?fit=crop&w=400&h=600",
-  },
-  {
-    id: 7,
-    title: "Voyage Astral",
-    author: "Luna Rivers",
-    category: "Spiritualité",
-    price: 14000,
-    originalPrice: 16000,
-    rating: 4.4,
-    reviews: 123,
-    pages: 298,
-    language: "Français",
-    publishYear: 2024,
-    description:
-      "Un guide spirituel pour explorer les dimensions cachées de la conscience humaine.",
-    tags: ["Spiritualité", "Méditation", "Conscience"],
-    bestseller: false,
-    newRelease: true,
-    cover:
-      "https://images.unsplash.com/photo-1576107232686-4f99e37b5f31?fit=crop&w=400&h=600",
-  },
-  {
-    id: 8,
-    title: "La Bibliothèque Oubliée",
-    author: "Gabriel Stone",
-    category: "Fantasy",
-    price: 15500,
-    originalPrice: 18500,
-    rating: 4.8,
-    reviews: 334,
-    pages: 423,
-    language: "Français",
-    publishYear: 2023,
-    description:
-      "Dans une bibliothèque magique, chaque livre contient un monde différent à explorer.",
-    tags: ["Fantasy", "Magie", "Livres"],
-    bestseller: true,
-    newRelease: false,
-    cover:
-      "https://images.unsplash.com/photo-1534081333815-ae5019106621?fit=crop&w=400&h=600",
-  },
-  {
-    id: 9,
-    title: "Récits de l'Aube",
-    author: "Emma Laurent",
-    category: "Poésie",
-    price: 9000,
-    originalPrice: 11000,
-    rating: 4.2,
-    reviews: 67,
-    pages: 156,
-    language: "Français",
-    publishYear: 2024,
-    description:
-      "Un recueil de poèmes qui capture la beauté et la mélancolie des premiers rayons du soleil.",
-    tags: ["Poésie", "Nature", "Contemplation"],
-    bestseller: false,
-    newRelease: true,
-    cover:
-      "https://images.unsplash.com/photo-1551024709-8f23befc6f87?fit=crop&w=400&h=600",
-  },
-  {
-    id: 10,
-    title: "Au Cœur des Ténèbres",
-    author: "Victor Blackwood",
-    category: "Horreur",
-    price: 13000,
-    originalPrice: 15000,
-    rating: 4.5,
-    reviews: 198,
-    pages: 367,
-    language: "Français",
-    publishYear: 2023,
-    description:
-      "Un récit d'horreur psychologique qui explore les recoins les plus sombres de l'âme humaine.",
-    tags: ["Horreur", "Psychologique", "Suspense"],
-    bestseller: false,
-    newRelease: false,
-    cover:
-      "https://images.unsplash.com/photo-1507842217343-583bb7270b66?fit=crop&w=400&h=600",
-  },
-  {
-    id: 11,
-    title: "L'Oracle de Verre",
-    author: "Crysta Webb",
-    category: "Fantasy",
-    price: 16000,
-    originalPrice: 19000,
-    rating: 4.9,
-    reviews: 412,
-    pages: 489,
-    language: "Français",
-    publishYear: 2022,
-    description:
-      "Une prophétie ancienne et un oracle mystérieux bouleversent le destin d'un royaume.",
-    tags: ["Fantasy", "Prophétie", "Royaume"],
-    bestseller: true,
-    newRelease: false,
-    cover:
-      "https://images.unsplash.com/photo-1551022372-0bdac482b9d9?fit=crop&w=400&h=600",
-  },
-  {
-    id: 12,
-    title: "Renaissance",
-    author: "André Moreau",
-    category: "Développement Personnel",
-    price: 12500,
-    originalPrice: 14500,
-    rating: 4.6,
-    reviews: 156,
-    pages: 298,
-    language: "Français",
-    publishYear: 2024,
-    description:
-      "Un guide pratique pour transformer sa vie et redécouvrir son potentiel intérieur.",
-    tags: ["Développement", "Transformation", "Potentiel"],
-    bestseller: false,
-    newRelease: true,
-    cover:
-      "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?fit=crop&w=400&h=600",
-  },
-];
+import { libraryAPI } from "../services/api";
 
 export const useBookStore = create((set, get) => ({
   // État
-  books: books,
+  books: [],
+  categories: [],
+  bookmarks: [],
+  currentBook: null,
+  libraryStats: null,
   selectedBooks: [],
+  loading: false,
+  error: null,
+  
+  // Pagination
+  currentPage: 1,
+  totalPages: 0,
+  totalCount: 0,
+  
+  // Filtres et recherche
   searchQuery: "",
   selectedCategory: "all",
-  sortBy: "title",
+  sortBy: "createdAt",
+  sortOrder: "desc",
   showCart: false,
-  viewMode: "grid", // 'grid' | 'list'
-  priceRange: [0, 25000],
   showFilters: false,
+  
+  // Filtres de bibliothèque
+  filters: {
+    author: "",
+    language: "",
+    fileType: "",
+  },
 
-  // Actions de sélection
+  // Controller pour annuler les requêtes
+  _abortController: null,
+
+  // Actions pour les livres (API calls)
+  fetchBooks: async (page = 1, customFilters = {}) => {
+    // Annuler la requête précédente si elle existe
+    const state = get();
+    if (state._abortController) {
+      state._abortController.abort();
+    }
+
+    // Créer un nouveau controller pour cette requête
+    const abortController = new AbortController();
+    set({ loading: true, error: null, _abortController: abortController });
+
+    try {
+      const currentState = get();
+      // Build API filters, prioritize customFilters over current state
+      const apiFilters = {
+        page,
+        limit: 20,
+        sortBy: currentState.sortBy,
+        sortOrder: currentState.sortOrder,
+      };
+
+      // Add search filter (customFilters takes priority)
+      const searchValue = customFilters.search !== undefined ? customFilters.search : currentState.searchQuery;
+      if (searchValue && searchValue.trim()) {
+        apiFilters.search = searchValue.trim();
+      }
+
+      // Add category filter (customFilters takes priority) 
+      const categoryValue = customFilters.category !== undefined ? customFilters.category : currentState.selectedCategory;
+      if (categoryValue && categoryValue !== "all") {
+        apiFilters.categoryId = categoryValue;
+      }
+
+      // Add other filters (customFilters takes priority)
+      const authorValue = customFilters.author !== undefined ? customFilters.author : currentState.filters.author;
+      if (authorValue && authorValue.trim()) {
+        apiFilters.author = authorValue.trim();
+      }
+
+      const languageValue = customFilters.language !== undefined ? customFilters.language : currentState.filters.language;
+      if (languageValue && languageValue.trim()) {
+        apiFilters.language = languageValue.trim();
+      }
+
+      const fileTypeValue = customFilters.fileType !== undefined ? customFilters.fileType : currentState.filters.fileType;
+      if (fileTypeValue && fileTypeValue.trim()) {
+        apiFilters.fileType = fileTypeValue.trim();
+      }
+
+      console.log('Calling API with filters:', apiFilters);
+      const response = await libraryAPI.getBooks(apiFilters, { signal: abortController.signal });
+      
+      // Vérifier que la requête n'a pas été annulée
+      if (!abortController.signal.aborted) {
+        set({
+          books: response.data.data.books || [],
+          currentPage: response.data.data.pagination?.currentPage || page,
+          totalPages: response.data.data.pagination?.totalPages || 0,
+          totalCount: response.data.data.pagination?.totalCount || 0,
+          loading: false,
+          _abortController: null
+        });
+      }
+    } catch (error) {
+      // Ne pas afficher d'erreur si la requête a été annulée
+      if (error.name === 'AbortError' || error.name === 'CanceledError' || error.code === 'ECONNABORTED' || error.code === 'ERR_CANCELED') {
+        set({ loading: false, _abortController: null });
+        return;
+      }
+      
+      console.error('Error fetching books:', error);
+      set({
+        error: error.response?.data?.error || 'Erreur lors du chargement des livres',
+        loading: false,
+        _abortController: null
+      });
+    }
+  },
+
+  fetchBookById: async (bookId) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await libraryAPI.getBookById(bookId);
+      set({
+        currentBook: response.data.data.book,
+        loading: false
+      });
+    } catch (error) {
+      set({
+        error: error.response?.data?.error || 'Livre non trouvé',
+        loading: false
+      });
+    }
+  },
+
+  fetchCategories: async (includeInactive = false) => {
+    try {
+      const response = await libraryAPI.getCategories(includeInactive);
+      set({ categories: response.data.data.categories || [] });
+    } catch (error) {
+      console.error('Erreur lors du chargement des catégories:', error);
+      set({ categories: [] }); // Ensure categories is always an array
+    }
+  },
+
+  fetchBookmarks: async (page = 1) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await libraryAPI.getUserBookmarks(page);
+      set({
+        bookmarks: response.data.data.bookmarks,
+        loading: false
+      });
+    } catch (error) {
+      set({
+        error: error.response?.data?.error || 'Erreur lors du chargement des favoris',
+        loading: false
+      });
+    }
+  },
+
+  fetchLibraryStats: async () => {
+    try {
+      const response = await libraryAPI.getLibraryStats();
+      set({ libraryStats: response.data.data });
+    } catch (error) {
+      console.error('Erreur lors du chargement des statistiques:', error);
+    }
+  },
+
+  // Actions de recherche et filtrage
+  searchBooks: async (query, page = 1) => {
+    set({ searchQuery: query, currentPage: 1 });
+    await get().fetchBooks(page, { search: query });
+  },
+
+  filterByCategory: async (categoryId, page = 1) => {
+    set({ selectedCategory: categoryId, currentPage: 1 });
+    await get().fetchBooks(page, { categoryId: categoryId !== "all" ? categoryId : "" });
+  },
+
+  setFilters: async (newFilters) => {
+    set(state => ({
+      filters: { ...state.filters, ...newFilters },
+      currentPage: 1
+    }));
+    await get().fetchBooks(1, newFilters);
+  },
+
+  setSortBy: async (sortBy, sortOrder = "desc") => {
+    set({ sortBy, sortOrder, currentPage: 1 });
+    await get().fetchBooks(1, { sortBy, sortOrder });
+  },
+
+  // Actions pour les favoris
+  toggleBookmark: async (bookId) => {
+    try {
+      const response = await libraryAPI.toggleBookmark(bookId);
+      
+      // Mettre à jour le livre actuel si chargé
+      const currentBook = get().currentBook;
+      if (currentBook && currentBook.id === bookId) {
+        set({
+          currentBook: {
+            ...currentBook,
+            isBookmarked: response.data.isBookmarked
+          }
+        });
+      }
+      
+      // Mettre à jour la liste des livres
+      const books = get().books;
+      const updatedBooks = books.map(book => 
+        book.id === bookId 
+          ? { ...book, isBookmarked: response.data.data.isBookmarked }
+          : book
+      );
+      set({ books: updatedBooks });
+      
+      return response.data.data;
+    } catch (error) {
+      set({ error: error.response?.data?.error || 'Erreur lors de la mise à jour des favoris' });
+      throw error;
+    }
+  },
+
+  // Actions pour les avis
+  addReview: async (bookId, reviewData) => {
+    try {
+      const response = await libraryAPI.addReview(bookId, reviewData);
+      
+      // Recharger le livre pour mettre à jour les avis
+      if (get().currentBook?.id === bookId) {
+        await get().fetchBookById(bookId);
+      }
+      
+      return response.data.data;
+    } catch (error) {
+      set({ error: error.response?.data?.error || 'Erreur lors de l\'ajout de l\'avis' });
+      throw error;
+    }
+  },
+
+  deleteReview: async (bookId) => {
+    try {
+      await libraryAPI.deleteReview(bookId);
+      
+      // Recharger le livre pour mettre à jour les avis
+      if (get().currentBook?.id === bookId) {
+        await get().fetchBookById(bookId);
+      }
+      
+      return { success: true };
+    } catch (error) {
+      set({ error: error.response?.data?.error || 'Erreur lors de la suppression de l\'avis' });
+      throw error;
+    }
+  },
+
+
+  // Actions de sélection (pour le panier)
   addBook: (book) => {
     const state = get();
     if (!state.selectedBooks.some((b) => b.id === book.id)) {
@@ -274,83 +274,266 @@ export const useBookStore = create((set, get) => ({
 
   clearSelection: () => set({ selectedBooks: [] }),
 
-  // Actions de recherche et filtrage
+  // Cart-specific actions
+  addToCart: (book) => {
+    const state = get();
+    if (!state.selectedBooks.some((b) => b.id === book.id)) {
+      set((state) => ({
+        selectedBooks: [...state.selectedBooks, book],
+        showCart: true // Auto-show cart when adding item
+      }));
+    }
+  },
+
+  removeFromCart: (bookId) => {
+    set((state) => ({
+      selectedBooks: state.selectedBooks.filter((b) => b.id !== bookId),
+    }));
+  },
+
+  updateCartQuantity: (bookId, quantity) => {
+    // For digital books, quantity is always 1, but keeping this for consistency
+    if (quantity <= 0) {
+      get().removeFromCart(bookId);
+    }
+  },
+
+  getCartTotal: () => {
+    const state = get();
+    return state.selectedBooks.reduce((total, book) => {
+      const price = book.isFree ? 0 : (book.price || 0);
+      return total + price;
+    }, 0);
+  },
+
+  getCartCount: () => {
+    return get().selectedBooks.length;
+  },
+
+  clearCart: () => {
+    set({ selectedBooks: [], showCart: false });
+  },
+
+  // Payment and Order actions
+  createOrder: async (paymentMethod = 'CARD') => {
+    set({ loading: true, error: null });
+    try {
+      const state = get();
+      const orderData = {
+        items: state.selectedBooks.map(book => ({
+          bookId: book.id,
+          quantity: 1,
+          unitPrice: book.isFree ? 0 : (book.price || 0)
+        })),
+        paymentMethod,
+        totalAmount: state.getCartTotal()
+      };
+
+      const response = await libraryAPI.createOrder(orderData);
+      
+      // Clear cart after successful order creation
+      set({ 
+        selectedBooks: [],
+        showCart: false,
+        loading: false 
+      });
+      
+      return response.data.data;
+    } catch (error) {
+      set({
+        error: error.response?.data?.error || 'Erreur lors de la création de la commande',
+        loading: false
+      });
+      throw error;
+    }
+  },
+
+  processPayment: async (orderId, paymentData) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await libraryAPI.processPayment(orderId, paymentData);
+      set({ loading: false });
+      return response.data.data;
+    } catch (error) {
+      set({
+        error: error.response?.data?.error || 'Erreur lors du paiement',
+        loading: false
+      });
+      throw error;
+    }
+  },
+
+  getUserOrders: async (page = 1) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await libraryAPI.getUserOrders(page);
+      set({ loading: false });
+      return response.data.data;
+    } catch (error) {
+      set({
+        error: error.response?.data?.error || 'Erreur lors du chargement des commandes',
+        loading: false
+      });
+      throw error;
+    }
+  },
+
+  // Actions d'interface
   setSearchQuery: (query) => set({ searchQuery: query }),
   setSelectedCategory: (category) => set({ selectedCategory: category }),
-  setSortBy: (sortBy) => set({ sortBy }),
-  setPriceRange: (range) => set({ priceRange: range }),
-  setViewMode: (mode) => set({ viewMode: mode }),
   setShowFilters: (show) => set({ showFilters: show }),
-
-  // Actions du panier
   toggleCart: () => set((state) => ({ showCart: !state.showCart })),
   setShowCart: (show) => set({ showCart: show }),
-
-  // Getters calculés
-  getFilteredBooks: () => {
+  
+  // Filter actions
+  setFilters: (newFilters) => {
+    set({ filters: newFilters });
+    // Trigger refetch with current state plus new filters
     const state = get();
-    let filtered = [...state.books];
-
-    // Filtre par recherche
-    if (state.searchQuery) {
-      const query = state.searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (book) =>
-          book.title.toLowerCase().includes(query) ||
-          book.author.toLowerCase().includes(query) ||
-          book.tags.some((tag) => tag.toLowerCase().includes(query))
-      );
-    }
-
-    // Filtre par catégorie
-    if (state.selectedCategory !== "all") {
-      filtered = filtered.filter(
-        (book) => book.category === state.selectedCategory
-      );
-    }
-
-    // Filtre par prix
-    filtered = filtered.filter(
-      (book) =>
-        book.price >= state.priceRange[0] && book.price <= state.priceRange[1]
-    );
-
-    // Tri
-    filtered.sort((a, b) => {
-      switch (state.sortBy) {
-        case "title":
-          return a.title.localeCompare(b.title);
-        case "author":
-          return a.author.localeCompare(b.author);
-        case "price-asc":
-          return a.price - b.price;
-        case "price-desc":
-          return b.price - a.price;
-        case "rating":
-          return b.rating - a.rating;
-        case "newest":
-          return b.publishYear - a.publishYear;
-        default:
-          return 0;
-      }
+    get().fetchBooks(1, {
+      search: state.searchQuery,
+      category: state.selectedCategory !== "all" ? state.selectedCategory : "",
+      ...newFilters
     });
-
-    return filtered;
   },
-
-  getCategories: () => {
+  
+  setSortBy: (sortBy, sortOrder = "desc") => {
+    set({ sortBy, sortOrder });
+    // Trigger refetch with current filters and new sort
     const state = get();
-    const categories = [...new Set(state.books.map((book) => book.category))];
-    return categories.sort();
+    get().fetchBooks(1, {
+      search: state.searchQuery,
+      category: state.selectedCategory !== "all" ? state.selectedCategory : "",
+      ...state.filters
+    });
   },
+  
+  // Search and filter functions
+  searchBooks: async (query, category = "all", customFilters = {}) => {
+    const state = get();
+    const newFilters = customFilters || state.filters;
+    
+    console.log('searchBooks called with:', { query, category, customFilters });
+    
+    // Update state first
+    set({ 
+      searchQuery: query || "",
+      selectedCategory: category || "all",
+      filters: newFilters
+    });
+    
+    // Fetch books with search parameters
+    await get().fetchBooks(1, {
+      search: query,
+      category: category !== "all" ? category : "",
+      ...newFilters
+    });
+  },
+  
+  filterByCategory: async (categoryId) => {
+    set({ selectedCategory: categoryId });
+    await get().fetchBooks(1, {
+      category: categoryId !== "all" ? categoryId : ""
+    });
+  },
+
+  // Actions de pagination
+  goToPage: async (page) => {
+    if (page >= 1 && page <= get().totalPages) {
+      await get().fetchBooks(page);
+    }
+  },
+
+  nextPage: async () => {
+    const { currentPage, totalPages } = get();
+    if (currentPage < totalPages) {
+      await get().fetchBooks(currentPage + 1);
+    }
+  },
+
+  prevPage: async () => {
+    const { currentPage } = get();
+    if (currentPage > 1) {
+      await get().fetchBooks(currentPage - 1);
+    }
+  },
+
+  // Utilitaires
+  clearCurrentBook: () => set({ currentBook: null }),
+  clearError: () => set({ error: null }),
 
   getTotalPrice: () => {
     const state = get();
-    return state.selectedBooks.reduce((total, book) => total + book.price, 0);
+    return state.selectedBooks.reduce((total, book) => total + (book.price || 0), 0);
   },
 
   getBookById: (id) => {
     const state = get();
     return state.books.find((book) => book.id === id);
+  },
+
+  // Getters calculés pour compatibilité
+  getFilteredBooks: () => {
+    return get().books; // Les livres sont déjà filtrés par l'API
+  },
+
+  getCategories: () => {
+    return get().categories.map(cat => cat.name);
+  },
+
+  // Initialisation
+  initialize: async () => {
+    try {
+      const actions = [
+        get().fetchBooks(),
+        get().fetchCategories(),
+        get().fetchLibraryStats()
+      ];
+      
+      const results = await Promise.allSettled(actions);
+      
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.error(`Action ${index} failed:`, result.reason);
+        }
+      });
+    } catch (error) {
+      console.error('Initialize error:', error);
+    }
+  },
+
+  // Reset du store
+  reset: () => {
+    const state = get();
+    // Annuler les requêtes en cours
+    if (state._abortController) {
+      state._abortController.abort();
+    }
+    
+    set({
+      books: [],
+      categories: [],
+      bookmarks: [],
+      currentBook: null,
+      libraryStats: null,
+      selectedBooks: [],
+      loading: false,
+      error: null,
+      currentPage: 1,
+      totalPages: 0,
+      totalCount: 0,
+      searchQuery: "",
+      selectedCategory: "all",
+      sortBy: "createdAt",
+      sortOrder: "desc",
+      showCart: false,
+      showFilters: false,
+      filters: {
+        author: "",
+        language: "",
+        fileType: "",
+      },
+      _abortController: null
+    });
   },
 }));

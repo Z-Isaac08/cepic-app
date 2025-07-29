@@ -12,73 +12,98 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useBookStore } from "../../stores/bookStore";
+import PaymentModal from "./PaymentModal";
 
 const CartSidebar = () => {
   const {
     selectedBooks,
     showCart,
     setShowCart,
-    removeBook,
-    clearSelection,
-    getTotalPrice,
+    removeFromCart,
+    clearCart,
+    getCartTotal,
+
+    getCartCount,
+    createOrder,
+    processPayment,
+
+    loading,
   } = useBookStore();
 
   const [promoCode, setPromoCode] = useState("");
   const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoError, setPromoError] = useState("");
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat("fr-FR").format(price);
   };
 
   // Calculs de prix
-  const subtotal = getTotalPrice();
-  const discount = appliedPromo ? Math.round(subtotal * 0.1) : 0; // 10% de réduction
-  const shipping = subtotal > 25000 ? 0 : 2500; // Livraison gratuite au-dessus de 25k
+  const subtotal = getCartTotal();
+  const discount = appliedPromo
+    ? Math.round(subtotal * (appliedPromo.discount / 100))
+    : 0;
+  const shipping = 0; // Digital products, no shipping
   const total = subtotal - discount + shipping;
 
-  // Codes promo valides (simulation)
-  const validPromoCodes = {
-    BOOK10: { discount: 10, description: "10% de réduction" },
-    WELCOME: { discount: 15, description: "15% de réduction nouveau client" },
-    STUDENT: { discount: 20, description: "20% de réduction étudiant" },
-  };
-
-  const handlePromoCode = () => {
-    if (validPromoCodes[promoCode.toUpperCase()]) {
-      setAppliedPromo({
-        code: promoCode.toUpperCase(),
-        ...validPromoCodes[promoCode.toUpperCase()],
-      });
-      setPromoCode("");
-    } else {
-      // Animation d'erreur
-      setPromoCode("");
-      setTimeout(() => setPromoCode("Code invalide"), 100);
-      setTimeout(() => setPromoCode(""), 2000);
+  const handlePromoCode = async () => {
+    if (!promoCode.trim()) {
+      setPromoError("Veuillez saisir un code promo");
+      return;
     }
-  };
 
-  const handleCheckout = async () => {
-    setIsCheckingOut(true);
+    setPromoError("");
 
-    // Simulation du processus de commande
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      // TODO: Replace with actual API call to validate promo code
+      // const response = await libraryAPI.validatePromoCode(promoCode.toUpperCase());
+      // setAppliedPromo(response.data.data);
 
-    alert(
-      `Commande confirmée !\n${
-        selectedBooks.length
-      } livre(s) pour ${formatPrice(total)} FCFA\n\nMerci pour votre achat !`
-    );
-
-    clearSelection();
-    setShowCart(false);
-    setAppliedPromo(null);
-    setIsCheckingOut(false);
+      // For now, show error for any promo code since API is not implemented
+      setPromoError("Service de codes promo temporairement indisponible");
+      setPromoCode("");
+    } catch (error) {
+      setPromoError(error.response?.data?.error || "Code promo invalide");
+      setPromoCode("");
+    }
   };
 
   const removePromo = () => {
     setAppliedPromo(null);
+    setPromoError("");
+  };
+
+  const handleCheckout = () => {
+    setShowPaymentModal(true);
+  };
+
+  const handlePayment = async (paymentData) => {
+    setIsCheckingOut(true);
+
+    try {
+      // Create order
+      const order = await createOrder("CARD");
+
+      // Process payment
+      const payment = await processPayment(order.id, paymentData);
+
+      alert(
+        `Commande confirmée !\n${
+          selectedBooks.length
+        } livre(s) pour ${formatPrice(total)} FCFA\n\nNuméro de commande: ${
+          order.id
+        }\n\nMerci pour votre achat !`
+      );
+
+      setAppliedPromo(null);
+      setShowPaymentModal(false);
+    } catch (error) {
+      alert("Erreur lors du paiement: " + error.message);
+    } finally {
+      setIsCheckingOut(false);
+    }
   };
 
   return (
@@ -161,7 +186,7 @@ const CartSidebar = () => {
                       >
                         <div className="relative">
                           <img
-                            src={book.cover}
+                            src={book.coverImage || book.cover}
                             alt={book.title}
                             className="w-16 h-24 object-cover rounded shadow-lg"
                           />
@@ -180,7 +205,7 @@ const CartSidebar = () => {
                             {book.author}
                           </p>
                           <p className="text-gray-500 text-xs mb-2">
-                            {book.category}
+                            {book.category?.name || "Catégorie"}
                           </p>
 
                           <div className="flex items-center justify-between">
@@ -196,7 +221,7 @@ const CartSidebar = () => {
                             </div>
 
                             <button
-                              onClick={() => removeBook(book.id)}
+                              onClick={() => removeFromCart(book.id)}
                               className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                               title="Retirer du panier"
                             >
@@ -240,30 +265,35 @@ const CartSidebar = () => {
                         </button>
                       </motion.div>
                     ) : (
-                      <div className="flex space-x-2">
-                        <input
-                          type="text"
-                          value={promoCode}
-                          onChange={(e) => setPromoCode(e.target.value)}
-                          placeholder="Entrez votre code"
-                          className="flex-1 p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
-                          onKeyPress={(e) =>
-                            e.key === "Enter" && handlePromoCode()
-                          }
-                        />
-                        <button
-                          onClick={handlePromoCode}
-                          className="px-4 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-sm font-semibold"
-                        >
-                          Appliquer
-                        </button>
+                      <div className="space-y-2">
+                        <div className="flex space-x-2">
+                          <input
+                            type="text"
+                            value={promoCode}
+                            onChange={(e) => {
+                              setPromoCode(e.target.value);
+                              setPromoError(""); // Clear error when typing
+                            }}
+                            placeholder="Entrez votre code"
+                            className={`flex-1 p-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm ${
+                              promoError ? "border-red-500" : "border-gray-600"
+                            }`}
+                            onKeyDown={(e) =>
+                              e.key === "Enter" && handlePromoCode()
+                            }
+                          />
+                          <button
+                            onClick={handlePromoCode}
+                            className="px-4 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-sm font-semibold"
+                          >
+                            Appliquer
+                          </button>
+                        </div>
+                        {promoError && (
+                          <p className="text-red-400 text-xs">{promoError}</p>
+                        )}
                       </div>
                     )}
-
-                    {/* Codes promo disponibles */}
-                    <div className="mt-3 text-xs text-gray-500">
-                      <p>Codes disponibles: BOOK10, WELCOME, STUDENT</p>
-                    </div>
                   </div>
                 </div>
               )}
@@ -336,7 +366,7 @@ const CartSidebar = () => {
                     </button>
 
                     <button
-                      onClick={clearSelection}
+                      onClick={clearCart}
                       disabled={isCheckingOut}
                       className="w-full bg-gray-700 text-gray-300 py-2 rounded-lg hover:bg-gray-600 disabled:opacity-50 transition-colors text-sm"
                     >
@@ -355,6 +385,15 @@ const CartSidebar = () => {
           </motion.div>
         </>
       )}
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        totalAmount={total}
+        onPayment={handlePayment}
+        loading={isCheckingOut}
+      />
     </AnimatePresence>
   );
 };
