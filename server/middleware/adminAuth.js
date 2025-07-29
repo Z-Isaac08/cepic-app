@@ -1,11 +1,9 @@
-const AuditLogger = require('../utils/auditLogger');
 
 // Middleware pour vérifier les privilèges administrateur
 const requireAdmin = async (req, res, next) => {
   try {
     // Vérifier que l'utilisateur est connecté (normalement fait par protect middleware)
     if (!req.user) {
-      await AuditLogger.logAdmin('admin_access_denied', req, null, false, { reason: 'no_user' });
       return res.status(401).json({
         success: false,
         error: 'Authentification requise'
@@ -14,10 +12,6 @@ const requireAdmin = async (req, res, next) => {
 
     // Vérifier que l'utilisateur a le rôle ADMIN
     if (req.user.role !== 'ADMIN') {
-      await AuditLogger.logAdmin('admin_access_denied', req, req.user.id, false, { 
-        reason: 'insufficient_privileges',
-        userRole: req.user.role 
-      });
       return res.status(403).json({
         success: false,
         error: 'Privilèges administrateur requis'
@@ -26,11 +20,6 @@ const requireAdmin = async (req, res, next) => {
 
     // Vérifier que le compte admin est actif et vérifié
     if (!req.user.isActive || !req.user.isVerified) {
-      await AuditLogger.logAdmin('admin_access_denied', req, req.user.id, false, { 
-        reason: 'account_status',
-        isActive: req.user.isActive,
-        isVerified: req.user.isVerified
-      });
       return res.status(403).json({
         success: false,
         error: 'Compte administrateur inactif ou non vérifié'
@@ -38,16 +27,9 @@ const requireAdmin = async (req, res, next) => {
     }
 
     // Logger l'accès admin réussi
-    await AuditLogger.logAdmin('admin_access_granted', req, req.user.id, true, {
-      endpoint: req.path,
-      method: req.method
-    });
 
     next();
   } catch (error) {
-    await AuditLogger.logAdmin('admin_middleware_error', req, req.user?.id, false, { 
-      error: error.message 
-    });
     next(error);
   }
 };
@@ -65,25 +47,15 @@ const requireSuperAdmin = async (req, res, next) => {
 
     // Vérifier le rôle super admin (si implémenté)
     if (req.user.role !== 'SUPER_ADMIN') {
-      await AuditLogger.logAdmin('super_admin_access_denied', req, req.user.id, false, { 
-        userRole: req.user.role 
-      });
       return res.status(403).json({
         success: false,
         error: 'Privilèges super-administrateur requis'
       });
     }
 
-    await AuditLogger.logAdmin('super_admin_access_granted', req, req.user.id, true, {
-      endpoint: req.path,
-      method: req.method
-    });
 
     next();
   } catch (error) {
-    await AuditLogger.logAdmin('super_admin_middleware_error', req, req.user?.id, false, { 
-      error: error.message 
-    });
     next(error);
   }
 };
@@ -110,9 +82,6 @@ const validateAdminParams = (requiredParams = []) => {
       }
 
       if (missingParams.length > 0) {
-        await AuditLogger.logAdmin('admin_validation_failed', req, req.user?.id, false, { 
-          missingParams 
-        });
         return res.status(400).json({
           success: false,
           error: 'Paramètres manquants',
@@ -122,9 +91,6 @@ const validateAdminParams = (requiredParams = []) => {
 
       next();
     } catch (error) {
-      await AuditLogger.logAdmin('admin_validation_error', req, req.user?.id, false, { 
-        error: error.message 
-      });
       next(error);
     }
   };
@@ -137,22 +103,14 @@ const requireConfirmation = (action) => {
       const { confirmation } = req.body;
 
       if (!confirmation || confirmation !== `CONFIRM_${action.toUpperCase()}`) {
-        await AuditLogger.logAdmin('admin_confirmation_failed', req, req.user.id, false, { 
-          action,
-          providedConfirmation: confirmation 
-        });
         return res.status(400).json({
           success: false,
           error: `Confirmation requise. Veuillez inclure "confirmation": "CONFIRM_${action.toUpperCase()}" dans votre requête`
         });
       }
 
-      await AuditLogger.logAdmin('admin_confirmation_success', req, req.user.id, true, { action });
       next();
     } catch (error) {
-      await AuditLogger.logAdmin('admin_confirmation_error', req, req.user?.id, false, { 
-        error: error.message 
-      });
       next(error);
     }
   };
@@ -169,16 +127,6 @@ const logAdminAction = (action) => {
     res.send = function(data) {
       // Logger le résultat de l'action
       const isSuccess = res.statusCode >= 200 && res.statusCode < 300;
-      AuditLogger.logAdmin(
-        `admin_${action}_${isSuccess ? 'success' : 'failed'}`, 
-        req, 
-        req.user?.id, 
-        isSuccess,
-        {
-          statusCode: res.statusCode,
-          responseData: typeof data === 'string' ? JSON.parse(data) : data
-        }
-      );
       
       return originalSend.call(this, data);
     };
@@ -198,7 +146,6 @@ const adminRateLimit = require('express-rate-limit')({
   standardHeaders: true,
   legacyHeaders: false,
   handler: async (req, res) => {
-    await AuditLogger.logAdmin('admin_rate_limit_exceeded', req, req.user?.id, false);
     res.status(429).json({
       success: false,
       error: 'Trop de requêtes admin. Veuillez patienter.'

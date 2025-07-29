@@ -98,16 +98,6 @@ const twoFACodeCreateSchema = z.object({
   expiresAt: z.date(),
 });
 
-// Audit log schema
-const auditLogSchema = z.object({
-  userId: z.cuid().optional(),
-  action: z.string().min(1).max(100),
-  resource: z.string().max(100).optional(),
-  details: z.record(z.any()).default({}),
-  ipAddress: ipAddressSchema.default("127.0.0.1"),
-  userAgent: userAgentSchema.default("Unknown"),
-  success: z.boolean().default(true),
-});
 
 module.exports = {
   // Request schemas
@@ -121,7 +111,6 @@ module.exports = {
   userCreateSchema,
   sessionCreateSchema,
   twoFACodeCreateSchema,
-  auditLogSchema,
 
   // Individual field schemas
   emailSchema,

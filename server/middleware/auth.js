@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 const prisma = require('../lib/prisma');
 const { verifyToken } = require('../utils/jwt');
-const AuditLogger = require('../utils/auditLogger');
 
 // Verify JWT token middleware (cookie-based)
 const protect = async (req, res, next) => {
@@ -50,10 +49,6 @@ const protect = async (req, res, next) => {
     });
 
     if (!session || !session.user.isActive) {
-      await AuditLogger.logSecurity('invalid_session_blocked', req, {
-        sessionExists: !!session,
-        userActive: session?.user.isActive
-      });
       
       return res.status(401).json({
         success: false,
@@ -67,9 +62,6 @@ const protect = async (req, res, next) => {
 
     next();
   } catch (error) {
-    await AuditLogger.logSecurity('token_verification_failed', req, {
-      error: error.message
-    });
     
     return res.status(401).json({
       success: false,

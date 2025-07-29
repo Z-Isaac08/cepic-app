@@ -29,6 +29,20 @@ const {
   getLibraryStats
 } = require('../controllers/libraryController');
 
+const {
+  // Orders
+  createOrder,
+  getUserOrders,
+  getOrderById,
+  
+  // Payments
+  processPayment,
+  getPaymentStatus,
+  
+  // Admin
+  getAllOrders
+} = require('../controllers/orderController');
+
 const { protect, requireVerified, requireAdmin } = require('../middleware/auth');
 const { globalLimiter, authLimiter } = require('../middleware/security');
 const { validate } = require('../middleware/validation');
@@ -73,6 +87,15 @@ router.post('/books', protect, requireVerified, authLimiter, createBook);
 router.put('/books/:bookId', protect, requireVerified, updateBook);
 router.delete('/books/:bookId', protect, requireVerified, deleteBook);
 
+// Order management
+router.post('/orders', protect, requireVerified, authLimiter, createOrder);
+router.get('/orders', protect, requireVerified, getUserOrders);
+router.get('/orders/:orderId', protect, requireVerified, getOrderById);
+
+// Payment processing
+router.post('/orders/:orderId/payment', protect, requireVerified, authLimiter, processPayment);
+router.get('/orders/:orderId/payment/status', protect, requireVerified, getPaymentStatus);
+
 // ADMIN ROUTES (require admin privileges)
 
 // Category management (admin only)
@@ -85,6 +108,9 @@ router.get('/admin/books', protect, requireAdmin, (req, res, next) => {
   req.query.showAll = 'true';
   getBooks(req, res, next);
 });
+
+// Get all orders (admin only)
+router.get('/admin/orders', protect, requireAdmin, getAllOrders);
 
 // Validation schemas for common operations
 const bookValidationRules = {
@@ -142,12 +168,50 @@ const reviewValidationRules = {
   }
 };
 
+const orderValidationRules = {
+  items: {
+    required: true,
+    type: 'array',
+    minItems: 1,
+    maxItems: 50
+  },
+  paymentMethod: {
+    enum: ['CARD', 'MOBILE_MONEY', 'BANK_TRANSFER']
+  }
+};
+
+const paymentValidationRules = {
+  cardNumber: {
+    required: true,
+    pattern: /^[0-9]{13,19}$/
+  },
+  expiryMonth: {
+    required: true,
+    pattern: /^(0[1-9]|1[0-2])$/
+  },
+  expiryYear: {
+    required: true,
+    pattern: /^20[2-9][0-9]$/
+  },
+  cvv: {
+    required: true,
+    pattern: /^[0-9]{3,4}$/
+  },
+  cardHolder: {
+    required: true,
+    minLength: 2,
+    maxLength: 100
+  }
+};
+
 // Apply validation to routes that need it
 router.post('/books', validate(bookValidationRules));
 router.put('/books/:bookId', validate(bookValidationRules));
 router.post('/categories', validate(categoryValidationRules));
 router.put('/categories/:categoryId', validate(categoryValidationRules));
 router.post('/books/:bookId/reviews', validate(reviewValidationRules));
+router.post('/orders', validate(orderValidationRules));
+router.post('/orders/:orderId/payment', validate(paymentValidationRules));
 
 // Parameter validation middleware
 router.param('bookId', (req, res, next, id) => {
@@ -165,6 +229,16 @@ router.param('categoryId', (req, res, next, id) => {
     return res.status(400).json({
       success: false,
       error: 'ID de catégorie invalide'
+    });
+  }
+  next();
+});
+
+router.param('orderId', (req, res, next, id) => {
+  if (!id || typeof id !== 'string' || id.length < 10) {
+    return res.status(400).json({
+      success: false,
+      error: 'ID de commande invalide'
     });
   }
   next();

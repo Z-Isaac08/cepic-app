@@ -6,7 +6,6 @@ const mongoSanitize = require('express-mongo-sanitize');
 const compression = require('compression');
 const DOMPurify = require('dompurify');
 const { JSDOM } = require('jsdom');
-const AuditLogger = require('../utils/auditLogger');
 
 // Create DOMPurify instance for server-side use
 const window = new JSDOM('').window;
@@ -51,10 +50,6 @@ const globalLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: async (req, res, next, options) => {
-    await AuditLogger.logSecurity('rate_limit_exceeded', req, {
-      limit: options.max,
-      windowMs: options.windowMs
-    });
     res.status(options.statusCode).json(options.message);
   }
 });
@@ -70,10 +65,6 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   skipSuccessfulRequests: true,
   handler: async (req, res, next, options) => {
-    await AuditLogger.logSecurity('auth_rate_limit_exceeded', req, {
-      limit: options.max,
-      windowMs: options.windowMs
-    });
     res.status(options.statusCode).json(options.message);
   }
 });
@@ -88,10 +79,6 @@ const strictAuthLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: async (req, res, next, options) => {
-    await AuditLogger.logSecurity('strict_auth_rate_limit_exceeded', req, {
-      limit: options.max,
-      windowMs: options.windowMs
-    });
     res.status(options.statusCode).json(options.message);
   }
 });
@@ -175,10 +162,6 @@ const csrfProtection = (req, res, next) => {
   ].filter(Boolean);
 
   if (!origin || !allowedOrigins.some(allowed => origin.startsWith(allowed))) {
-    AuditLogger.logSecurity('csrf_blocked', req, { 
-      origin, 
-      allowedOrigins 
-    });
     
     return res.status(403).json({
       success: false,
@@ -200,10 +183,6 @@ const inputValidation = (req, res, next) => {
   const checkString = (str, fieldPath) => {
     if (typeof str === 'string') {
       if (sqlInjectionPattern.test(str) || nosqlInjectionPattern.test(str)) {
-        AuditLogger.logSecurity('injection_attempt_blocked', req, {
-          field: fieldPath,
-          value: str.substring(0, 100) // Log first 100 chars only
-        });
         
         throw new Error(`Potential injection detected in ${fieldPath}`);
       }

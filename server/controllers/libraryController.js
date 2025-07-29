@@ -1,5 +1,4 @@
 const prisma = require('../lib/prisma');
-const AuditLogger = require('../utils/auditLogger');
 
 // CATEGORY CONTROLLERS
 
@@ -24,14 +23,12 @@ const getCategories = async (req, res, next) => {
       orderBy: { name: 'asc' }
     });
 
-    await AuditLogger.log('library_categories_view', req, req.user?.id, true);
 
     res.status(200).json({
       success: true,
       data: { categories }
     });
   } catch (error) {
-    await AuditLogger.log('library_categories_error', req, req.user?.id, false, { error: error.message });
     next(error);
   }
 };
@@ -56,7 +53,6 @@ const createCategory = async (req, res, next) => {
       }
     });
 
-    await AuditLogger.log('library_category_create', req, req.user.id, true, { categoryId: category.id, name });
 
     res.status(201).json({
       success: true,
@@ -70,7 +66,6 @@ const createCategory = async (req, res, next) => {
         error: 'Cette catégorie existe déjà'
       });
     }
-    await AuditLogger.log('library_category_create_error', req, req.user?.id, false, { error: error.message });
     next(error);
   }
 };
@@ -103,7 +98,6 @@ const updateCategory = async (req, res, next) => {
       data: updateData
     });
 
-    await AuditLogger.log('library_category_update', req, req.user.id, true, { categoryId, changes: updateData });
 
     res.status(200).json({
       success: true,
@@ -111,7 +105,6 @@ const updateCategory = async (req, res, next) => {
       message: 'Catégorie mise à jour avec succès'
     });
   } catch (error) {
-    await AuditLogger.log('library_category_update_error', req, req.user?.id, false, { categoryId: req.params.categoryId, error: error.message });
     next(error);
   }
 };
@@ -144,14 +137,12 @@ const deleteCategory = async (req, res, next) => {
       where: { id: categoryId }
     });
 
-    await AuditLogger.log('library_category_delete', req, req.user.id, true, { categoryId, name: category.name });
 
     res.status(200).json({
       success: true,
       message: 'Catégorie supprimée avec succès'
     });
   } catch (error) {
-    await AuditLogger.log('library_category_delete_error', req, req.user?.id, false, { categoryId: req.params.categoryId, error: error.message });
     next(error);
   }
 };
@@ -225,7 +216,6 @@ const getBooks = async (req, res, next) => {
       prisma.libraryBook.count({ where })
     ]);
 
-    await AuditLogger.log('library_books_view', req, req.user?.id, true, { resultCount: books.length });
 
     res.status(200).json({
       success: true,
@@ -241,7 +231,6 @@ const getBooks = async (req, res, next) => {
       }
     });
   } catch (error) {
-    await AuditLogger.log('library_books_view_error', req, req.user?.id, false, { error: error.message });
     next(error);
   }
 };
@@ -308,7 +297,6 @@ const getBookById = async (req, res, next) => {
       isBookmarked = !!bookmark;
     }
 
-    await AuditLogger.log('library_book_view', req, req.user?.id, true, { bookId, title: book.title });
 
     res.status(200).json({
       success: true,
@@ -320,7 +308,6 @@ const getBookById = async (req, res, next) => {
       }
     });
   } catch (error) {
-    await AuditLogger.log('library_book_view_error', req, req.user?.id, false, { bookId: req.params.bookId, error: error.message });
     next(error);
   }
 };
@@ -390,7 +377,6 @@ const createBook = async (req, res, next) => {
       }
     });
 
-    await AuditLogger.log('library_book_create', req, req.user.id, true, { bookId: book.id, title });
 
     res.status(201).json({
       success: true,
@@ -404,7 +390,6 @@ const createBook = async (req, res, next) => {
         error: 'Un livre avec cet ISBN existe déjà'
       });
     }
-    await AuditLogger.log('library_book_create_error', req, req.user?.id, false, { error: error.message });
     next(error);
   }
 };
@@ -472,7 +457,6 @@ const updateBook = async (req, res, next) => {
       }
     });
 
-    await AuditLogger.log('library_book_update', req, req.user.id, true, { bookId, changes: filteredData });
 
     res.status(200).json({
       success: true,
@@ -480,7 +464,6 @@ const updateBook = async (req, res, next) => {
       message: 'Livre mis à jour avec succès'
     });
   } catch (error) {
-    await AuditLogger.log('library_book_update_error', req, req.user?.id, false, { bookId: req.params.bookId, error: error.message });
     next(error);
   }
 };
@@ -517,14 +500,12 @@ const deleteBook = async (req, res, next) => {
       await tx.libraryBook.delete({ where: { id: bookId } });
     });
 
-    await AuditLogger.log('library_book_delete', req, req.user.id, true, { bookId, title: book.title });
 
     res.status(200).json({
       success: true,
       message: 'Livre supprimé avec succès'
     });
   } catch (error) {
-    await AuditLogger.log('library_book_delete_error', req, req.user?.id, false, { bookId: req.params.bookId, error: error.message });
     next(error);
   }
 };
@@ -612,7 +593,6 @@ const toggleBookmark = async (req, res, next) => {
       action = 'added';
     }
 
-    await AuditLogger.log(`library_bookmark_${action}`, req, req.user.id, true, { bookId, title: book.title });
 
     res.status(200).json({
       success: true,
@@ -620,7 +600,6 @@ const toggleBookmark = async (req, res, next) => {
       message: `Livre ${action === 'added' ? 'ajouté aux' : 'retiré des'} favoris`
     });
   } catch (error) {
-    await AuditLogger.log('library_bookmark_error', req, req.user?.id, false, { bookId: req.params.bookId, error: error.message });
     next(error);
   }
 };
@@ -728,7 +707,6 @@ const addOrUpdateReview = async (req, res, next) => {
       data: { rating: avgRating._avg.rating || 0 }
     });
 
-    await AuditLogger.log('library_review_create', req, req.user.id, true, { bookId, rating });
 
     res.status(200).json({
       success: true,
@@ -736,7 +714,6 @@ const addOrUpdateReview = async (req, res, next) => {
       message: 'Avis ajouté avec succès'
     });
   } catch (error) {
-    await AuditLogger.log('library_review_create_error', req, req.user?.id, false, { bookId: req.params.bookId, error: error.message });
     next(error);
   }
 };
@@ -772,14 +749,12 @@ const deleteReview = async (req, res, next) => {
       data: { rating: avgRating._avg.rating || 0 }
     });
 
-    await AuditLogger.log('library_review_delete', req, req.user.id, true, { bookId });
 
     res.status(200).json({
       success: true,
       message: 'Avis supprimé avec succès'
     });
   } catch (error) {
-    await AuditLogger.log('library_review_delete_error', req, req.user?.id, false, { bookId: req.params.bookId, error: error.message });
     next(error);
   }
 };
@@ -833,7 +808,6 @@ const downloadBook = async (req, res, next) => {
       data: { downloads: { increment: 1 } }
     });
 
-    await AuditLogger.log('library_book_download', req, req.user?.id, true, { bookId, title: book.title });
 
     res.status(200).json({
       success: true,
@@ -844,7 +818,6 @@ const downloadBook = async (req, res, next) => {
       message: 'Téléchargement autorisé'
     });
   } catch (error) {
-    await AuditLogger.log('library_book_download_error', req, req.user?.id, false, { bookId: req.params.bookId, error: error.message });
     next(error);
   }
 };
@@ -901,7 +874,6 @@ const getLibraryStats = async (req, res, next) => {
       })
     ]);
 
-    await AuditLogger.log('library_stats_view', req, req.user?.id, true);
 
     res.status(200).json({
       success: true,
@@ -920,7 +892,6 @@ const getLibraryStats = async (req, res, next) => {
       }
     });
   } catch (error) {
-    await AuditLogger.log('library_stats_error', req, req.user?.id, false, { error: error.message });
     next(error);
   }
 };

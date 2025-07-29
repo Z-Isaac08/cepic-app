@@ -3,7 +3,6 @@ const crypto = require('crypto');
 const prisma = require('../lib/prisma');
 const { createSendToken, generateTempToken, generate2FACode, clearAuthCookies } = require('../utils/jwt');
 const emailService = require('../utils/email');
-const AuditLogger = require('../utils/auditLogger');
 
 // Check if email exists
 const checkEmail = async (req, res, next) => {
@@ -15,7 +14,6 @@ const checkEmail = async (req, res, next) => {
       select: { id: true, email: true, isActive: true }
     });
 
-    await AuditLogger.logAuth('check_email', req, null, true, { email });
 
     res.status(200).json({
       success: true,
@@ -25,7 +23,6 @@ const checkEmail = async (req, res, next) => {
       }
     });
   } catch (error) {
-    await AuditLogger.logAuth('check_email', req, null, false, { error: error.message });
     next(error);
   }
 };
@@ -41,7 +38,6 @@ const loginExistingUser = async (req, res, next) => {
     });
 
     if (!user) {
-      await AuditLogger.logAuth('login_failed', req, null, false, { email, reason: 'user_not_found' });
       return res.status(401).json({
         success: false,
         error: 'Invalid email or password'
@@ -51,7 +47,6 @@ const loginExistingUser = async (req, res, next) => {
     // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      await AuditLogger.logAuth('login_failed', req, user.id, false, { reason: 'invalid_password' });
       return res.status(401).json({
         success: false,
         error: 'Invalid email or password'
@@ -81,7 +76,6 @@ const loginExistingUser = async (req, res, next) => {
       console.log(`2FA Code for ${email}: ${code}`);
     }
 
-    await AuditLogger.logAuth('login_2fa_sent', req, user.id, true);
 
     res.status(200).json({
       success: true,
@@ -92,7 +86,6 @@ const loginExistingUser = async (req, res, next) => {
       }
     });
   } catch (error) {
-    await AuditLogger.logAuth('login_error', req, null, false, { error: error.message });
     next(error);
   }
 };
@@ -108,7 +101,6 @@ const registerNewUser = async (req, res, next) => {
     });
 
     if (existingUser) {
-      await AuditLogger.logAuth('register_failed', req, null, false, { email, reason: 'user_exists' });
       return res.status(400).json({
         success: false,
         error: 'User with this email already exists'
@@ -151,7 +143,6 @@ const registerNewUser = async (req, res, next) => {
       console.log(`Verification Code for ${email}: ${code}`);
     }
 
-    await AuditLogger.logAuth('register_success', req, newUser.id, true);
 
     res.status(201).json({
       success: true,
@@ -162,7 +153,6 @@ const registerNewUser = async (req, res, next) => {
       }
     });
   } catch (error) {
-    await AuditLogger.logAuth('register_error', req, null, false, { error: error.message });
     next(error);
   }
 };
@@ -179,7 +169,6 @@ const verify2FA = async (req, res, next) => {
     });
 
     if (!twoFARecord || twoFARecord.isUsed || twoFARecord.expiresAt < new Date()) {
-      await AuditLogger.logAuth('2fa_failed', req, null, false, { reason: 'invalid_token' });
       return res.status(400).json({
         success: false,
         error: 'Invalid or expired verification code'
@@ -187,7 +176,6 @@ const verify2FA = async (req, res, next) => {
     }
 
     if (twoFARecord.code !== code) {
-      await AuditLogger.logAuth('2fa_failed', req, twoFARecord.userId, false, { reason: 'invalid_code' });
       return res.status(400).json({
         success: false,
         error: 'Invalid verification code'
@@ -214,12 +202,10 @@ const verify2FA = async (req, res, next) => {
       await emailService.sendWelcomeEmail(updatedUser.email, `${updatedUser.firstName} ${updatedUser.lastName}`);
     }
 
-    await AuditLogger.logAuth('2fa_success', req, updatedUser.id, true);
 
     // Generate JWT and send response with cookies
     await createSendToken(updatedUser, 200, res, req, 'Login successful');
   } catch (error) {
-    await AuditLogger.logAuth('2fa_error', req, null, false, { error: error.message });
     next(error);
   }
 };
@@ -236,7 +222,6 @@ const resend2FA = async (req, res, next) => {
     });
 
     if (!existingRecord || existingRecord.isUsed) {
-      await AuditLogger.logAuth('resend_2fa_failed', req, null, false, { reason: 'invalid_token' });
       return res.status(400).json({
         success: false,
         error: 'Invalid token'
@@ -267,14 +252,12 @@ const resend2FA = async (req, res, next) => {
       console.log(`New 2FA Code for ${existingRecord.user.email}: ${newCode}`);
     }
 
-    await AuditLogger.logAuth('resend_2fa_success', req, existingRecord.userId, true);
 
     res.status(200).json({
       success: true,
       message: 'New verification code sent'
     });
   } catch (error) {
-    await AuditLogger.logAuth('resend_2fa_error', req, null, false, { error: error.message });
     next(error);
   }
 };
@@ -333,7 +316,6 @@ const logout = async (req, res, next) => {
     // Clear auth cookies
     clearAuthCookies(res);
 
-    await AuditLogger.logAuth('logout', req, req.user?.id, true);
 
     res.status(200).json({
       success: true,
@@ -342,7 +324,6 @@ const logout = async (req, res, next) => {
   } catch (error) {
     // Still clear cookies even if database operation fails
     clearAuthCookies(res);
-    await AuditLogger.logAuth('logout_error', req, req.user?.id, false, { error: error.message });
     next(error);
   }
 };
@@ -366,7 +347,6 @@ const refreshToken = async (req, res, next) => {
     });
 
     if (!session || session.isRevoked || session.expiresAt < new Date()) {
-      await AuditLogger.logSecurity('invalid_refresh_token', req);
       return res.status(401).json({
         success: false,
         error: 'Invalid or expired refresh token'
@@ -382,9 +362,7 @@ const refreshToken = async (req, res, next) => {
       data: { isRevoked: true }
     });
 
-    await AuditLogger.logAuth('token_refresh', req, session.userId, true);
   } catch (error) {
-    await AuditLogger.logAuth('token_refresh_error', req, null, false, { error: error.message });
     next(error);
   }
 };

@@ -26,13 +26,13 @@ model User {
   // Relations
   sessions    Session[]
   twoFACodes  TwoFACode[]
-  auditLogs   AuditLog[]
   
   // Library relations
   uploadedBooks  LibraryBook[]
   bookmarks      LibraryBookmark[]
   reviews        LibraryReview[]
   downloads      LibraryDownload[]
+  orders         Order[]
 
   @@map("users")
 }
@@ -73,21 +73,6 @@ model TwoFACode {
   @@map("two_fa_codes")
 }
 
-model AuditLog {
-  id          String   @id @default(cuid())
-  action      String
-  resource    String?
-  details     Json?
-  ipAddress   String?
-  userAgent   String?
-  success     Boolean  @default(true)
-  createdAt   DateTime @default(now())
-
-  userId      String?
-  user        User?     @relation(fields: [userId], references: [id])
-
-  @@map("audit_logs")
-}
 
 model LibraryCategory {
   id          String   @id @default(cuid())
@@ -123,6 +108,9 @@ model LibraryBook {
   views       Int      @default(0)
   rating      Float?   @default(0)
   tags        String[] @default([])
+  price       Int      @default(0) // Price in cents (FCFA)
+  originalPrice Int?   // Original price for discounts
+  isFree      Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -134,6 +122,7 @@ model LibraryBook {
   bookmarks   LibraryBookmark[]
   reviews     LibraryReview[]
   downloads_log LibraryDownload[]
+  orderItems  OrderItem[]
 
   @@map("library_books")
 }
@@ -185,6 +174,43 @@ model LibraryDownload {
   @@map("library_downloads")
 }
 
+model Order {
+  id          String   @id @default(cuid())
+  userId      String
+  status      OrderStatus @default(PENDING)
+  totalAmount Int      // Total price in cents (FCFA)
+  currency    String   @default("XOF") // West African CFA franc
+  paymentMethod String? // CARD, MOBILE_MONEY, BANK_TRANSFER
+  paymentId   String?  // External payment reference
+  paymentData Json?    // Store payment gateway response
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  paidAt      DateTime?
+  
+  // Relations
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  bookId      String
+  quantity    Int      @default(1)
+  unitPrice   Int      // Price at time of order in cents
+  totalPrice  Int      // quantity * unitPrice
+  
+  // Relations
+  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  book        LibraryBook @relation(fields: [bookId], references: [id])
+
+  @@unique([orderId, bookId]) // Prevent duplicate books in same order
+  @@map("order_items")
+}
+
 enum Role {
   USER
   ADMIN
@@ -208,4 +234,14 @@ enum FileType {
   MP4
   VIDEO
   IMAGE
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  PAID
+  COMPLETED
+  CANCELLED
+  FAILED
+  REFUNDED
 }

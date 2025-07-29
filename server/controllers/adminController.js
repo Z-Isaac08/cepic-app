@@ -1,5 +1,4 @@
 const prisma = require('../lib/prisma');
-const AuditLogger = require('../utils/auditLogger');
 
 // Obtenir les statistiques du dashboard
 const getDashboardStats = async (req, res, next) => {
@@ -56,7 +55,6 @@ const getDashboardStats = async (req, res, next) => {
       eventRegistrations: Math.floor(Math.random() * 80) + 20
     };
 
-    await AuditLogger.logAdmin('dashboard_access', req, req.user.id, true);
 
     res.status(200).json({
       success: true,
@@ -77,7 +75,6 @@ const getDashboardStats = async (req, res, next) => {
       }
     });
   } catch (error) {
-    await AuditLogger.logAdmin('dashboard_error', req, req.user?.id, false, { error: error.message });
     next(error);
   }
 };
@@ -139,10 +136,6 @@ const getUsers = async (req, res, next) => {
       prisma.user.count({ where })
     ]);
 
-    await AuditLogger.logAdmin('users_list_access', req, req.user.id, true, {
-      filters: { search, status, role },
-      resultCount: users.length
-    });
 
     res.status(200).json({
       success: true,
@@ -158,7 +151,6 @@ const getUsers = async (req, res, next) => {
       }
     });
   } catch (error) {
-    await AuditLogger.logAdmin('users_list_error', req, req.user?.id, false, { error: error.message });
     next(error);
   }
 };
@@ -208,11 +200,6 @@ const updateUserStatus = async (req, res, next) => {
       }
     });
 
-    await AuditLogger.logAdmin('user_status_update', req, req.user.id, true, {
-      targetUserId: userId,
-      targetUserEmail: user.email,
-      changes: updateData
-    });
 
     res.status(200).json({
       success: true,
@@ -220,10 +207,6 @@ const updateUserStatus = async (req, res, next) => {
       message: 'Statut utilisateur mis à jour avec succès'
     });
   } catch (error) {
-    await AuditLogger.logAdmin('user_status_update_error', req, req.user?.id, false, { 
-      targetUserId: req.params.userId,
-      error: error.message 
-    });
     next(error);
   }
 };
@@ -285,20 +268,12 @@ const deleteUser = async (req, res, next) => {
       });
     });
 
-    await AuditLogger.logAdmin('user_delete', req, req.user.id, true, {
-      deletedUserId: userId,
-      deletedUserEmail: user.email
-    });
 
     res.status(200).json({
       success: true,
       message: 'Utilisateur supprimé avec succès'
     });
   } catch (error) {
-    await AuditLogger.logAdmin('user_delete_error', req, req.user?.id, false, { 
-      targetUserId: req.params.userId,
-      error: error.message 
-    });
     next(error);
   }
 };
@@ -346,7 +321,6 @@ const getSecurityLogs = async (req, res, next) => {
       prisma.auditLog.count({ where })
     ]);
 
-    await AuditLogger.logAdmin('security_logs_access', req, req.user.id, true);
 
     res.status(200).json({
       success: true,
@@ -360,7 +334,6 @@ const getSecurityLogs = async (req, res, next) => {
       }
     });
   } catch (error) {
-    await AuditLogger.logAdmin('security_logs_error', req, req.user?.id, false, { error: error.message });
     next(error);
   }
 };
@@ -388,7 +361,6 @@ const getSystemHealth = async (req, res, next) => {
       storage: 'healthy'
     };
 
-    await AuditLogger.logAdmin('system_health_access', req, req.user.id, true);
 
     res.status(200).json({
       success: true,
@@ -401,7 +373,6 @@ const getSystemHealth = async (req, res, next) => {
       }
     });
   } catch (error) {
-    await AuditLogger.logAdmin('system_health_error', req, req.user?.id, false, { error: error.message });
     next(error);
   }
 };
@@ -433,14 +404,12 @@ const getAnalytics = async (req, res, next) => {
         data = await getUserAnalytics(startDate, endDate, timeRange);
     }
 
-    await AuditLogger.logAdmin('analytics_access', req, req.user.id, true, { metric, timeRange });
 
     res.status(200).json({
       success: true,
       data
     });
   } catch (error) {
-    await AuditLogger.logAdmin('analytics_error', req, req.user?.id, false, { error: error.message });
     next(error);
   }
 };
