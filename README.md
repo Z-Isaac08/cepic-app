@@ -302,13 +302,3 @@ Assurez-vous de configurer :
 ## 📄 Licence
 
 Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
-
-## 👥 Support
-
-Pour toute question ou support :
-- Email: support@projectmoney.com
-- GitHub Issues: [Ouvrir un ticket](https://github.com/username/projectmoney/issues)
-
----
-
-**Développé avec ❤️ pour la communauté francophone africaine**
