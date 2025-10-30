@@ -108,8 +108,6 @@ app.use('/api/payments', require('./routers/paymentRoutes'));
 app.use('/api/gallery', require('./routers/galleryRoutes'));
 app.use('/api/contact', require('./routers/contactRoutes'));
 
-app.use('/api/library', require('./routers/libraryRoutes'));
-
 // Catch all for API routes
 app.use('/api/*', (req, res) => {
   res.status(404).json({ 
