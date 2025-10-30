@@ -194,8 +194,10 @@ const requireAdmin = async (req, res, next) => {
 
 module.exports = {
   protect,
+  authenticate: protect, // Alias pour protect
   optionalAuth,
   restrictTo,
+  authorize: restrictTo, // Alias pour restrictTo
   requireVerified,
   requireAdmin,
   cleanupExpiredSessions

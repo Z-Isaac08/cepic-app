@@ -5,30 +5,30 @@
 
 /* Configuration du thème avec CSS Custom Properties */
 @theme {
-  /* Colors - Palette Jaune/Vert */
-  --color-primary-50: #fefce8;
-  --color-primary-100: #fef9c3;
-  --color-primary-200: #fef08a;
-  --color-primary-300: #fde047;
-  --color-primary-400: #facc15;
-  --color-primary-500: #eab308;
-  --color-primary-600: #ca8a04;
-  --color-primary-700: #a16207;
-  --color-primary-800: #854d0e;
-  --color-primary-900: #713f12;
-  --color-primary-950: #422006;
+  /* Colors - Palette CEPIC (Bleu #2C2E83 / Or #ECB519) */
+  --color-primary-50: #f0f1fb;
+  --color-primary-100: #e4e5f8;
+  --color-primary-200: #cdd0f2;
+  --color-primary-300: #adb1e9;
+  --color-primary-400: #8a8fdd;
+  --color-primary-500: #6d73d0;
+  --color-primary-600: #5a5fc0;
+  --color-primary-700: #4d51a8;
+  --color-primary-800: #2C2E83;
+  --color-primary-900: #252766;
+  --color-primary-950: #1a1b4a;
 
-  --color-secondary-50: #f0fdf4;
-  --color-secondary-100: #dcfce7;
-  --color-secondary-200: #bbf7d0;
-  --color-secondary-300: #86efac;
-  --color-secondary-400: #4ade80;
-  --color-secondary-500: #22c55e;
-  --color-secondary-600: #16a34a;
-  --color-secondary-700: #15803d;
-  --color-secondary-800: #166534;
-  --color-secondary-900: #14532d;
-  --color-secondary-950: #052e16;
+  --color-secondary-50: #fefbf0;
+  --color-secondary-100: #fdf6db;
+  --color-secondary-200: #fbedb8;
+  --color-secondary-300: #f8df8a;
+  --color-secondary-400: #f5ca5a;
+  --color-secondary-500: #ECB519;
+  --color-secondary-600: #d49e15;
+  --color-secondary-700: #b08312;
+  --color-secondary-800: #8f6a0f;
+  --color-secondary-900: #75570c;
+  --color-secondary-950: #4a3608;
 
   --color-dark-50: #f8fafc;
   --color-dark-100: #f1f5f9;

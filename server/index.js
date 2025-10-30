@@ -100,6 +100,14 @@ app.get('/api/status', (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', require('./routers/adminRoutes'));
+
+// CEPIC Routes
+app.use('/api/trainings', require('./routers/trainingRoutes'));
+app.use('/api/enrollments', require('./routers/enrollmentRoutes'));
+app.use('/api/payments', require('./routers/paymentRoutes'));
+app.use('/api/gallery', require('./routers/galleryRoutes'));
+app.use('/api/contact', require('./routers/contactRoutes'));
+
 app.use('/api/library', require('./routers/libraryRoutes'));
 
 // Catch all for API routes

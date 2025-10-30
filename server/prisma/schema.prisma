@@ -1,5 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// CEPIC Platform - Prisma Schema
+// Migration from ProjectMoney to CEPIC Training Platform
+// Date: 30 Octobre 2025
 
 generator client {
   provider = "prisma-client-js"
@@ -10,206 +11,329 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  password    String
-  firstName   String
-  lastName    String
-  role        Role     @default(USER)
-  isVerified  Boolean  @default(false)
-  isActive    Boolean  @default(true)
-  lastLogin   DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// ============================================
+// MODÈLES EXISTANTS (CONSERVÉS)
+// ============================================
 
-  // Relations
-  sessions    Session[]
-  twoFACodes  TwoFACode[]
-  
-  // Library relations
-  uploadedBooks  LibraryBook[]
-  bookmarks      LibraryBookmark[]
-  reviews        LibraryReview[]
-  downloads      LibraryDownload[]
-  orders         Order[]
+model User {
+  id         String    @id @default(cuid())
+  email      String    @unique
+  password   String
+  firstName  String
+  lastName   String
+  role       Role      @default(USER)
+  isVerified Boolean   @default(false)
+  isActive   Boolean   @default(true)
+  lastLogin  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations existantes
+  sessions   Session[]
+  twoFACodes TwoFACode[]
+
+  // Nouvelles relations CEPIC
+  trainings           Training[]
+  trainingBookmarks   TrainingBookmark[]
+  trainingReviews     TrainingReview[]
+  trainingEnrollments TrainingEnrollment[]
+  galleryPhotos       GalleryPhoto[]
 
   @@map("users")
 }
 
 model Session {
-  id          String   @id @default(cuid())
-  userId      String
-  token       String   @unique
-  refreshToken String? @unique
-  expiresAt   DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isRevoked   Boolean  @default(false)
-  
-  // Device/Browser info for security
-  userAgent   String?
-  ipAddress   String?
-  
-  // Relations
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  userId       String
+  token        String   @unique
+  refreshToken String?  @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  isRevoked    Boolean  @default(false)
+  userAgent    String?
+  ipAddress    String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
 }
 
 model TwoFACode {
-  id          String   @id @default(cuid())
-  userId      String
-  code        String
-  tempToken   String   @unique
-  type        TwoFAType @default(LOGIN)
-  expiresAt   DateTime
-  isUsed      Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  
-  // Relations
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String    @id @default(cuid())
+  userId    String
+  code      String
+  tempToken String    @unique
+  type      TwoFAType @default(LOGIN)
+  expiresAt DateTime
+  isUsed    Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("two_fa_codes")
 }
 
+// ============================================
+// NOUVEAUX MODÈLES CEPIC
+// ============================================
 
-model LibraryCategory {
+// 1. CATÉGORIES DE FORMATIONS
+model TrainingCategory {
   id          String   @id @default(cuid())
   name        String   @unique
+  slug        String   @unique
   description String?
+  icon        String? // Nom de l'icône Lucide React
   color       String?  @default("#3B82F6")
+  order       Int      @default(0)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relations
-  books       LibraryBook[]
+  trainings Training[]
 
-  @@map("library_categories")
+  @@map("training_categories")
 }
 
-model LibraryBook {
-  id          String   @id @default(cuid())
-  title       String
-  author      String
-  isbn        String?  @unique
-  description String?
-  coverImage  String?
-  fileUrl     String?
-  fileType    FileType @default(PDF)
-  fileSize    Int?     // in bytes
-  pages       Int?
-  language    String   @default("fr")
-  publishedAt DateTime?
-  isPublic    Boolean  @default(true)
-  isAvailable Boolean  @default(true)
-  downloads   Int      @default(0)
+// 2. FORMATIONS
+model Training {
+  id             String   @id @default(cuid())
+  title          String
+  slug           String   @unique
+  description    String?  @db.Text
+  objectives     String[] // Objectifs pédagogiques
+  prerequisites  String[] // Prérequis
+  targetAudience String? // Public cible
+  program        String?  @db.Text // Programme détaillé
+  coverImage     String?
+
+  // Détails pratiques
+  duration     Int // Durée en heures
+  durationUnit String  @default("hours") // hours, days, weeks
+  cost         Int // Coût en FCFA (centimes)
+  originalCost Int? // Prix original (pour réductions)
+  isFree       Boolean @default(false)
+
+  // Modalités
+  deliveryMode    DeliveryMode @default(PRESENTIAL)
+  location        String? // Lieu (si présentiel)
+  maxParticipants Int? // Nombre max de participants
+  minParticipants Int? // Nombre min pour ouvrir
+
+  // Dates et horaires
+  schedule  String? // Ex: "Lun-Ven 9h-17h"
+  startDate DateTime?
+  endDate   DateTime?
+
+  // Formateur
+  instructor      String?
+  instructorBio   String? @db.Text
+  instructorPhoto String?
+
+  // Métadonnées
+  isPublished Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  isFeatured  Boolean  @default(false) // Formation à la une
   views       Int      @default(0)
+  enrollments Int      @default(0)
   rating      Float?   @default(0)
   tags        String[] @default([])
-  price       Int      @default(0) // Price in cents (FCFA)
-  originalPrice Int?   // Original price for discounts
-  isFree      Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
-  // Relations
-  categoryId  String
-  category    LibraryCategory @relation(fields: [categoryId], references: [id])
-  uploadedBy  String
-  uploader    User            @relation(fields: [uploadedBy], references: [id])
-  bookmarks   LibraryBookmark[]
-  reviews     LibraryReview[]
-  downloads_log LibraryDownload[]
-  orderItems  OrderItem[]
-
-  @@map("library_books")
-}
-
-model LibraryBookmark {
-  id        String   @id @default(cuid())
-  userId    String
-  bookId    String
-  createdAt DateTime @default(now())
-
-  // Relations
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  book      LibraryBook @relation(fields: [bookId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, bookId])
-  @@map("library_bookmarks")
-}
-
-model LibraryReview {
-  id        String   @id @default(cuid())
-  rating    Int      // 1-5 stars
-  comment   String?
-  isPublic  Boolean  @default(true)
-  userId    String
-  bookId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  book      LibraryBook @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   TrainingCategory @relation(fields: [categoryId], references: [id])
+  createdBy  String
+  creator    User             @relation(fields: [createdBy], references: [id])
 
-  @@unique([userId, bookId])
-  @@map("library_reviews")
+  bookmarks       TrainingBookmark[]
+  reviews         TrainingReview[]
+  enrollments_rel TrainingEnrollment[]
+  sessions        TrainingSession[]
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([isPublished, isActive])
+  @@map("trainings")
 }
 
-model LibraryDownload {
-  id          String   @id @default(cuid())
-  userId      String
-  bookId      String
-  ipAddress   String?
-  userAgent   String?
-  downloadedAt DateTime @default(now())
+// 3. SESSIONS DE FORMATION
+model TrainingSession {
+  id         String   @id @default(cuid())
+  trainingId String
+  training   Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
 
-  // Relations
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  book        LibraryBook @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  name               String? // Ex: "Session Janvier 2025"
+  startDate          DateTime
+  endDate            DateTime
+  location           String?
+  maxParticipants    Int?
+  currentEnrollments Int           @default(0)
+  status             SessionStatus @default(SCHEDULED)
+  notes              String?
 
-  @@map("library_downloads")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([trainingId])
+  @@index([startDate])
+  @@map("training_sessions")
 }
 
-model Order {
+// 4. INSCRIPTIONS AUX FORMATIONS
+model TrainingEnrollment {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainingId String
+  training   Training @relation(fields: [trainingId], references: [id])
+
+  // Informations inscription
+  status        EnrollmentStatus @default(PENDING)
+  paymentStatus PaymentStatus    @default(UNPAID)
+  amount        Int // Montant payé en FCFA (centimes)
+
+  // Dates
+  enrolledAt  DateTime  @default(now())
+  paidAt      DateTime?
+  completedAt DateTime?
+  cancelledAt DateTime?
+
+  // Certificat
+  certificateUrl      String?
+  certificateIssuedAt DateTime?
+
+  // Notes
+  notes      String?
+  adminNotes String?
+
+  // Relation paiement (1:1)
+  payment Payment?
+
+  @@unique([userId, trainingId])
+  @@index([userId])
+  @@index([trainingId])
+  @@index([status])
+  @@map("training_enrollments")
+}
+
+// 5. FAVORIS FORMATIONS
+model TrainingBookmark {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainingId String
+  training   Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, trainingId])
+  @@index([userId])
+  @@map("training_bookmarks")
+}
+
+// 6. AVIS SUR FORMATIONS
+model TrainingReview {
+  id         String   @id @default(cuid())
+  rating     Int // 1-5 étoiles
+  comment    String?  @db.Text
+  isPublic   Boolean  @default(true)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainingId String
+  training   Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, trainingId])
+  @@index([trainingId])
+  @@map("training_reviews")
+}
+
+// 7. GALERIE PHOTOS
+model GalleryPhoto {
   id          String   @id @default(cuid())
-  userId      String
-  status      OrderStatus @default(PENDING)
-  totalAmount Int      // Total price in cents (FCFA)
-  currency    String   @default("XOF") // West African CFA franc
-  paymentMethod String? // CARD, MOBILE_MONEY, BANK_TRANSFER
-  paymentId   String?  // External payment reference
-  paymentData Json?    // Store payment gateway response
-  notes       String?
+  title       String?
+  description String?
+  imageUrl    String
+  category    String? // "Formations", "Événements", "Équipe", "Locaux"
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  uploadedBy  String
+  uploader    User     @relation(fields: [uploadedBy], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  paidAt      DateTime?
-  
-  // Relations
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items       OrderItem[]
 
-  @@map("orders")
+  @@index([category])
+  @@index([order])
+  @@map("gallery_photos")
 }
 
-model OrderItem {
-  id          String   @id @default(cuid())
-  orderId     String
-  bookId      String
-  quantity    Int      @default(1)
-  unitPrice   Int      // Price at time of order in cents
-  totalPrice  Int      // quantity * unitPrice
-  
-  // Relations
-  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  book        LibraryBook @relation(fields: [bookId], references: [id])
+// 8. MESSAGES DE CONTACT
+model ContactMessage {
+  id        String        @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String        @db.Text
+  status    MessageStatus @default(NEW)
+  repliedAt DateTime?
+  repliedBy String?
+  reply     String?       @db.Text
+  createdAt DateTime      @default(now())
 
-  @@unique([orderId, bookId]) // Prevent duplicate books in same order
-  @@map("order_items")
+  @@index([status])
+  @@index([createdAt])
+  @@map("contact_messages")
 }
+
+// 9. PAIEMENTS (CinetPay)
+model Payment {
+  id           String             @id @default(cuid())
+  enrollmentId String             @unique
+  enrollment   TrainingEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  // CinetPay
+  transactionId String @unique // ID transaction CinetPay
+  paymentMethod String // ORANGE_MONEY, MTN_MONEY, MOOV_MONEY, WAVE, CARD
+  gateway       String @default("CINETPAY")
+
+  // Montants
+  amount    Int // Montant en FCFA (centimes)
+  currency  String @default("XOF") // Franc CFA
+  fees      Int? // Frais de transaction
+  netAmount Int? // Montant net (amount - fees)
+
+  // Statut
+  status PaymentStatus @default(PENDING)
+
+  // Métadonnées CinetPay
+  paymentData Json? // Réponse complète CinetPay
+  paymentUrl  String? // URL de paiement CinetPay
+  operatorId  String? // ID opérateur (Orange, MTN, etc.)
+
+  // Sécurité
+  ipAddress String?
+  userAgent String?
+
+  // Dates
+  initiatedAt DateTime  @default(now())
+  completedAt DateTime?
+  failedAt    DateTime?
+  refundedAt  DateTime?
+
+  @@index([transactionId])
+  @@index([status])
+  @@index([enrollmentId])
+  @@map("payments")
+}
+
+// ============================================
+// ENUMS
+// ============================================
 
 enum Role {
   USER
@@ -223,25 +347,41 @@ enum TwoFAType {
   PASSWORD_RESET
 }
 
-enum FileType {
-  PDF
-  EPUB
-  MOBI
-  DOC
-  DOCX
-  TXT
-  MP3
-  MP4
-  VIDEO
-  IMAGE
+enum DeliveryMode {
+  PRESENTIAL // Présentiel
+  REMOTE // Distanciel
+  HYBRID // Hybride
 }
 
-enum OrderStatus {
-  PENDING
-  PROCESSING
-  PAID
-  COMPLETED
-  CANCELLED
-  FAILED
-  REFUNDED
+enum SessionStatus {
+  SCHEDULED // Programmée
+  ONGOING // En cours
+  COMPLETED // Terminée
+  CANCELLED // Annulée
+}
+
+enum EnrollmentStatus {
+  PENDING // En attente
+  CONFIRMED // Confirmée
+  COMPLETED // Complétée
+  CANCELLED // Annulée
+}
+
+enum PaymentStatus {
+  PENDING // En attente
+  PROCESSING // En cours
+  COMPLETED // Complété
+  FAILED // Échoué
+  CANCELLED // Annulé
+  REFUNDED // Remboursé
+  UNPAID // Non payé
+  PARTIAL // Partiellement payé
+  PAID // Payé
+}
+
+enum MessageStatus {
+  NEW // Nouveau
+  READ // Lu
+  REPLIED // Répondu
+  ARCHIVED // Archivé
 }

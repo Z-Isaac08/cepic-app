@@ -1,0 +1,62 @@
+### TESTS API CEPIC
+### Utiliser avec REST Client (VS Code extension) ou Postman
+
+@baseUrl = http://localhost:3001/api
+
+### 1. TEST SANTÉ DU SERVEUR
+GET http://localhost:3001/health
+
+### 2. LISTE DES FORMATIONS (Public)
+GET {{baseUrl}}/trainings
+
+### 3. CATÉGORIES
+GET {{baseUrl}}/trainings/categories
+
+### 4. DÉTAIL FORMATION (remplacer {id} par un vrai ID)
+GET {{baseUrl}}/trainings/clzxxx
+
+### 5. LOGIN ADMIN
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@cepic.ci",
+  "password": "secret123"
+}
+
+### 6. LOGIN USER
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@test.com",
+  "password": "secret123"
+}
+
+### 7. CRÉER INSCRIPTION (nécessite auth)
+POST {{baseUrl}}/enrollments
+Content-Type: application/json
+Cookie: auth_token=YOUR_TOKEN_HERE
+
+{
+  "trainingId": "TRAINING_ID_HERE"
+}
+
+### 8. MES INSCRIPTIONS (nécessite auth)
+GET {{baseUrl}}/enrollments
+Cookie: auth_token=YOUR_TOKEN_HERE
+
+### 9. GALERIE PHOTOS
+GET {{baseUrl}}/gallery
+
+### 10. ENVOYER MESSAGE CONTACT
+POST {{baseUrl}}/contact
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "phone": "0123456789",
+  "subject": "Test",
+  "message": "Message de test"
+}
