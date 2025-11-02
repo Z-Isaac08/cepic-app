@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { Clock, MapPin, Users, Star, Bookmark, BookmarkCheck } from 'lucide-react';
 import { Link } from 'react-router';
 import { useState } from 'react';
@@ -25,8 +26,16 @@ const TrainingCard = ({ training, showBookmark = true }) => {
     try {
       const response = await toggleBookmark(training.id);
       setIsBookmarked(response.bookmarked);
+      
+      // Toast feedback
+      if (response.bookmarked) {
+        toast.success('Formation ajoutée aux favoris');
+      } else {
+        toast.info('Formation retirée des favoris');
+      }
     } catch (error) {
       console.error('Erreur bookmark:', error);
+      toast.error('Erreur lors de la mise à jour des favoris');
     } finally {
       setIsLoading(false);
     }

@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import {
   Check,
   Eye,
@@ -108,9 +109,10 @@ const RegisterPage = () => {
   const handleResendCode = async () => {
     try {
       await resendTwoFA();
-      alert("Code renvoyé avec succès!");
+      toast.success("Code renvoyé avec succès!");
     } catch (err) {
       console.error("Resend error:", err);
+      toast.error("Erreur lors du renvoi du code");
     }
   };
 

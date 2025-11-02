@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
 import { Route, Routes } from "react-router";
+import { Toaster } from "sonner";
 import ErrorBoundary from "./components/errorboundary/ErrorBoundary";
 import Layout from "./components/layout/Layout";
 import { useAuthStore } from "./stores/authStore";
@@ -136,7 +137,12 @@ const AppContent = () => {
 };
 
 function App() {
-  return <AppContent />;
+  return (
+    <>
+      <Toaster position="top-right" richColors closeButton />
+      <AppContent />
+    </>
+  );
 }
 
 export default App;

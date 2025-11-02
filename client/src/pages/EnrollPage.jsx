@@ -1,9 +1,13 @@
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { ArrowLeft, Calendar, CheckCircle, MapPin, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { Button } from "../components/ui";
+import { PaymentMethodSelector, MobileMoneyForm, CreditCardForm } from "../components/payment";
 import { getTrainingById } from "../services/api/trainings";
+import { createEnrollment } from "../services/api/enrollments";
+import { initiatePayment } from "../services/api/payments";
 import { useAuthStore } from "../stores/authStore";
 
 const EnrollPage = () => {
@@ -13,6 +17,7 @@ const EnrollPage = () => {
   const [training, setTraining] = useState(null);
   const [loading, setLoading] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState("mobile_money");
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   useEffect(() => {
     // Si pas connecté, rediriger vers login
@@ -45,17 +50,40 @@ const EnrollPage = () => {
     fetchTraining();
   }, [user, id, navigate]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // TODO: Implémenter la logique de paiement
-    console.log("Processing payment with method:", paymentMethod);
-
-    // Rediriger vers confirmation
-    navigate("/mes-inscriptions", {
-      state: {
-        message: "Inscription réussie! Vous recevrez un email de confirmation.",
-      },
-    });
+  const handlePaymentSubmit = async (paymentData) => {
+    setPaymentLoading(true);
+    const toastId = toast.loading('Création de l\'inscription...');
+    
+    try {
+      // 1. Créer l'inscription
+      const enrollmentResponse = await createEnrollment(training.id);
+      
+      if (!enrollmentResponse.success) {
+        throw new Error(enrollmentResponse.error || 'Erreur lors de la création de l\'inscription');
+      }
+      
+      const enrollment = enrollmentResponse.data;
+      
+      // 2. Initier le paiement CinetPay
+      toast.loading('Initialisation du paiement...', { id: toastId });
+      
+      const paymentResponse = await initiatePayment(enrollment.id);
+      
+      if (!paymentResponse.success) {
+        throw new Error(paymentResponse.error || 'Erreur lors de l\'initialisation du paiement');
+      }
+      
+      // 3. Rediriger vers la page de paiement CinetPay
+      toast.success('Redirection vers le paiement...', { id: toastId });
+      
+      // Rediriger vers l'URL de paiement CinetPay
+      window.location.href = paymentResponse.data.paymentUrl;
+      
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error(error.message || 'Erreur lors du paiement. Veuillez réessayer.', { id: toastId });
+      setPaymentLoading(false);
+    }
   };
 
   if (loading) {
@@ -133,76 +161,31 @@ const EnrollPage = () => {
                   </div>
                 </div>
 
-                {/* Mode de paiement */}
+                {/* Sélection mode de paiement */}
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-4">
-                    Mode de paiement
-                  </h3>
-                  <div className="space-y-3">
-                    <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary-800 transition-colors">
-                      <input
-                        type="radio"
-                        name="payment"
-                        value="mobile_money"
-                        checked={paymentMethod === "mobile_money"}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="w-4 h-4 text-primary-800 focus:ring-primary-600"
-                      />
-                      <div className="ml-3">
-                        <p className="font-medium text-gray-900">
-                          Mobile Money
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Orange Money, MTN Money, Moov Money
-                        </p>
-                      </div>
-                    </label>
-
-                    <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary-800 transition-colors">
-                      <input
-                        type="radio"
-                        name="payment"
-                        value="bank_transfer"
-                        checked={paymentMethod === "bank_transfer"}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="w-4 h-4 text-primary-800 focus:ring-primary-600"
-                      />
-                      <div className="ml-3">
-                        <p className="font-medium text-gray-900">
-                          Virement bancaire
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Paiement par virement
-                        </p>
-                      </div>
-                    </label>
-
-                    <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary-800 transition-colors">
-                      <input
-                        type="radio"
-                        name="payment"
-                        value="on_site"
-                        checked={paymentMethod === "on_site"}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="w-4 h-4 text-primary-800 focus:ring-primary-600"
-                      />
-                      <div className="ml-3">
-                        <p className="font-medium text-gray-900">
-                          Paiement sur place
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Payez directement au centre
-                        </p>
-                      </div>
-                    </label>
-                  </div>
+                  <PaymentMethodSelector
+                    selected={paymentMethod}
+                    onSelect={setPaymentMethod}
+                  />
                 </div>
 
-                {/* Bouton de soumission */}
-                <div className="pt-4">
-                  <Button type="submit" size="lg" className="w-full">
-                    Confirmer l'inscription
-                  </Button>
+                {/* Formulaire de paiement */}
+                <div>
+                  {paymentMethod === "mobile_money" && (
+                    <MobileMoneyForm
+                      amount={training.cost}
+                      onSubmit={handlePaymentSubmit}
+                      loading={paymentLoading}
+                    />
+                  )}
+
+                  {paymentMethod === "credit_card" && (
+                    <CreditCardForm
+                      amount={training.cost}
+                      onSubmit={handlePaymentSubmit}
+                      loading={paymentLoading}
+                    />
+                  )}
                 </div>
               </form>
             </motion.div>

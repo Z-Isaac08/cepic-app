@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { 
   GraduationCap, 
   Clock, 
@@ -32,8 +33,16 @@ const PricingCard = ({ training }) => {
     try {
       const response = await toggleBookmark(training.id);
       setIsBookmarked(response.bookmarked);
+      
+      // Toast feedback
+      if (response.bookmarked) {
+        toast.success('Formation ajoutée aux favoris');
+      } else {
+        toast.info('Formation retirée des favoris');
+      }
     } catch (error) {
       console.error('Erreur bookmark:', error);
+      toast.error('Erreur lors de la mise à jour des favoris');
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +58,7 @@ const PricingCard = ({ training }) => {
     } else {
       // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href);
-      alert('Lien copié dans le presse-papier !');
+      toast.success('Lien copié dans le presse-papier !');
     }
   };
 

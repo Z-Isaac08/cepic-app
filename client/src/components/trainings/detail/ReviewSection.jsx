@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { Star, ThumbsUp, MessageSquare, Send } from 'lucide-react';
 import { Button } from '../../ui';
 import { useAuthStore } from '../../../stores/authStore';
@@ -58,9 +59,9 @@ const ReviewSection = ({ training }) => {
       await addReview(training.id, reviewForm);
       setReviewForm({ rating: 5, comment: '' });
       setShowReviewForm(false);
-      alert('Votre avis a été ajouté avec succès!');
+      toast.success('Votre avis a été ajouté avec succès!');
     } catch (error) {
-      alert(error.response?.data?.error || 'Erreur lors de l\'ajout de l\'avis');
+      toast.error(error.response?.data?.error || 'Erreur lors de l\'ajout de l\'avis');
     } finally {
       setSubmitting(false);
     }
