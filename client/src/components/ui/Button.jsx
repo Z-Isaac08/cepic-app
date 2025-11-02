@@ -14,12 +14,15 @@ const Button = ({
 
   const variants = {
     primary:
-      "bg-primary-500 hover:bg-primary-600 text-dark-900 focus:ring-primary-500 hover:shadow-lg",
+      "bg-primary-800 hover:bg-primary-900 text-white focus:ring-primary-800 hover:shadow-lg",
     secondary:
-      "bg-secondary-500 hover:bg-secondary-600 text-white focus:ring-secondary-500 hover:shadow-lg",
+      "bg-secondary-500 hover:bg-secondary-600 text-primary-900 focus:ring-secondary-500 hover:shadow-lg",
     outline:
-      "border-2 border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white focus:ring-primary-500",
-    ghost: "text-primary-500 hover:bg-primary-50 focus:ring-primary-500",
+      "border-2 border-primary-800 bg-transparent text-primary-800 hover:bg-primary-800 hover:text-white hover:border-primary-800 focus:ring-primary-800 transition-colors",
+    "outline-white":
+      "border-2 border-white bg-transparent text-white hover:bg-white hover:text-primary-800 hover:border-white focus:ring-white transition-colors",
+    ghost: "text-primary-800 hover:bg-primary-50 focus:ring-primary-800",
+    danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-600 hover:shadow-lg",
   };
 
   const sizes = {

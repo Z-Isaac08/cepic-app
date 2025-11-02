@@ -291,6 +291,25 @@ Assurez-vous de configurer :
 - Service email configuré
 - HTTPS avec certificats SSL
 
+## 📚 Documentation Complète
+
+Toute la documentation technique du projet est disponible dans le dossier [`docs/`](./docs/):
+
+- **[INDEX.md](./docs/INDEX.md)** - Index complet de toute la documentation
+- **[README_AGENT_WORK.md](./docs/README_AGENT_WORK.md)** - Guide complet du travail effectué
+- **[AUDIT_COMPLET_PRE_PAIEMENT.md](./docs/AUDIT_COMPLET_PRE_PAIEMENT.md)** - Audit technique
+- **[EXECUTION_PLAN_PROGRESS.md](./docs/EXECUTION_PLAN_PROGRESS.md)** - Plan d'action et progression
+
+**46 documents de documentation disponibles** couvrant:
+- Architecture et base de données
+- Authentification et sécurité
+- Gestion des formations et inscriptions
+- Reviews et favoris
+- Email service
+- Frontend et UI
+- Fixes et debugging
+- Migration et déploiement
+
 ## 📝 Contribution
 
 1. Fork le projet

@@ -1,281 +1,160 @@
 import { create } from "zustand";
-import { authAPI } from "../services/api";
+import * as authAPI from "../services/api/auth";
 
 export const useAuthStore = create((set, get) => ({
-  // États d'authentification
-  authState: "logged_out", // 'logged_out' | 'awaiting_2fa' | 'logged_in'
-  userEmail: "",
-  tempToken: "",
+  // State
   user: null,
   loading: false,
   error: null,
-  initialized: false, // Track if auth has been initialized
+  tempToken: "", // For 2FA flow
+  awaitingTwoFA: false,
 
   // Actions
-  setLoading: (loading) => set({ loading }),
-  setError: (error) => set({ error }),
-  clearError: () => set({ error: null }),
-
-  // Étape 1 - Connexion avec email/password
   login: async (email, password) => {
     set({ loading: true, error: null });
-
     try {
       const response = await authAPI.loginExistingUser(email, password);
-
+      
+      console.log('=== LOGIN RESPONSE ===');
+      console.log('Full response:', response);
+      console.log('Response data:', response.data);
+      console.log('User from response:', response.data?.user);
+      console.log('=====================');
+      
+      // If 2FA required
+      if (response.data.tempToken) {
+        set({
+          tempToken: response.data.tempToken,
+          awaitingTwoFA: true,
+          loading: false,
+        });
+        return { requiresTwoFA: true };
+      }
+      
+      // Direct login (no 2FA)
       set({
-        authState: "awaiting_2fa",
-        userEmail: email,
-        tempToken: response.data.tempToken,
+        user: response.data.user,
         loading: false,
       });
-
-      return {
-        success: true,
-        message: response.message || "Code de vérification envoyé par email",
-      };
+      
+      console.log('User set in store:', response.data.user);
+      console.log('Current store state:', get());
+      
+      return { success: true };
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.error || error.message || "Erreur de connexion";
+      console.error('Login error:', error);
+      const errorMessage = error.response?.data?.error || "Login failed";
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
   },
 
-  loginExistingUser: async (email, password) => {
+  register: async ({ email, firstName, lastName, password, phone }) => {
     set({ loading: true, error: null });
-
-    try {
-      const response = await authAPI.loginExistingUser(email, password);
-
-      set({
-        authState: "awaiting_2fa",
-        userEmail: email,
-        tempToken: response.data.tempToken,
-        loading: false,
-      });
-
-      return response;
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.error ||
-        error.message ||
-        "Email ou mot de passe incorrect";
-      set({
-        error: errorMessage,
-        loading: false,
-      });
-      throw new Error(errorMessage);
-    }
-  },
-
-  registerNewUser: async ({ email, firstName, lastName, password }) => {
-    set({ loading: true, error: null });
-
     try {
       const response = await authAPI.registerNewUser({
         email,
         firstName,
         lastName,
         password,
+        phone,
       });
-
-      set({
-        authState: "awaiting_2fa",
-        userEmail: email,
-        tempToken: response.data.tempToken,
-        loading: false,
-      });
-
-      return response;
-    } catch (error) {
-      console.error('Registration error:', error);
-      let errorMessage = "Erreur lors de la création du compte";
       
-      if (error.response?.data) {
-        // Handle validation errors with details
-        if (error.response.data.details && Array.isArray(error.response.data.details)) {
-          errorMessage = error.response.data.details.map(detail => detail.message).join(', ');
-        } else if (error.response.data.error) {
-          errorMessage = error.response.data.error;
-        }
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      set({ error: errorMessage, loading: false });
-      throw new Error(errorMessage);
-    }
-  },
-
-  checkEmail: async (email) => {
-    set({ loading: true, error: null });
-
-    try {
-      const response = await authAPI.checkEmail(email);
-
-      if (response.data.exists) {
+      // If 2FA required after registration
+      if (response.data.tempToken) {
         set({
-          authState: "existing_user_login",
-          userEmail: email,
+          tempToken: response.data.tempToken,
+          awaitingTwoFA: true,
           loading: false,
         });
-      } else {
-        set({
-          authState: "new_user_registration",
-          userEmail: email,
-          loading: false,
-        });
+        return { requiresTwoFA: true };
       }
-
-      return response;
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.error ||
-        error.message ||
-        "Erreur lors de la vérification";
-      set({ error: errorMessage, loading: false });
-      throw new Error(errorMessage);
-    }
-  },
-
-  // Étape 2 - Vérification du code 2FA
-  verify2FA: async (code) => {
-    set({ loading: true, error: null });
-
-    try {
-      const tempToken = get().tempToken;
-      const response = await authAPI.verify2FA(tempToken, code);
-
-      // No need to store token - it's in HTTP-only cookies
-      // Just store user data for UI purposes if needed
-
+      
+      // Direct registration
       set({
-        authState: "logged_in",
         user: response.data.user,
         loading: false,
-        tempToken: "", // Clear temp token
       });
-
-      return {
-        success: true,
-        message: response.message || "Connexion réussie",
-      };
+      return { success: true };
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.error ||
-        error.message ||
-        "Code de vérification incorrect";
+      const errorMessage = error.response?.data?.error || "Registration failed";
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
   },
 
-  // Déconnexion
+  verifyTwoFA: async (code) => {
+    set({ loading: true, error: null });
+    try {
+      const { tempToken } = get();
+      const response = await authAPI.verify2FA(tempToken, code);
+      
+      set({
+        user: response.data.user,
+        awaitingTwoFA: false,
+        tempToken: "",
+        loading: false,
+      });
+      return { success: true };
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || "Invalid code";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
+
+  resendTwoFA: async () => {
+    set({ loading: true, error: null });
+    try {
+      const { tempToken } = get();
+      await authAPI.resend2FA(tempToken);
+      set({ loading: false });
+      return { success: true };
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || "Failed to resend code";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
+
   logout: async () => {
     try {
       await authAPI.logout();
     } catch (error) {
-      console.log("Logout error:", error);
+      console.error("Logout error:", error);
     } finally {
-      // Always clear local state (cookies are cleared by server)
       set({
-        authState: "logged_out",
-        userEmail: "",
-        tempToken: "",
         user: null,
+        tempToken: "",
+        awaitingTwoFA: false,
         error: null,
       });
     }
   },
 
-  // Resend 2FA code
-  resend2FA: async () => {
-    const tempToken = get().tempToken;
-    if (!tempToken) return;
-
-    set({ loading: true, error: null });
-
-    try {
-      const response = await authAPI.resend2FA(tempToken);
-
-      set({ loading: false });
-      return {
-        success: true,
-        message: response.message || "Nouveau code envoyé",
-      };
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.error || error.message || "Erreur lors du renvoi";
-      set({ error: errorMessage, loading: false });
-      throw new Error(errorMessage);
-    }
-  },
-
-  // Retour à l'étape de login depuis 2FA
-  backToLogin: () => {
-    set({
-      authState: "logged_out",
-      userEmail: "",
-      tempToken: "",
-      error: null,
-    });
-  },
-
-  // Check authentication status on app startup
-  checkAuthStatus: async () => {
+  checkAuth: async () => {
+    set({ loading: true });
     try {
       const response = await authAPI.getCurrentUser();
-
       set({
-        authState: "logged_in",
         user: response.data.user,
         loading: false,
-        error: null,
       });
-
       return response.data.user;
-    } catch {
-      // Not authenticated or session expired
+    } catch (error) {
       set({
-        authState: "logged_out",
         user: null,
         loading: false,
-        error: null,
       });
       return null;
     }
   },
 
-  // Initialize auth state
-  initAuth: async () => {
-    // Prevent multiple initialization attempts
-    if (get().initialized) {
-      return;
-    }
-    
-    set({ loading: true, initialized: true });
-    try {
-      await get().checkAuthStatus();
-    } catch (error) {
-      // Silently fail on initialization - don't throw errors
-      console.log('Auth initialization: No valid session found', error);
-      set({
-        authState: "logged_out",
-        user: null,
-        loading: false,
-        error: null,
-      });
-    }
-  },
-
-  // Helpers
-  isLoggedIn: () => get().authState === "logged_in",
-  isAwaitingTwoFA: () => get().authState === "awaiting_2fa",
-  isLoggedOut: () => get().authState === "logged_out",
-
-  // Nouveaux helpers nécessaires pour le flow
-  isEmailVerification: () => get().authState === "email_verification",
-  isNewUserRegistration: () => get().authState === "new_user_registration",
-  isExistingUserLogin: () => get().authState === "existing_user_login",
+  clearError: () => set({ error: null }),
+  
+  cancelTwoFA: () => set({ 
+    awaitingTwoFA: false, 
+    tempToken: "", 
+    error: null 
+  }),
 }));

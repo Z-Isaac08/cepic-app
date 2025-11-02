@@ -9,6 +9,10 @@ const signToken = (id, email, role = 'USER') => {
 };
 
 const createSendToken = async (user, statusCode, res, req, message = 'Success') => {
+  console.log('=== CREATE SEND TOKEN ===');
+  console.log('User ID:', user.id);
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  
   const token = signToken(user.id, user.email, user.role);
   const refreshToken = crypto.randomBytes(40).toString('hex');
   
@@ -24,10 +28,11 @@ const createSendToken = async (user, statusCode, res, req, message = 'Success') 
         token,
         refreshToken,
         expiresAt: jwtExpires,
-        userAgent: req.get('User-Agent'),
-        ipAddress: req.ip || req.connection?.remoteAddress || 'unknown'
+        userAgent: req?.get('User-Agent') || 'unknown',
+        ipAddress: req?.ip || req?.connection?.remoteAddress || 'unknown'
       }
     });
+    console.log('Session created in DB');
   } catch (error) {
     console.error('Failed to create session:', error);
   }
@@ -37,7 +42,7 @@ const createSendToken = async (user, statusCode, res, req, message = 'Success') 
     expires: jwtExpires,
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax', // Changed from 'strict' for better compatibility
+    sameSite: 'lax',
     path: '/'
   };
 
@@ -49,12 +54,16 @@ const createSendToken = async (user, statusCode, res, req, message = 'Success') 
     path: '/api/auth'
   };
 
+  console.log('Setting cookies with options:', { cookieOptions, refreshCookieOptions });
   res.cookie('auth_token', token, cookieOptions);
   res.cookie('refresh_token', refreshToken, refreshCookieOptions);
+  console.log('Cookies set!');
 
   // Remove sensitive data from response
   const { password, ...userWithoutPassword } = user;
 
+  console.log('Sending response with user:', { id: userWithoutPassword.id, email: userWithoutPassword.email });
+  
   res.status(statusCode).json({
     success: true,
     message,

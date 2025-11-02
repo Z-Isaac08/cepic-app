@@ -46,14 +46,12 @@ const useTrainingStore = create(
       },
 
       fetchCategories: async () => {
-        set({ loading: true, error: null });
         try {
           const response = await trainingsAPI.getCategories();
-          set({ categories: response.data, loading: false });
+          set({ categories: response.data });
         } catch (error) {
           set({ 
-            error: error.response?.data?.error || 'Erreur lors du chargement des catégories',
-            loading: false 
+            error: error.response?.data?.error || 'Erreur lors du chargement des catégories'
           });
         }
       },
@@ -179,4 +177,6 @@ const useTrainingStore = create(
   )
 );
 
+// Export par défaut et nommé pour compatibilité
+export { useTrainingStore };
 export default useTrainingStore;

@@ -3,27 +3,87 @@ const prisma = require('../lib/prisma');
 // GET /api/trainings - Liste des formations
 exports.getAllTrainings = async (req, res, next) => {
   try {
-    const { category, search, featured } = req.query;
+    const { 
+      category, 
+      categoryId,
+      search, 
+      featured,
+      deliveryMode,
+      isFree,
+      minPrice,
+      maxPrice,
+      sortBy = 'createdAt',
+      sortOrder = 'desc'
+    } = req.query;
     
     const where = {
       isPublished: true,
       isActive: true
     };
 
+    // Filtre par slug de catégorie
     if (category) {
       where.category = { slug: category };
     }
 
+    // Filtre par ID de catégorie
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
+
+    // Recherche textuelle (moins stricte - cherche dans plusieurs champs)
     if (search) {
+      const searchTerms = search.trim().split(/\s+/); // Séparer les mots
+      
       where.OR = [
+        // Recherche dans le titre
         { title: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } }
+        // Recherche dans la description
+        { description: { contains: search, mode: 'insensitive' } },
+        // Recherche dans les objectifs
+        { objectives: { contains: search, mode: 'insensitive' } },
+        // Recherche dans le contenu
+        { content: { contains: search, mode: 'insensitive' } },
+        // Recherche dans la catégorie
+        { 
+          category: { 
+            name: { contains: search, mode: 'insensitive' } 
+          } 
+        }
       ];
     }
 
+    // Filtre featured
     if (featured === 'true') {
       where.isFeatured = true;
     }
+
+    // Filtre mode de formation
+    if (deliveryMode) {
+      where.deliveryMode = deliveryMode;
+    }
+
+    // Filtre gratuit/payant
+    if (isFree === 'true') {
+      where.isFree = true;
+    } else if (isFree === 'false') {
+      where.isFree = false;
+    }
+
+    // Filtre prix minimum
+    if (minPrice) {
+      where.cost = { ...where.cost, gte: parseFloat(minPrice) };
+    }
+
+    // Filtre prix maximum
+    if (maxPrice) {
+      where.cost = { ...where.cost, lte: parseFloat(maxPrice) };
+    }
+
+    // Construire l'orderBy
+    const orderByField = sortBy || 'createdAt';
+    const orderByDirection = sortOrder || 'desc';
+    const orderBy = { [orderByField]: orderByDirection };
 
     const trainings = await prisma.training.findMany({
       where,
@@ -33,12 +93,28 @@ exports.getAllTrainings = async (req, res, next) => {
           select: { enrollments_rel: true, reviews: true }
         }
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy
     });
+
+    // Ajouter isBookmarked pour chaque formation si utilisateur connecté
+    let trainingsWithBookmarks = trainings;
+    if (req.user) {
+      const userBookmarks = await prisma.trainingBookmark.findMany({
+        where: { userId: req.user.id },
+        select: { trainingId: true }
+      });
+      
+      const bookmarkedIds = new Set(userBookmarks.map(b => b.trainingId));
+      
+      trainingsWithBookmarks = trainings.map(training => ({
+        ...training,
+        isBookmarked: bookmarkedIds.has(training.id)
+      }));
+    }
 
     res.json({
       success: true,
-      data: trainings
+      data: trainingsWithBookmarks
     });
   } catch (error) {
     next(error);
@@ -89,9 +165,26 @@ exports.getTrainingById = async (req, res, next) => {
       data: { views: { increment: 1 } }
     });
 
+    // Vérifier si l'utilisateur a mis en favoris (si connecté)
+    let isBookmarked = false;
+    if (req.user) {
+      const bookmark = await prisma.trainingBookmark.findUnique({
+        where: {
+          userId_trainingId: {
+            userId: req.user.id,
+            trainingId: id
+          }
+        }
+      });
+      isBookmarked = !!bookmark;
+    }
+
     res.json({
       success: true,
-      data: training
+      data: {
+        ...training,
+        isBookmarked
+      }
     });
   } catch (error) {
     next(error);

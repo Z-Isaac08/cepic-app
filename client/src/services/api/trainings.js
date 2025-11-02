@@ -16,8 +16,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Rediriger vers login si non authentifié
-      window.location.href = '/login';
+      // Rediriger vers connexion si non authentifié
+      window.location.href = '/connexion';
     }
     return Promise.reject(error);
   }

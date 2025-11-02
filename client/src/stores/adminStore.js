@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { adminAPI } from '../services/api';
+import * as adminAPI from '../services/api/admin';
 
 export const useAdminStore = create((set, get) => ({
   // État du dashboard

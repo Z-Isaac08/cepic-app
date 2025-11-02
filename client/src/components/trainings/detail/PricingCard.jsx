@@ -1,0 +1,255 @@
+import { motion } from 'framer-motion';
+import { 
+  GraduationCap, 
+  Clock, 
+  Users, 
+  Award, 
+  Download, 
+  Share2,
+  Bookmark,
+  BookmarkCheck,
+  CheckCircle,
+  Infinity
+} from 'lucide-react';
+import { Button, Badge } from '../../ui';
+import { useState } from 'react';
+import { useAuthStore } from '../../../stores/authStore';
+import { useTrainingStore } from '../../../stores/trainingStore';
+
+const PricingCard = ({ training }) => {
+  const { user } = useAuthStore();
+  const { toggleBookmark } = useTrainingStore();
+  const [isBookmarked, setIsBookmarked] = useState(training.isBookmarked || false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleBookmark = async () => {
+    if (!user) {
+      window.location.href = '/connexion';
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await toggleBookmark(training.id);
+      setIsBookmarked(response.bookmarked);
+    } catch (error) {
+      console.error('Erreur bookmark:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: training.title,
+        text: training.description,
+        url: window.location.href
+      });
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(window.location.href);
+      alert('Lien copié dans le presse-papier !');
+    }
+  };
+
+  const handleEnroll = () => {
+    if (!user) {
+      window.location.href = '/connexion';
+      return;
+    }
+    // Navigate to enrollment page or open modal
+    window.location.href = `/enroll/${training.id}`;
+  };
+
+  // Format price (convert from cents to FCFA)
+  const formatPrice = (priceInCents) => {
+    const priceInFCFA = priceInCents / 100;
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'XOF',
+      minimumFractionDigits: 0
+    }).format(priceInFCFA);
+  };
+
+  // Calculate discount
+  const discount = training.originalCost && training.originalCost > training.cost
+    ? Math.round(((training.originalCost - training.cost) / training.originalCost) * 100)
+    : 0;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4 }}
+      className="bg-white rounded-xl shadow-lg overflow-hidden"
+    >
+      {/* Price Section */}
+      <div className="p-6 bg-gradient-to-br from-primary-50 to-white">
+        <div className="flex items-baseline justify-between mb-4">
+          {training.isFree ? (
+            <span className="text-4xl font-bold text-green-600">Gratuit</span>
+          ) : (
+            <div className="flex flex-col">
+              <span className="text-4xl font-bold text-primary-800">
+                {formatPrice(training.cost)}
+              </span>
+              {training.originalCost && training.originalCost > training.cost && (
+                <span className="text-lg text-gray-400 line-through">
+                  {formatPrice(training.originalCost)}
+                </span>
+              )}
+            </div>
+          )}
+          {discount > 0 && (
+            <Badge variant="accent" className="text-lg px-3 py-1">
+              -{discount}%
+            </Badge>
+          )}
+        </div>
+
+        {/* CTA Buttons */}
+        <div className="space-y-3">
+          <Button 
+            size="lg" 
+            className="w-full"
+            onClick={handleEnroll}
+          >
+            S'inscrire maintenant
+          </Button>
+          
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleBookmark}
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isBookmarked ? (
+                <BookmarkCheck className="w-4 h-4 mr-1" />
+              ) : (
+                <Bookmark className="w-4 h-4 mr-1" />
+              )}
+              {isBookmarked ? 'Sauvegardé' : 'Sauvegarder'}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShare}
+              className="w-full"
+            >
+              <Share2 className="w-4 h-4 mr-1" />
+              Partager
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Features */}
+      <div className="p-6 border-t border-gray-200">
+        <h4 className="font-semibold text-gray-900 mb-4">Cette formation inclut :</h4>
+        <ul className="space-y-3">
+          <li className="flex items-start">
+            <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
+            <span className="text-sm text-gray-700">
+              {training.duration} {training.durationUnit === 'hours' ? 'heures' : 'jours'} de contenu
+            </span>
+          </li>
+          <li className="flex items-start">
+            <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
+            <span className="text-sm text-gray-700">
+              Accès à vie au contenu
+            </span>
+          </li>
+          <li className="flex items-start">
+            <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
+            <span className="text-sm text-gray-700">
+              Certificat de fin de formation
+            </span>
+          </li>
+          <li className="flex items-start">
+            <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
+            <span className="text-sm text-gray-700">
+              Support et assistance
+            </span>
+          </li>
+          {training.hasDownloadableResources && (
+            <li className="flex items-start">
+              <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
+              <span className="text-sm text-gray-700">
+                Ressources téléchargeables
+              </span>
+            </li>
+          )}
+          {training.deliveryMode === 'ONLINE' && (
+            <li className="flex items-start">
+              <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
+              <span className="text-sm text-gray-700">
+                Accessible sur mobile et tablette
+              </span>
+            </li>
+          )}
+        </ul>
+      </div>
+
+      {/* Quick Info */}
+      <div className="p-6 bg-gray-50 border-t border-gray-200">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600 flex items-center">
+              <Users className="w-4 h-4 mr-2" />
+              Participants
+            </span>
+            <span className="font-semibold text-gray-900">
+              {training._count?.enrollments_rel || 0}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600 flex items-center">
+              <Clock className="w-4 h-4 mr-2" />
+              Durée
+            </span>
+            <span className="font-semibold text-gray-900">
+              {training.duration} {training.durationUnit === 'hours' ? 'h' : 'j'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600 flex items-center">
+              <Award className="w-4 h-4 mr-2" />
+              Niveau
+            </span>
+            <span className="font-semibold text-gray-900">
+              {training.level}
+            </span>
+          </div>
+          {training.language && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Langue</span>
+              <span className="font-semibold text-gray-900">
+                {training.language}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Download Syllabus */}
+      {training.syllabus && (
+        <div className="p-6 border-t border-gray-200">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={() => window.open(training.syllabus, '_blank')}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Télécharger le programme
+          </Button>
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
+export default PricingCard;

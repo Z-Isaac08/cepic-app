@@ -1,8 +1,13 @@
-const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
-const prisma = require('../lib/prisma');
-const { createSendToken, generateTempToken, generate2FACode, clearAuthCookies } = require('../utils/jwt');
-const emailService = require('../utils/email');
+const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
+const prisma = require("../lib/prisma");
+const {
+  createSendToken,
+  generateTempToken,
+  generate2FACode,
+  clearAuthCookies,
+} = require("../utils/jwt");
+const emailService = require("../utils/email");
 
 // Check if email exists
 const checkEmail = async (req, res, next) => {
@@ -11,16 +16,15 @@ const checkEmail = async (req, res, next) => {
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
-      select: { id: true, email: true, isActive: true }
+      select: { id: true, email: true, isActive: true },
     });
-
 
     res.status(200).json({
       success: true,
       data: {
         exists: !!existingUser && existingUser.isActive,
-        email
-      }
+        email,
+      },
     });
   } catch (error) {
     next(error);
@@ -31,16 +35,16 @@ const checkEmail = async (req, res, next) => {
 const loginExistingUser = async (req, res, next) => {
   try {
     const { email, password } = req.validatedData;
-    
+
     // Find user with password for verification
     const user = await prisma.user.findUnique({
-      where: { email, isActive: true }
+      where: { email, isActive: true },
     });
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        error: 'Invalid email or password'
+        error: "Email ou mot de passe incorrect",
       });
     }
 
@@ -49,76 +53,49 @@ const loginExistingUser = async (req, res, next) => {
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        error: 'Invalid email or password'
+        error: "Email ou mot de passe incorrect",
       });
     }
 
-    // Generate 2FA code and temp token
-    const code = generate2FACode();
-    const tempToken = generateTempToken();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-    // Store 2FA code
-    await prisma.twoFACode.create({
-      data: {
-        userId: user.id,
-        code,
-        tempToken,
-        type: 'LOGIN',
-        expiresAt
-      }
-    });
-
-    // Send 2FA code via email (in production)
-    if (process.env.NODE_ENV === 'production') {
-      await emailService.send2FACode(email, code, `${user.firstName} ${user.lastName}`);
-    } else {
-      console.log(`2FA Code for ${email}: ${code}`);
-    }
-
-
-    res.status(200).json({
-      success: true,
-      message: 'Please check your email for the verification code',
-      data: {
-        tempToken,
-        requires2FA: true
-      }
-    });
+    // Login directly without 2FA
+    // Create session and send token
+    await createSendToken(user, 200, res, req, "Connexion réussie");
   } catch (error) {
     next(error);
   }
 };
 
-// Register new user
+// Register new user (with 2FA)
 const registerNewUser = async (req, res, next) => {
   try {
-    const { email, firstName, lastName, password } = req.validatedData;
-    
+    const { email, firstName, lastName, password, phone } = req.validatedData;
+
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        error: 'User with this email already exists'
+        error: "Un compte avec cet email existe déjà",
       });
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
-    
-    // Create new user
+
+    // Create new user (not verified yet)
     const newUser = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         firstName,
         lastName,
-        role: 'USER'
-      }
+        phone: phone || null,
+        role: "USER",
+        isVerified: false, // Will be verified after 2FA
+      },
     });
 
     // Generate 2FA code for email verification
@@ -131,26 +108,25 @@ const registerNewUser = async (req, res, next) => {
         userId: newUser.id,
         code,
         tempToken,
-        type: 'REGISTRATION',
-        expiresAt
-      }
+        type: "REGISTRATION",
+        expiresAt,
+      },
     });
 
     // Send verification email
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       await emailService.send2FACode(email, code, `${firstName} ${lastName}`);
     } else {
       console.log(`Verification Code for ${email}: ${code}`);
     }
 
-
     res.status(201).json({
       success: true,
-      message: 'Account created successfully. Please verify your email.',
+      message: "Compte créé avec succès. Veuillez vérifier votre email.",
       data: {
         tempToken,
-        requires2FA: true
-      }
+        requires2FA: true,
+      },
     });
   } catch (error) {
     next(error);
@@ -161,31 +137,35 @@ const registerNewUser = async (req, res, next) => {
 const verify2FA = async (req, res, next) => {
   try {
     const { tempToken, code } = req.validatedData;
-    
+
     // Find and verify 2FA code
     const twoFARecord = await prisma.twoFACode.findUnique({
       where: { tempToken },
-      include: { user: true }
+      include: { user: true },
     });
 
-    if (!twoFARecord || twoFARecord.isUsed || twoFARecord.expiresAt < new Date()) {
+    if (
+      !twoFARecord ||
+      twoFARecord.isUsed ||
+      twoFARecord.expiresAt < new Date()
+    ) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid or expired verification code'
+        error: "Code de vérification invalide ou expiré",
       });
     }
 
     if (twoFARecord.code !== code) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid verification code'
+        error: "Code de vérification incorrect",
       });
     }
 
     // Mark code as used
     await prisma.twoFACode.update({
       where: { id: twoFARecord.id },
-      data: { isUsed: true }
+      data: { isUsed: true },
     });
 
     // Mark user as verified and update last login
@@ -193,18 +173,23 @@ const verify2FA = async (req, res, next) => {
       where: { id: twoFARecord.userId },
       data: {
         isVerified: true,
-        lastLogin: new Date()
-      }
+        lastLogin: new Date(),
+      },
     });
 
     // Send welcome email for new registrations
-    if (process.env.NODE_ENV === 'production' && twoFARecord.type === 'REGISTRATION') {
-      await emailService.sendWelcomeEmail(updatedUser.email, `${updatedUser.firstName} ${updatedUser.lastName}`);
+    if (
+      process.env.NODE_ENV === "production" &&
+      twoFARecord.type === "REGISTRATION"
+    ) {
+      await emailService.sendWelcomeEmail(
+        updatedUser.email,
+        `${updatedUser.firstName} ${updatedUser.lastName}`
+      );
     }
 
-
     // Generate JWT and send response with cookies
-    await createSendToken(updatedUser, 200, res, req, 'Login successful');
+    await createSendToken(updatedUser, 200, res, req, "Connexion réussie");
   } catch (error) {
     next(error);
   }
@@ -214,17 +199,17 @@ const verify2FA = async (req, res, next) => {
 const resend2FA = async (req, res, next) => {
   try {
     const { tempToken } = req.validatedData;
-    
+
     // Find existing 2FA record
     const existingRecord = await prisma.twoFACode.findUnique({
       where: { tempToken },
-      include: { user: true }
+      include: { user: true },
     });
 
     if (!existingRecord || existingRecord.isUsed) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid token'
+        error: "Token invalide",
       });
     }
 
@@ -237,25 +222,24 @@ const resend2FA = async (req, res, next) => {
       where: { id: existingRecord.id },
       data: {
         code: newCode,
-        expiresAt: newExpiresAt
-      }
+        expiresAt: newExpiresAt,
+      },
     });
 
     // Send new code
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       await emailService.send2FACode(
-        existingRecord.user.email, 
-        newCode, 
+        existingRecord.user.email,
+        newCode,
         `${existingRecord.user.firstName} ${existingRecord.user.lastName}`
       );
     } else {
       console.log(`New 2FA Code for ${existingRecord.user.email}: ${newCode}`);
     }
 
-
     res.status(200).json({
       success: true,
-      message: 'New verification code sent'
+      message: "Nouveau code de vérification envoyé",
     });
   } catch (error) {
     next(error);
@@ -276,20 +260,20 @@ const getCurrentUser = async (req, res, next) => {
         isVerified: true,
         isActive: true,
         lastLogin: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
 
     if (!user || !user.isActive) {
       return res.status(404).json({
         success: false,
-        error: 'User not found'
+        error: "Utilisateur non trouvé",
       });
     }
 
     res.status(200).json({
       success: true,
-      data: { user }
+      data: { user },
     });
   } catch (error) {
     next(error);
@@ -301,25 +285,24 @@ const logout = async (req, res, next) => {
   try {
     // Get token from cookie
     const token = req.cookies.auth_token;
-    
+
     if (token) {
       // Mark session as revoked in database
       await prisma.session.updateMany({
-        where: { 
+        where: {
           token,
-          userId: req.user?.id 
+          userId: req.user?.id,
         },
-        data: { isRevoked: true }
+        data: { isRevoked: true },
       });
     }
 
     // Clear auth cookies
     clearAuthCookies(res);
 
-
     res.status(200).json({
       success: true,
-      message: 'Logged out successfully'
+      message: "Déconnexion réussie",
     });
   } catch (error) {
     // Still clear cookies even if database operation fails
@@ -332,36 +315,35 @@ const logout = async (req, res, next) => {
 const refreshToken = async (req, res, next) => {
   try {
     const refreshTokenValue = req.cookies.refresh_token;
-    
+
     if (!refreshTokenValue) {
       return res.status(401).json({
         success: false,
-        error: 'No refresh token provided'
+        error: "Aucun token de rafraîchissement fourni",
       });
     }
 
     // Find session with refresh token
     const session = await prisma.session.findUnique({
       where: { refreshToken: refreshTokenValue },
-      include: { user: true }
+      include: { user: true },
     });
 
     if (!session || session.isRevoked || session.expiresAt < new Date()) {
       return res.status(401).json({
         success: false,
-        error: 'Invalid or expired refresh token'
+        error: "Token de rafraîchissement invalide ou expiré",
       });
     }
 
     // Generate new tokens
-    await createSendToken(session.user, 200, res, req, 'Token refreshed');
-    
+    await createSendToken(session.user, 200, res, req, "Token rafraîchi");
+
     // Revoke old session
     await prisma.session.update({
       where: { id: session.id },
-      data: { isRevoked: true }
+      data: { isRevoked: true },
     });
-
   } catch (error) {
     next(error);
   }
@@ -375,5 +357,5 @@ module.exports = {
   resend2FA,
   getCurrentUser,
   logout,
-  refreshToken
+  refreshToken,
 };

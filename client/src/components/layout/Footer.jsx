@@ -1,5 +1,5 @@
 import {
-  Calendar,
+  GraduationCap,
   Facebook,
   Instagram,
   Linkedin,
@@ -9,26 +9,26 @@ import {
   Twitter,
 } from "lucide-react";
 import { Link } from "react-router";
+import { CEPIC_INFO } from "../../config/cepic";
 
 const Footer = () => {
   const footerLinks = {
-    company: [
-      { name: "À propos", href: "/about" },
-      { name: "Équipe", href: "/team" },
-      { name: "Carrières", href: "/careers" },
-      { name: "Presse", href: "/press" },
+    formations: [
+      { name: "Toutes les formations", href: "/formations" },
+      { name: "Management de projet", href: "/formations?category=management-projet" },
+      { name: "Banque et finance", href: "/formations?category=banque-finance" },
+      { name: "Entrepreneuriat", href: "/formations?category=entrepreneuriat" },
     ],
-    services: [
-      { name: "Créer un événement", href: "/create" },
-      { name: "Gestion d'événements", href: "/manage" },
-      { name: "Billetterie", href: "/ticketing" },
-      { name: "Support", href: "/support" },
+    company: [
+      { name: "À propos", href: "/a-propos" },
+      { name: "Galerie", href: "/galerie" },
+      { name: "Contact", href: "/contact" },
+      { name: "Mes inscriptions", href: "/mes-inscriptions" },
     ],
     legal: [
-      { name: "Conditions d'utilisation", href: "/terms" },
-      { name: "Politique de confidentialité", href: "/privacy" },
-      { name: "Cookies", href: "/cookies" },
-      { name: "Mentions légales", href: "/legal" },
+      { name: "Conditions d'utilisation", href: "/conditions" },
+      { name: "Politique de confidentialité", href: "/confidentialite" },
+      { name: "Mentions légales", href: "/mentions-legales" },
     ],
   };
 
@@ -46,44 +46,52 @@ const Footer = () => {
           {/* Brand & Contact */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-secondary-500 rounded-lg flex items-center justify-center">
+                <GraduationCap className="w-6 h-6 text-primary-800" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">
-                EventPro
+              <span className="text-xl font-bold text-white">
+                CEPIC
               </span>
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              {CEPIC_INFO.fullName}
+            </p>
+            <p className="text-gray-400 text-xs">
+              Excellence en Formation Professionnelle
             </p>
             <div className="space-y-2">
               <div className="flex items-center space-x-2 text-sm text-gray-400">
                 <Mail className="w-4 h-4" />
-                <span>contact@eventpro.ci</span>
+                <a href={`mailto:${CEPIC_INFO.email}`} className="hover:text-secondary-500 transition-colors">
+                  {CEPIC_INFO.email}
+                </a>
               </div>
               <div className="flex items-center space-x-2 text-sm text-gray-400">
                 <Phone className="w-4 h-4" />
-                <span>+225 01 02 03 04 05</span>
+                <span>{CEPIC_INFO.phone.primary}</span>
               </div>
               <div className="flex items-center space-x-2 text-sm text-gray-400">
-                <MapPin className="w-4 h-4" />
-                <span>Abidjan, Côte d'Ivoire</span>
+                <Phone className="w-4 h-4" />
+                <span>{CEPIC_INFO.phone.secondary}</span>
+              </div>
+              <div className="flex items-start space-x-2 text-sm text-gray-400">
+                <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
+                <span>{CEPIC_INFO.address}</span>
               </div>
             </div>
           </div>
 
-          {/* Company Links */}
+          {/* Formations Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-primary-400">
-              Entreprise
+            <h3 className="text-lg font-semibold mb-4 text-secondary-500">
+              Formations
             </h3>
             <ul className="space-y-2">
-              {footerLinks.company.map((link) => (
+              {footerLinks.formations.map((link) => (
                 <li key={link.name}>
                   <Link
                     to={link.href}
-                    className="text-gray-400 hover:text-primary-400 transition-colors duration-200 text-sm"
+                    className="text-gray-400 hover:text-secondary-500 transition-colors duration-200 text-sm"
                   >
                     {link.name}
                   </Link>
@@ -92,17 +100,17 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Services Links */}
+          {/* Company Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-secondary-400">
-              Services
+            <h3 className="text-lg font-semibold mb-4 text-secondary-500">
+              CEPIC
             </h3>
             <ul className="space-y-2">
-              {footerLinks.services.map((link) => (
+              {footerLinks.company.map((link) => (
                 <li key={link.name}>
                   <Link
                     to={link.href}
-                    className="text-gray-400 hover:text-secondary-400 transition-colors duration-200 text-sm"
+                    className="text-gray-400 hover:text-secondary-500 transition-colors duration-200 text-sm"
                   >
                     {link.name}
                   </Link>
@@ -113,7 +121,7 @@ const Footer = () => {
 
           {/* Legal & Social */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-primary-400">
+            <h3 className="text-lg font-semibold mb-4 text-secondary-500">
               Légal
             </h3>
             <ul className="space-y-2 mb-6">
@@ -121,7 +129,7 @@ const Footer = () => {
                 <li key={link.name}>
                   <Link
                     to={link.href}
-                    className="text-gray-400 hover:text-primary-400 transition-colors duration-200 text-sm"
+                    className="text-gray-400 hover:text-secondary-500 transition-colors duration-200 text-sm"
                   >
                     {link.name}
                   </Link>
@@ -129,9 +137,16 @@ const Footer = () => {
               ))}
             </ul>
 
+            {/* Informations légales */}
+            <div className="space-y-1 mb-6">
+              <p className="text-xs text-gray-500">RCCM: {CEPIC_INFO.rccm}</p>
+              <p className="text-xs text-gray-500">IDU: {CEPIC_INFO.idu}</p>
+              <p className="text-xs text-gray-500">NCC: {CEPIC_INFO.ncc}</p>
+            </div>
+
             {/* Social Links */}
             <div>
-              <h4 className="text-sm font-semibold mb-3 text-secondary-400">
+              <h4 className="text-sm font-semibold mb-3 text-secondary-500">
                 Suivez-nous
               </h4>
               <div className="flex space-x-3">
@@ -139,7 +154,7 @@ const Footer = () => {
                   <a
                     key={social.name}
                     href={social.href}
-                    className="w-9 h-9 bg-gray-800 hover:bg-primary-500 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110"
+                    className="w-9 h-9 bg-gray-800 hover:bg-secondary-500 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110"
                     aria-label={social.name}
                   >
                     <social.icon className="w-4 h-4" />
@@ -151,9 +166,12 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
           <p className="text-gray-400 text-sm">
-            © 2025 EventPro. Tous droits réservés.
+            © {new Date().getFullYear()} {CEPIC_INFO.shortName}. Tous droits réservés.
+          </p>
+          <p className="text-gray-500 text-xs">
+            Développé avec ❤️ pour l'excellence en formation
           </p>
         </div>
       </div>

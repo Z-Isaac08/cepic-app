@@ -3,6 +3,14 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
+// Valider les variables d'environnement au démarrage
+const { validateEnv } = require('./utils/validateEnv');
+validateEnv();
+
+// Logger centralisé
+const logger = require('./utils/logger');
+const requestLogger = require('./middleware/logger');
+
 const authRoutes = require('./routers/authRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const {
@@ -23,6 +31,9 @@ const PORT = process.env.PORT || 3001;
 
 // Trust proxy for accurate IP detection
 app.use(trustProxy);
+
+// Request logging middleware
+app.use(requestLogger);
 
 // Security middleware
 app.use(helmetConfig);
@@ -129,26 +140,37 @@ app.use('*', (req, res) => {
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
-  console.log('SIGTERM received, shutting down gracefully');
+  logger.info('SIGTERM received, shutting down gracefully');
   const prisma = require('./lib/prisma');
   await prisma.$disconnect();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
-  console.log('SIGINT received, shutting down gracefully');
+  logger.info('SIGINT received, shutting down gracefully');
   const prisma = require('./lib/prisma');
   await prisma.$disconnect();
   process.exit(0);
 });
 
+// Gestion des erreurs non capturées
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔒 Security: Enhanced with CSRF, XSS, Rate Limiting`);
-  console.log(`🍪 Cookies: Secure HTTP-only cookies enabled`);
-  console.log(`🗄️  Database: PostgreSQL with Prisma ORM`);
-  console.log(`📊 Audit: Comprehensive logging enabled`);
+  logger.info(`🚀 Server running on port ${PORT}`);
+  logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`🔒 Security: Enhanced with CSRF, XSS, Rate Limiting`);
+  logger.info(`🍪 Cookies: Secure HTTP-only cookies enabled`);
+  logger.info(`🗄️  Database: PostgreSQL with Prisma ORM`);
+  logger.info(`📊 Audit: Comprehensive logging enabled`);
 });
 
 module.exports = app;
