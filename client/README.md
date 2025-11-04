@@ -1,4 +1,11 @@
-# 🎨 Frontend Client - ProjectMoney
+# 🎨 Frontend Client - ProjectMoney (Privé CEPIC)
+
+> Confidentialité: document interne réservé à CEPIC. Pour la vue d’ensemble, les procédures de déploiement et la configuration des environnements, voir les documents centralisés à la racine du dépôt:
+>
+> - README.md (vue d’ensemble projet, infos CEPIC)
+> - DOCUMENTATION.md (architecture, API, stores)
+> - GUIDE_DEPLOIEMENT.md (Docker/VPS, Nginx, scripts npm)
+> - ENVIRONNEMENT.md (variables dev/prod, secrets)
 
 Interface utilisateur moderne construite avec React 19, Vite et Zustand pour une expérience utilisateur fluide et responsive.
 
@@ -54,7 +61,7 @@ Le frontend de ProjectMoney est une application React moderne qui offre :
 - **Prettier** - Formatage automatique du code
 - **Vite DevTools** - Outils de debugging et performance
 
-## 🚀 Installation
+## 🚀 Installation (npm)
 
 ### Prérequis
 ```bash

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Users,
@@ -8,48 +8,44 @@ import {
   Eye,
   UserCheck,
   BookOpen,
-  MessageSquare
+  MessageSquare,
+  RefreshCw
 } from 'lucide-react';
+import { useAdminStore } from '../../stores/adminStore';
 
 const DashboardOverview = () => {
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    totalTrainings: 0,
-    totalEnrollments: 0,
-    totalRevenue: 0,
-    activeUsers: 0,
-    pendingMessages: 0,
-    publishedTrainings: 0,
-    totalViews: 0
-  });
+  const { dashboardData, loading, fetchDashboardData } = useAdminStore();
 
   useEffect(() => {
-    // TODO: Fetch real stats from API
-    // For now, using mock data
-    setStats({
-      totalUsers: 1247,
-      totalTrainings: 45,
-      totalEnrollments: 3891,
-      totalRevenue: 45678000,
-      activeUsers: 892,
-      pendingMessages: 12,
-      publishedTrainings: 38,
-      totalViews: 15234
-    });
-  }, []);
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  if (loading && !dashboardData) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="w-8 h-8 text-primary-600 animate-spin" />
+      </div>
+    );
+  }
+
+  const stats = dashboardData || {};
+
+  const userStats = stats.userStats || {};
+  const systemHealth = stats.systemHealth || {};
+  const recent = stats.recent || {};
 
   const statCards = [
     {
       title: 'Utilisateurs',
-      value: stats.totalUsers,
-      change: '+12%',
+      value: userStats.totalUsers || 0,
+      change: userStats.userGrowth ? `+${userStats.userGrowth.toFixed(1)}%` : '+0%',
       icon: Users,
       color: 'blue',
       bgColor: 'bg-blue-500'
     },
     {
       title: 'Formations',
-      value: stats.totalTrainings,
+      value: recent.totalTrainings || 0,
       change: '+3',
       icon: GraduationCap,
       color: 'purple',
@@ -57,7 +53,7 @@ const DashboardOverview = () => {
     },
     {
       title: 'Inscriptions',
-      value: stats.totalEnrollments,
+      value: recent.eventRegistrations || 0,
       change: '+18%',
       icon: UserCheck,
       color: 'green',
@@ -65,7 +61,7 @@ const DashboardOverview = () => {
     },
     {
       title: 'Revenus',
-      value: `${(stats.totalRevenue / 1000000).toFixed(1)}M FCFA`,
+      value: recent.completedTransactions ? `${(recent.completedTransactions / 100).toFixed(0)}K FCFA` : '0 FCFA',
       change: '+25%',
       icon: DollarSign,
       color: 'yellow',
@@ -76,25 +72,25 @@ const DashboardOverview = () => {
   const secondaryStats = [
     {
       label: 'Utilisateurs actifs',
-      value: stats.activeUsers,
+      value: userStats.activeUsers || 0,
       icon: TrendingUp,
       color: 'text-green-600'
     },
     {
-      label: 'Messages en attente',
-      value: stats.pendingMessages,
+      label: 'En ligne',
+      value: stats.onlineUsers || 0,
       icon: MessageSquare,
       color: 'text-orange-600'
     },
     {
-      label: 'Formations publiées',
-      value: stats.publishedTrainings,
+      label: 'Nouveaux ce mois',
+      value: userStats.newUsersThisMonth || 0,
       icon: BookOpen,
       color: 'text-blue-600'
     },
     {
-      label: 'Vues totales',
-      value: stats.totalViews.toLocaleString(),
+      label: 'Vérifiés',
+      value: userStats.verifiedUsers || 0,
       icon: Eye,
       color: 'text-purple-600'
     }

@@ -1,10 +1,22 @@
-# 📚 ProjectMoney - Digital Library Platform
+# 📚 ProjectMoney - Plateforme Client (CEPIC)
+
+Note de confidentialité: Ce dépôt est privé et fourni dans le cadre d’une prestation pour le client CEPIC. Toute diffusion est interdite sans accord écrit de CEPIC.
 
 ProjectMoney est une plateforme de bibliothèque numérique complète permettant aux utilisateurs d'acheter, télécharger et gérer des livres numériques. La plateforme inclut un système d'authentification sécurisé avec 2FA, une gestion des commandes, et une interface d'administration.
+
+Informations client (CEPIC):
+
+- Raison sociale: Cabinet d’études, de prestations et d’intermédiation commerciale (CEPIC)
+- Sigle: CEPIC — SARL (création: Juin 2023)
+- Adresse: Cocody M’Badon village – 18 BP 822 ABIDJAN 18 (Abidjan – Côte d’Ivoire)
+- Contacts: +225 27 22 28 20 66 / +225 05 46 66 33 63
+- Email: info@cepic.ci
+- Site: www.cepic.ci
 
 ## ✨ Fonctionnalités
 
 ### 🔐 Authentification & Sécurité
+
 - **Authentification à deux facteurs (2FA)** par email
 - **Sessions sécurisées** avec JWT et refresh tokens
 - **Cookies HTTP-only** pour la sécurité
@@ -13,6 +25,7 @@ ProjectMoney est une plateforme de bibliothèque numérique complète permettant
 - **Vérification email** obligatoire
 
 ### 📖 Bibliothèque Numérique
+
 - **Catalogue de livres** avec catégories, tags et recherche
 - **Support multi-formats** : PDF, EPUB, MOBI, DOC, etc.
 - **Système de notation** et avis clients
@@ -21,6 +34,7 @@ ProjectMoney est une plateforme de bibliothèque numérique complète permettant
 - **Images de couverture** automatiques via Unsplash
 
 ### 💰 Commerce Électronique
+
 - **Système de commandes** complet
 - **Panier d'achat** avec gestion des quantités
 - **Prix en FCFA** (Franc CFA d'Afrique de l'Ouest)
@@ -29,6 +43,7 @@ ProjectMoney est une plateforme de bibliothèque numérique complète permettant
 - **Intégration paiement** prête (Mobile Money, Cartes, Virements)
 
 ### 👑 Administration
+
 - **Panel d'administration** pour les ADMIN/MODERATOR
 - **Gestion des utilisateurs** et rôles
 - **Gestion des livres** et catégories
@@ -38,6 +53,7 @@ ProjectMoney est une plateforme de bibliothèque numérique complète permettant
 ## 🏗️ Architecture Technique
 
 ### Backend (Node.js + Express)
+
 ```
 server/
 ├── controllers/        # Logique métier
@@ -49,6 +65,7 @@ server/
 ```
 
 ### Frontend (React + Vite)
+
 ```
 client/
 ├── src/
@@ -60,6 +77,7 @@ client/
 ```
 
 ### Base de Données (PostgreSQL)
+
 - **Users** : Utilisateurs avec rôles et authentification
 - **Sessions** : Gestion des sessions sécurisées
 - **TwoFACodes** : Codes 2FA temporaires
@@ -74,6 +92,7 @@ client/
 ## 🚀 Installation & Démarrage
 
 ### Prérequis
+
 - Node.js 20+
 - PostgreSQL 15+
 - Docker & Docker Compose (optionnel)
@@ -81,17 +100,20 @@ client/
 ### 🐳 Démarrage avec Docker (Recommandé)
 
 1. **Cloner le projet**
+
 ```bash
 git clone <repository-url>
 cd ProjectMoney
 ```
 
 2. **Lancer avec Docker Compose**
+
 ```bash
 docker-compose up
 ```
 
 3. **Accès à l'application**
+
 - Frontend: [http://localhost:5173](http://localhost:5173)
 - Backend API: [http://localhost:3001](http://localhost:3001)
 - Base de données: localhost:5432
@@ -99,6 +121,7 @@ docker-compose up
 ### 💻 Installation locale
 
 #### Backend
+
 ```bash
 cd server
 npm install
@@ -110,6 +133,7 @@ npm run dev
 ```
 
 #### Frontend
+
 ```bash
 cd client
 npm install
@@ -121,6 +145,7 @@ npm run dev
 Le système inclut des données de test automatiquement créées :
 
 ### 👥 Comptes Utilisateurs
+
 ```
 Admin:     admin@test.com       / secret123
 User:      user@test.com        / secret123
@@ -128,14 +153,16 @@ Non-vérifié: unverified@test.com / secret123
 ```
 
 ### 📚 Catalogue
+
 - **6 catégories** : Fantasy, Thriller, Science-Fiction, Romance, Développement Personnel, Histoire
 - **14 livres** avec couvertures, descriptions et prix
 - **2 livres gratuits** pour tester le téléchargement
 - **Prix réalistes** en FCFA (11,000 - 17,500 FCFA)
 
 ### 🏷️ Exemples de Livres
+
 - **Le Royaume Perdu** (Fantasy) - 15,000 FCFA
-- **Ombres et Secrets** (Thriller) - 12,000 FCFA  
+- **Ombres et Secrets** (Thriller) - 12,000 FCFA
 - **Code Quantum** (Sci-Fi) - 17,500 FCFA
 - **Guide JavaScript** (Gratuit)
 - **Recettes Africaines** (Gratuit)
@@ -143,6 +170,7 @@ Non-vérifié: unverified@test.com / secret123
 ## 🔧 Configuration
 
 ### Variables d'Environnement (Backend)
+
 ```env
 # Serveur
 PORT=3001
@@ -168,6 +196,7 @@ COOKIE_SECRET=your_cookie_secret_key
 ```
 
 ### Variables d'Environnement (Frontend)
+
 ```env
 VITE_API_BASE_URL=http://localhost:3001/api
 ```
@@ -175,6 +204,7 @@ VITE_API_BASE_URL=http://localhost:3001/api
 ## 📡 API Endpoints
 
 ### 🔐 Authentication
+
 ```
 POST /api/auth/check-email        # Vérifier si email existe
 POST /api/auth/login             # Connexion utilisateur
@@ -187,6 +217,7 @@ POST /api/auth/reset-password    # Réinitialiser mot de passe
 ```
 
 ### 📚 Library
+
 ```
 GET  /api/library/books          # Liste des livres
 GET  /api/library/books/:id      # Détail d'un livre
@@ -198,6 +229,7 @@ GET  /api/library/books/:id/download  # Télécharger livre
 ```
 
 ### 🛒 Orders
+
 ```
 POST /api/orders                 # Créer commande
 GET  /api/orders                 # Mes commandes
@@ -206,6 +238,7 @@ PUT  /api/orders/:id/pay         # Confirmer paiement
 ```
 
 ### 👑 Admin
+
 ```
 GET  /api/admin/users            # Gestion utilisateurs
 GET  /api/admin/books            # Gestion livres
@@ -216,6 +249,7 @@ GET  /api/admin/analytics        # Statistiques
 ## 🛠️ Stack Technologique
 
 ### Backend
+
 - **Node.js 18+** - Runtime JavaScript
 - **Express.js** - Framework web
 - **Prisma ORM** - Base de données
@@ -226,7 +260,8 @@ GET  /api/admin/analytics        # Statistiques
 - **Helmet** - Sécurité HTTP
 - **Express-Rate-Limit** - Limitation de taux
 
-### Frontend  
+### Frontend
+
 - **React 19** - Interface utilisateur
 - **Vite 7** - Build tool
 - **Tailwind CSS 4** - Styling
@@ -236,6 +271,7 @@ GET  /api/admin/analytics        # Statistiques
 - **Lucide React** - Icônes
 
 ### DevOps
+
 - **Docker** - Conteneurisation
 - **Docker Compose** - Orchestration
 - **PostgreSQL 15** - Base de données
@@ -251,6 +287,7 @@ GET  /api/admin/analytics        # Statistiques
 ## 💳 Système de Paiement
 
 Le système est prêt pour l'intégration avec :
+
 - **Mobile Money** (Orange Money, MTN Money)
 - **Cartes bancaires** (Visa, Mastercard)
 - **Virements bancaires**
@@ -276,39 +313,35 @@ Le système est prêt pour l'intégration avec :
 
 ## 🚀 Déploiement Production
 
-### DockerHub
-Les images sont disponibles sur DockerHub :
+### Images Docker (privé)
+
+Ce dépôt étant privé, les images ne sont pas publiées publiquement. Construisez les images localement ou via un registre privé CEPIC:
+
 ```bash
-docker pull zcook08/projectmoney-frontend:latest
-docker pull zcook08/projectmoney-backend:latest
+# Frontend
+cd client && docker build -t cepic/projectmoney-frontend:latest .
+# Backend
+cd server && docker build -t cepic/projectmoney-backend:latest .
 ```
 
 ### Variables Production
+
 Assurez-vous de configurer :
+
 - `NODE_ENV=production`
 - JWT secrets forts
-- Base de données PostgreSQL sécurisée  
+- Base de données PostgreSQL sécurisée
 - Service email configuré
 - HTTPS avec certificats SSL
+- CORS strict pointant vers le(s) domaine(s) CEPIC
 
 ## 📚 Documentation Complète
 
-Toute la documentation technique du projet est disponible dans le dossier [`docs/`](./docs/):
+Documents principaux (adaptés dépôt privé CEPIC):
 
-- **[INDEX.md](./docs/INDEX.md)** - Index complet de toute la documentation
-- **[README_AGENT_WORK.md](./docs/README_AGENT_WORK.md)** - Guide complet du travail effectué
-- **[AUDIT_COMPLET_PRE_PAIEMENT.md](./docs/AUDIT_COMPLET_PRE_PAIEMENT.md)** - Audit technique
-- **[EXECUTION_PLAN_PROGRESS.md](./docs/EXECUTION_PLAN_PROGRESS.md)** - Plan d'action et progression
-
-**46 documents de documentation disponibles** couvrant:
-- Architecture et base de données
-- Authentification et sécurité
-- Gestion des formations et inscriptions
-- Reviews et favoris
-- Email service
-- Frontend et UI
-- Fixes et debugging
-- Migration et déploiement
+- **[DOCUMENTATION.md](./DOCUMENTATION.md)** — Guide technique: architecture, API, stores, conventions.
+- **[GUIDE_DEPLOIEMENT.md](./GUIDE_DEPLOIEMENT.md)** — Déploiement production (Docker, VPS, variables, HTTPS) — usage interne CEPIC.
+- **[ENVIRONNEMENT.md](./ENVIRONNEMENT.md)** — Variables d’environnement (dev/prod) et gestion des secrets.
 
 ## 📝 Contribution
 

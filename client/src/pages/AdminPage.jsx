@@ -1,30 +1,30 @@
-import { useState } from 'react';
-import { Navigate } from 'react-router';
 import { motion } from 'framer-motion';
 import {
-  LayoutDashboard,
-  GraduationCap,
-  Users,
-  BookOpen,
-  Image as ImageIcon,
-  MessageSquare,
-  Settings,
   BarChart3,
+  BookOpen,
+  GraduationCap,
+  Image as ImageIcon,
+  LayoutDashboard,
   LogOut,
   Menu,
-  X
+  MessageSquare,
+  Settings,
+  Users,
+  X,
 } from 'lucide-react';
+import { useState } from 'react';
+import { Navigate } from 'react-router';
 import { useAuthStore } from '../stores/authStore';
 
 // Import admin components (to be created)
-import DashboardOverview from '../components/admin/DashboardOverview';
-import TrainingsManagement from '../components/admin/TrainingsManagement';
-import UsersManagement from '../components/admin/UsersManagement';
+import AnalyticsPanel from '../components/admin/AnalyticsPanel';
 import CategoriesManagement from '../components/admin/CategoriesManagement';
+import DashboardOverview from '../components/admin/DashboardOverview';
 import GalleryManagement from '../components/admin/GalleryManagement';
 import MessagesManagement from '../components/admin/MessagesManagement';
 import SettingsPanel from '../components/admin/SettingsPanel';
-import AnalyticsPanel from '../components/admin/AnalyticsPanel';
+import TrainingsManagement from '../components/admin/TrainingsManagement';
+import UsersManagement from '../components/admin/UsersManagement';
 
 const AdminPage = () => {
   const { user, logout } = useAuthStore();
@@ -86,9 +86,7 @@ const AdminPage = () => {
         {/* Logo */}
         <div className="p-6 border-b border-primary-700">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-secondary-500 rounded-lg flex items-center justify-center">
-              <GraduationCap className="w-6 h-6 text-primary-900" />
-            </div>
+            <img src="/logo_cepic.jpg" alt="CEPIC" className="w-10 h-10 rounded-lg object-cover" />
             <div>
               <h1 className="text-xl font-bold">CEPIC Admin</h1>
               <p className="text-xs text-primary-200">Gestion de la plateforme</p>
@@ -101,7 +99,7 @@ const AdminPage = () => {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
-            
+
             return (
               <button
                 key={item.id}
@@ -120,11 +118,12 @@ const AdminPage = () => {
         </nav>
 
         {/* User Info & Logout */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-primary-700">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-primary-700 overflow-hidden">
           <div className="flex items-center space-x-3 mb-3">
             <div className="w-10 h-10 bg-primary-700 rounded-full flex items-center justify-center">
               <span className="text-sm font-bold">
-                {user.firstName?.[0]}{user.lastName?.[0]}
+                {user.firstName?.[0]}
+                {user.lastName?.[0]}
               </span>
             </div>
             <div className="flex-1 min-w-0">
@@ -136,7 +135,7 @@ const AdminPage = () => {
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+            className="inline-flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
           >
             <LogOut className="w-4 h-4" />
             <span className="text-sm font-medium">Déconnexion</span>
@@ -162,14 +161,12 @@ const AdminPage = () => {
               </button>
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {menuItems.find(item => item.id === activeTab)?.label}
+                  {menuItems.find((item) => item.id === activeTab)?.label}
                 </h2>
-                <p className="text-sm text-gray-500">
-                  Gérez votre plateforme de formation
-                </p>
+                <p className="text-sm text-gray-500">Gérez votre plateforme de formation</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="hidden md:flex items-center space-x-2 px-4 py-2 bg-primary-50 rounded-lg">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -195,7 +192,7 @@ const AdminPage = () => {
       {/* Overlay for mobile */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}

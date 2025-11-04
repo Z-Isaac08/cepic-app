@@ -31,7 +31,7 @@ api.interceptors.response.use(
  * @returns {Promise}
  */
 export const getDashboardStats = async () => {
-  const response = await api.get('/admin/stats');
+  const response = await api.get('/admin/dashboard');
   return response.data;
 };
 
@@ -150,6 +150,15 @@ export const toggleTrainingPublish = async (id) => {
 // ============================================
 
 /**
+ * Récupérer toutes les catégories
+ * @returns {Promise}
+ */
+export const getCategories = async () => {
+  const response = await api.get('/trainings/categories');
+  return response.data;
+};
+
+/**
  * Créer une catégorie
  * @param {Object} data - Données de la catégorie
  * @returns {Promise}
@@ -208,6 +217,15 @@ export const updateEnrollmentStatus = async (id, status) => {
 // ============================================
 // GALLERY MANAGEMENT
 // ============================================
+
+/**
+ * Récupérer toutes les images de la galerie
+ * @returns {Promise}
+ */
+export const getAllGalleryImages = async () => {
+  const response = await api.get('/gallery');
+  return response.data;
+};
 
 /**
  * Upload une photo dans la galerie
@@ -290,11 +308,13 @@ export default {
   updateTraining,
   deleteTraining,
   toggleTrainingPublish,
+  getCategories,
   createCategory,
   updateCategory,
   deleteCategory,
   getAllEnrollments,
   updateEnrollmentStatus,
+  getAllGalleryImages,
   uploadGalleryPhoto,
   updateGalleryPhoto,
   deleteGalleryPhoto,

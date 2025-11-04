@@ -1,4 +1,11 @@
-# 🔧 Backend API - ProjectMoney
+# 🔧 Backend API - ProjectMoney (Privé CEPIC)
+
+> Confidentialité: document interne réservé à CEPIC. Pour la vue d’ensemble, les procédures de déploiement et la configuration des environnements, voir les documents centralisés à la racine du dépôt:
+>
+> - README.md (vue d’ensemble projet, infos CEPIC)
+> - DOCUMENTATION.md (architecture, API, stores)
+> - GUIDE_DEPLOIEMENT.md (Docker/VPS, Nginx, scripts npm)
+> - ENVIRONNEMENT.md (variables dev/prod, secrets)
 
 API REST sécurisée construite avec Node.js, Express et PostgreSQL avec authentification avancée et sécurité renforcée.
 
@@ -31,12 +38,14 @@ L'API backend de ProjectMoney fournit une infrastructure robuste pour la gestion
 ## 🛠️ Technologies
 
 ### Core
+
 - **Node.js 18+** - Runtime JavaScript
 - **Express.js** - Framework web minimaliste et rapide
 - **Prisma ORM** - ORM type-safe avec migrations automatiques
 - **PostgreSQL** - Base de données relationnelle performante
 
 ### Authentification & Sécurité
+
 - **JWT (jsonwebtoken)** - Tokens d'authentification
 - **bcryptjs** - Hachage sécurisé des mots de passe
 - **Helmet.js** - Sécurisation des headers HTTP
@@ -45,14 +54,16 @@ L'API backend de ProjectMoney fournit une infrastructure robuste pour la gestion
 - **Express Validator** - Validation et sanitisation des données
 
 ### Utilitaires
+
 - **Nodemailer** - Envoi d'emails transactionnels
 - **Cookie Parser** - Gestion des cookies sécurisés
 - **Morgan** - Logging des requêtes HTTP
 - **Dotenv** - Gestion des variables d'environnement
 
-## 🚀 Installation
+## 🚀 Installation (npm)
 
 ### Prérequis
+
 ```bash
 # Versions requises
 Node.js >= 18.0.0
@@ -61,12 +72,14 @@ npm >= 8.0.0
 ```
 
 ### 1. Installation des Dépendances
+
 ```bash
 cd server
 npm install
 ```
 
 ### 2. Configuration de la Base de Données
+
 ```bash
 # Créer une base de données PostgreSQL
 createdb projectmoney
@@ -77,6 +90,7 @@ cp .env.example .env
 ```
 
 ### 3. Migration et Initialisation
+
 ```bash
 # Appliquer les migrations Prisma
 npx prisma migrate dev
@@ -89,6 +103,7 @@ npx prisma db seed
 ```
 
 ### 4. Démarrage du Serveur
+
 ```bash
 # Développement
 npm run dev
@@ -315,26 +330,30 @@ npx prisma generate
 ### Mesures Implémentées
 
 #### 1. Protection des Headers HTTP
+
 ```javascript
 // Helmet.js configuration
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
     },
-  },
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true
-  }
-}));
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+  })
+);
 ```
 
 #### 2. Rate Limiting
+
 ```javascript
 // Configuration rate limiting
 const authLimiter = rateLimit({
@@ -347,25 +366,23 @@ const authLimiter = rateLimit({
 ```
 
 #### 3. Validation des Données
+
 ```javascript
 // Exemple de schéma de validation
 const loginSchema = z.object({
-  email: z.string()
-    .email('Email invalide')
-    .max(255, 'Email trop long'),
-  password: z.string()
-    .min(8, 'Mot de passe trop court')
-    .max(128, 'Mot de passe trop long')
+  email: z.string().email('Email invalide').max(255, 'Email trop long'),
+  password: z.string().min(8, 'Mot de passe trop court').max(128, 'Mot de passe trop long'),
 });
 ```
 
 #### 4. Audit Logging
+
 ```javascript
 // Journal d'audit automatique
 await AuditLogger.logAuth('login_success', req, user.id, true, {
   userAgent: req.get('User-Agent'),
   ipAddress: req.ip,
-  timestamp: new Date()
+  timestamp: new Date(),
 });
 ```
 
@@ -373,22 +390,23 @@ await AuditLogger.logAuth('login_success', req, user.id, true, {
 
 ### Authentification
 
-| Méthode | Endpoint | Description | Auth |
-|---------|----------|-------------|------|
-| `POST` | `/api/auth/check-email` | Vérifier si email existe | ❌ |
-| `POST` | `/api/auth/login` | Connexion utilisateur | ❌ |
-| `POST` | `/api/auth/register` | Inscription utilisateur | ❌ |
-| `POST` | `/api/auth/verify-2fa` | Vérifier code 2FA | ❌ |
-| `POST` | `/api/auth/resend-2fa` | Renvoyer code 2FA | ❌ |
-| `GET` | `/api/auth/me` | Profil utilisateur | ✅ |
-| `POST` | `/api/auth/logout` | Déconnexion | ✅ |
-| `POST` | `/api/auth/refresh` | Renouveler token | ❌ |
-| `GET` | `/api/auth/sessions` | Sessions actives | ✅ |
-| `DELETE` | `/api/auth/sessions/:id` | Révoquer session | ✅ |
+| Méthode  | Endpoint                 | Description              | Auth |
+| -------- | ------------------------ | ------------------------ | ---- |
+| `POST`   | `/api/auth/check-email`  | Vérifier si email existe | ❌   |
+| `POST`   | `/api/auth/login`        | Connexion utilisateur    | ❌   |
+| `POST`   | `/api/auth/register`     | Inscription utilisateur  | ❌   |
+| `POST`   | `/api/auth/verify-2fa`   | Vérifier code 2FA        | ❌   |
+| `POST`   | `/api/auth/resend-2fa`   | Renvoyer code 2FA        | ❌   |
+| `GET`    | `/api/auth/me`           | Profil utilisateur       | ✅   |
+| `POST`   | `/api/auth/logout`       | Déconnexion              | ✅   |
+| `POST`   | `/api/auth/refresh`      | Renouveler token         | ❌   |
+| `GET`    | `/api/auth/sessions`     | Sessions actives         | ✅   |
+| `DELETE` | `/api/auth/sessions/:id` | Révoquer session         | ✅   |
 
 ### Exemples de Requêtes
 
 #### Connexion
+
 ```bash
 curl -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
@@ -399,6 +417,7 @@ curl -X POST http://localhost:3001/api/auth/login \
 ```
 
 #### Obtenir le profil utilisateur
+
 ```bash
 curl -X GET http://localhost:3001/api/auth/me \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
@@ -408,6 +427,7 @@ curl -X GET http://localhost:3001/api/auth/me \
 ### Réponses API
 
 #### Succès (200)
+
 ```json
 {
   "success": true,
@@ -424,6 +444,7 @@ curl -X GET http://localhost:3001/api/auth/me \
 ```
 
 #### Erreur (400)
+
 ```json
 {
   "success": false,
@@ -476,12 +497,10 @@ server/tests/
 // tests/integration/auth.test.js
 describe('API Authentification', () => {
   test('POST /api/auth/login - Connexion réussie', async () => {
-    const response = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'test@example.com',
-        password: 'password123'
-      });
+    const response = await request(app).post('/api/auth/login').send({
+      email: 'test@example.com',
+      password: 'password123',
+    });
 
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
@@ -527,14 +546,11 @@ const winston = require('winston');
 
 const logger = winston.createLogger({
   level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   transports: [
     new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/combined.log' })
-  ]
+    new winston.transports.File({ filename: 'logs/combined.log' }),
+  ],
 });
 ```
 

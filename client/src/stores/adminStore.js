@@ -5,6 +5,11 @@ export const useAdminStore = create((set, get) => ({
   // État du dashboard
   dashboardData: null,
   users: [],
+  trainings: [],
+  categories: [],
+  galleryImages: [],
+  messages: [],
+  messagesLoading: false,
   loading: false,
   error: null,
 
@@ -13,18 +18,18 @@ export const useAdminStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await adminAPI.getDashboardStats();
-      set({ 
+      set({
         dashboardData: {
           ...get().dashboardData,
           ...response.data,
-          lastUpdated: new Date().toISOString()
+          lastUpdated: new Date().toISOString(),
         },
-        loading: false 
+        loading: false,
       });
     } catch (error) {
-      set({ 
+      set({
         error: error.response?.data?.error || 'Erreur lors du chargement des données',
-        loading: false 
+        loading: false,
       });
     }
   },
@@ -33,11 +38,11 @@ export const useAdminStore = create((set, get) => ({
   fetchUserStats: async () => {
     try {
       const response = await adminAPI.getUserStats();
-      set(state => ({
+      set((state) => ({
         dashboardData: {
           ...state.dashboardData,
-          userStats: response.data
-        }
+          userStats: response.data,
+        },
       }));
     } catch (error) {
       console.error('Erreur lors du chargement des stats utilisateurs:', error);
@@ -48,12 +53,12 @@ export const useAdminStore = create((set, get) => ({
   fetchUsers: async (filters = {}) => {
     set({ loading: true, error: null });
     try {
-      const response = await adminAPI.getUsers(filters);
-      set({ users: response.data.users, loading: false });
+      const response = await adminAPI.getAllUsers(filters);
+      set({ users: response.data.users || response.data, loading: false });
     } catch (error) {
-      set({ 
+      set({
         error: error.response?.data?.error || 'Erreur lors du chargement des utilisateurs',
-        loading: false 
+        loading: false,
       });
     }
   },
@@ -61,12 +66,10 @@ export const useAdminStore = create((set, get) => ({
   updateUserStatus: async (userId, status) => {
     try {
       await adminAPI.updateUserStatus(userId, status);
-      
+
       // Mettre à jour l'utilisateur dans la liste
-      set(state => ({
-        users: state.users.map(user => 
-          user.id === userId ? { ...user, ...status } : user
-        )
+      set((state) => ({
+        users: state.users.map((user) => (user.id === userId ? { ...user, ...status } : user)),
       }));
 
       // Rafraîchir les stats
@@ -79,10 +82,10 @@ export const useAdminStore = create((set, get) => ({
   deleteUser: async (userId) => {
     try {
       await adminAPI.deleteUser(userId);
-      
+
       // Supprimer l'utilisateur de la liste
-      set(state => ({
-        users: state.users.filter(user => user.id !== userId)
+      set((state) => ({
+        users: state.users.filter((user) => user.id !== userId),
       }));
 
       // Rafraîchir les stats
@@ -96,11 +99,11 @@ export const useAdminStore = create((set, get) => ({
   fetchSystemHealth: async () => {
     try {
       const response = await adminAPI.getSystemHealth();
-      set(state => ({
+      set((state) => ({
         dashboardData: {
           ...state.dashboardData,
-          systemHealth: response.data
-        }
+          systemHealth: response.data,
+        },
       }));
     } catch (error) {
       console.error('Erreur lors du chargement de la santé système:', error);
@@ -111,11 +114,11 @@ export const useAdminStore = create((set, get) => ({
   fetchSecurityLogs: async (filters = {}) => {
     try {
       const response = await adminAPI.getSecurityLogs(filters);
-      set(state => ({
+      set((state) => ({
         dashboardData: {
           ...state.dashboardData,
-          securityLogs: response.data
-        }
+          securityLogs: response.data,
+        },
       }));
     } catch (error) {
       console.error('Erreur lors du chargement des logs de sécurité:', error);
@@ -126,17 +129,17 @@ export const useAdminStore = create((set, get) => ({
   fetchAnalytics: async (timeRange = '7d', metric = 'users') => {
     try {
       const response = await adminAPI.getAnalytics(timeRange, metric);
-      set(state => ({
+      set((state) => ({
         dashboardData: {
           ...state.dashboardData,
           analytics: {
             ...state.dashboardData?.analytics,
             [metric]: {
               ...state.dashboardData?.analytics?.[metric],
-              [timeRange]: response.data
-            }
-          }
-        }
+              [timeRange]: response.data,
+            },
+          },
+        },
       }));
     } catch (error) {
       console.error('Erreur lors du chargement des analytics:', error);
@@ -147,11 +150,11 @@ export const useAdminStore = create((set, get) => ({
   fetchEventStats: async () => {
     try {
       const response = await adminAPI.getEventStats();
-      set(state => ({
+      set((state) => ({
         dashboardData: {
           ...state.dashboardData,
-          events: response.data
-        }
+          events: response.data,
+        },
       }));
     } catch (error) {
       console.error('Erreur lors du chargement des stats événements:', error);
@@ -162,11 +165,11 @@ export const useAdminStore = create((set, get) => ({
   fetchLibraryStats: async () => {
     try {
       const response = await adminAPI.getLibraryStats();
-      set(state => ({
+      set((state) => ({
         dashboardData: {
           ...state.dashboardData,
-          library: response.data
-        }
+          library: response.data,
+        },
       }));
     } catch (error) {
       console.error('Erreur lors du chargement des stats bibliothèque:', error);
@@ -177,11 +180,11 @@ export const useAdminStore = create((set, get) => ({
   fetchFinancialStats: async () => {
     try {
       const response = await adminAPI.getFinancialStats();
-      set(state => ({
+      set((state) => ({
         dashboardData: {
           ...state.dashboardData,
-          financial: response.data
-        }
+          financial: response.data,
+        },
       }));
     } catch (error) {
       console.error('Erreur lors du chargement des stats financières:', error);
@@ -197,10 +200,10 @@ export const useAdminStore = create((set, get) => ({
       get().fetchSecurityLogs,
       get().fetchEventStats,
       get().fetchLibraryStats,
-      get().fetchFinancialStats
+      get().fetchFinancialStats,
     ];
 
-    await Promise.allSettled(actions.map(action => action()));
+    await Promise.allSettled(actions.map((action) => action()));
   },
 
   // Réinitialiser l'état
@@ -209,7 +212,7 @@ export const useAdminStore = create((set, get) => ({
       dashboardData: null,
       users: [],
       loading: false,
-      error: null
+      error: null,
     });
   },
 
@@ -222,11 +225,13 @@ export const useAdminStore = create((set, get) => ({
   updateSystemConfig: async (config) => {
     try {
       await adminAPI.updateSystemConfig(config);
-      
+
       // Rafraîchir la santé du système
       get().fetchSystemHealth();
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erreur lors de la mise à jour de la configuration');
+      throw new Error(
+        error.response?.data?.error || 'Erreur lors de la mise à jour de la configuration'
+      );
     }
   },
 
@@ -235,7 +240,7 @@ export const useAdminStore = create((set, get) => ({
     try {
       await adminAPI.sendNotification(notification);
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erreur lors de l\'envoi de la notification');
+      throw new Error(error.response?.data?.error || "Erreur lors de l'envoi de la notification");
     }
   },
 
@@ -273,7 +278,7 @@ export const useAdminStore = create((set, get) => ({
     const interval = setInterval(() => {
       const currentData = get().dashboardData;
       if (currentData) {
-        set(state => ({
+        set((state) => ({
           dashboardData: {
             ...state.dashboardData,
             onlineUsers: Math.floor(Math.random() * 50) + 10,
@@ -281,9 +286,9 @@ export const useAdminStore = create((set, get) => ({
               activeConnections: Math.floor(Math.random() * 100) + 50,
               requestsPerMinute: Math.floor(Math.random() * 500) + 200,
               errorRate: Math.random() * 2,
-              lastUpdate: new Date().toISOString()
-            }
-          }
+              lastUpdate: new Date().toISOString(),
+            },
+          },
         }));
       }
     }, 5000); // Mise à jour toutes les 5 secondes
@@ -311,5 +316,272 @@ export const useAdminStore = create((set, get) => ({
   validateAdminAccess: () => {
     const { user } = get();
     return user && user.role === 'ADMIN';
-  }
+  },
+
+  // ============================================
+  // GESTION DES MESSAGES (CONTACT)
+  // ============================================
+
+  // Récupérer les messages de contact (admin)
+  getMessages: async (params = {}) => {
+    set({ messagesLoading: true, error: null });
+    try {
+      const response = await adminAPI.getAllMessages(params);
+      // Normaliser et trier par date décroissante
+      const items = (response.data?.messages || response.data || []).map((m) => ({
+        id: m.id,
+        name: m.name || m.fullName || `${m.firstName || ''} ${m.lastName || ''}`.trim(),
+        email: m.email,
+        subject: m.subject || m.title || 'Sans sujet',
+        message: m.message || m.content || '',
+        isRead: Boolean(m.isRead),
+        createdAt: m.createdAt || m.date || new Date().toISOString(),
+      }));
+      items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      set({ messages: items, messagesLoading: false });
+    } catch (error) {
+      set({
+        error: error.response?.data?.error || 'Erreur lors du chargement des messages',
+        messagesLoading: false,
+      });
+    }
+  },
+
+  // Marquer un message comme lu (et permettre le toggle en local pour non lu)
+  markAsRead: async (id, isRead = true) => {
+    try {
+      if (isRead) {
+        await adminAPI.markMessageAsRead(id);
+      }
+      // Mise à jour locale (permet de marquer comme non lu même si pas d'endpoint dédié)
+      set((state) => ({
+        messages: state.messages.map((m) => (m.id === id ? { ...m, isRead } : m)),
+      }));
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la mise à jour du message');
+    }
+  },
+
+  // Supprimer un message
+  deleteMessage: async (id) => {
+    try {
+      await adminAPI.deleteMessage(id);
+      set((state) => ({
+        messages: state.messages.filter((m) => m.id !== id),
+      }));
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la suppression du message');
+    }
+  },
+
+  // Compteur non lus
+  getUnreadCount: () => {
+    return get().messages.filter((m) => !m.isRead).length;
+  },
+
+  // ============================================
+  // GESTION DES FORMATIONS
+  // ============================================
+
+  // Récupérer toutes les formations (admin)
+  fetchTrainings: async () => {
+    set({ loading: true, error: null });
+    try {
+      const response = await adminAPI.getAllTrainingsAdmin();
+      set({ trainings: response.data || [], loading: false });
+    } catch (error) {
+      set({
+        error: error.response?.data?.error || 'Erreur lors du chargement des formations',
+        loading: false,
+      });
+    }
+  },
+
+  // Créer une formation
+  createTraining: async (trainingData) => {
+    try {
+      const response = await adminAPI.createTraining(trainingData);
+
+      // Ajouter la nouvelle formation à la liste
+      set((state) => ({
+        trainings: [...state.trainings, response.data],
+      }));
+
+      return response;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la création');
+    }
+  },
+
+  // Modifier une formation
+  updateTraining: async (id, trainingData) => {
+    try {
+      const response = await adminAPI.updateTraining(id, trainingData);
+
+      // Mettre à jour la formation dans la liste
+      set((state) => ({
+        trainings: state.trainings.map((training) =>
+          training.id === id ? { ...training, ...response.data } : training
+        ),
+      }));
+
+      return response;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la modification');
+    }
+  },
+
+  // Supprimer une formation
+  deleteTraining: async (id) => {
+    try {
+      await adminAPI.deleteTraining(id);
+
+      // Supprimer la formation de la liste
+      set((state) => ({
+        trainings: state.trainings.filter((training) => training.id !== id),
+      }));
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la suppression');
+    }
+  },
+
+  // Toggle publié/non publié
+  toggleTrainingPublish: async (id, isPublished) => {
+    try {
+      const response = await adminAPI.updateTraining(id, { isPublished: !isPublished });
+
+      // Mettre à jour dans la liste
+      set((state) => ({
+        trainings: state.trainings.map((training) =>
+          training.id === id ? { ...training, isPublished: !isPublished } : training
+        ),
+      }));
+
+      return response;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la modification');
+    }
+  },
+
+  // ============================================
+  // GESTION DES CATÉGORIES
+  // ============================================
+
+  // Récupérer toutes les catégories
+  fetchCategories: async () => {
+    try {
+      const response = await adminAPI.getCategories();
+      set({ categories: response.data || [] });
+    } catch (error) {
+      console.error('Erreur lors du chargement des catégories:', error);
+    }
+  },
+
+  // Créer une catégorie
+  createCategory: async (categoryData) => {
+    try {
+      const response = await adminAPI.createCategory(categoryData);
+
+      set((state) => ({
+        categories: [...state.categories, response.data],
+      }));
+
+      return response;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la création');
+    }
+  },
+
+  // Modifier une catégorie
+  updateCategory: async (id, categoryData) => {
+    try {
+      const response = await adminAPI.updateCategory(id, categoryData);
+
+      set((state) => ({
+        categories: state.categories.map((cat) =>
+          cat.id === id ? { ...cat, ...response.data } : cat
+        ),
+      }));
+
+      return response;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la modification');
+    }
+  },
+
+  // Supprimer une catégorie
+  deleteCategory: async (id) => {
+    try {
+      await adminAPI.deleteCategory(id);
+
+      set((state) => ({
+        categories: state.categories.filter((cat) => cat.id !== id),
+      }));
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la suppression');
+    }
+  },
+
+  // ============================================
+  // GESTION DE LA GALERIE
+  // ============================================
+
+  // Récupérer toutes les images
+  fetchGalleryImages: async () => {
+    set({ loading: true, error: null });
+    try {
+      const response = await adminAPI.getAllGalleryImages();
+      set({ galleryImages: response.data || [], loading: false });
+    } catch (error) {
+      set({
+        error: error.response?.data?.error || 'Erreur lors du chargement des images',
+        loading: false,
+      });
+    }
+  },
+
+  // Upload une image
+  uploadGalleryImage: async (imageData) => {
+    try {
+      const response = await adminAPI.uploadGalleryPhoto(imageData);
+
+      set((state) => ({
+        galleryImages: [response.data, ...state.galleryImages],
+      }));
+
+      return response;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || "Erreur lors de l'upload");
+    }
+  },
+
+  // Modifier une image
+  updateGalleryImage: async (id, imageData) => {
+    try {
+      const response = await adminAPI.updateGalleryPhoto(id, imageData);
+
+      set((state) => ({
+        galleryImages: state.galleryImages.map((img) =>
+          img.id === id ? { ...img, ...response.data } : img
+        ),
+      }));
+
+      return response;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la modification');
+    }
+  },
+
+  // Supprimer une image
+  deleteGalleryImage: async (id) => {
+    try {
+      await adminAPI.deleteGalleryPhoto(id);
+
+      set((state) => ({
+        galleryImages: state.galleryImages.filter((img) => img.id !== id),
+      }));
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la suppression');
+    }
+  },
 }));

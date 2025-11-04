@@ -1,42 +1,33 @@
-import {
-  GraduationCap,
-  Facebook,
-  Instagram,
-  Linkedin,
-  Mail,
-  MapPin,
-  Phone,
-  Twitter,
-} from "lucide-react";
-import { Link } from "react-router";
-import { CEPIC_INFO } from "../../config/cepic";
+import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Twitter } from 'lucide-react';
+import { Link } from 'react-router';
+import { CEPIC_INFO } from '../../config/cepic';
 
 const Footer = () => {
   const footerLinks = {
     formations: [
-      { name: "Toutes les formations", href: "/formations" },
-      { name: "Management de projet", href: "/formations?category=management-projet" },
-      { name: "Banque et finance", href: "/formations?category=banque-finance" },
-      { name: "Entrepreneuriat", href: "/formations?category=entrepreneuriat" },
+      { name: 'Toutes les formations', href: '/formations' },
+      { name: 'Management de projet', href: '/formations?category=management-projet' },
+      { name: 'Banque et finance', href: '/formations?category=banque-finance' },
+      { name: 'Entrepreneuriat', href: '/formations?category=entrepreneuriat' },
     ],
     company: [
-      { name: "À propos", href: "/a-propos" },
-      { name: "Galerie", href: "/galerie" },
-      { name: "Contact", href: "/contact" },
-      { name: "Mes inscriptions", href: "/mes-inscriptions" },
+      { name: 'À propos', href: '/a-propos' },
+      { name: 'Galerie', href: '/galerie' },
+      { name: 'Contact', href: '/contact' },
+      { name: 'Mes inscriptions', href: '/mes-inscriptions' },
     ],
     legal: [
-      { name: "Conditions d'utilisation", href: "/conditions" },
-      { name: "Politique de confidentialité", href: "/confidentialite" },
-      { name: "Mentions légales", href: "/mentions-legales" },
+      { name: "Conditions d'utilisation", href: '/conditions' },
+      { name: 'Politique de confidentialité', href: '/confidentialite' },
+      { name: 'Mentions légales', href: '/mentions-legales' },
     ],
   };
 
   const socialLinks = [
-    { name: "Facebook", icon: Facebook, href: "#" },
-    { name: "Twitter", icon: Twitter, href: "#" },
-    { name: "Instagram", icon: Instagram, href: "#" },
-    { name: "LinkedIn", icon: Linkedin, href: "#" },
+    { name: 'Facebook', icon: Facebook, href: '#' },
+    { name: 'Twitter', icon: Twitter, href: '#' },
+    { name: 'Instagram', icon: Instagram, href: '#' },
+    { name: 'LinkedIn', icon: Linkedin, href: '#' },
   ];
 
   return (
@@ -46,23 +37,22 @@ const Footer = () => {
           {/* Brand & Contact */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-secondary-500 rounded-lg flex items-center justify-center">
-                <GraduationCap className="w-6 h-6 text-primary-800" />
-              </div>
-              <span className="text-xl font-bold text-white">
-                CEPIC
-              </span>
+              <img
+                src="/logo_cepic.jpg"
+                alt="CEPIC"
+                className="w-10 h-10 rounded-lg object-cover"
+              />
+              <span className="text-xl font-bold text-white">CEPIC</span>
             </Link>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              {CEPIC_INFO.fullName}
-            </p>
-            <p className="text-gray-400 text-xs">
-              Excellence en Formation Professionnelle
-            </p>
+            <p className="text-gray-400 text-sm leading-relaxed">{CEPIC_INFO.fullName}</p>
+            <p className="text-gray-400 text-xs">Excellence en Formation Professionnelle</p>
             <div className="space-y-2">
               <div className="flex items-center space-x-2 text-sm text-gray-400">
                 <Mail className="w-4 h-4" />
-                <a href={`mailto:${CEPIC_INFO.email}`} className="hover:text-secondary-500 transition-colors">
+                <a
+                  href={`mailto:${CEPIC_INFO.email}`}
+                  className="hover:text-secondary-500 transition-colors"
+                >
                   {CEPIC_INFO.email}
                 </a>
               </div>
@@ -83,9 +73,7 @@ const Footer = () => {
 
           {/* Formations Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-secondary-500">
-              Formations
-            </h3>
+            <h3 className="text-lg font-semibold mb-4 text-secondary-500">Formations</h3>
             <ul className="space-y-2">
               {footerLinks.formations.map((link) => (
                 <li key={link.name}>
@@ -102,9 +90,7 @@ const Footer = () => {
 
           {/* Company Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-secondary-500">
-              CEPIC
-            </h3>
+            <h3 className="text-lg font-semibold mb-4 text-secondary-500">CEPIC</h3>
             <ul className="space-y-2">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
@@ -121,9 +107,7 @@ const Footer = () => {
 
           {/* Legal & Social */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-secondary-500">
-              Légal
-            </h3>
+            <h3 className="text-lg font-semibold mb-4 text-secondary-500">Légal</h3>
             <ul className="space-y-2 mb-6">
               {footerLinks.legal.map((link) => (
                 <li key={link.name}>
@@ -146,9 +130,7 @@ const Footer = () => {
 
             {/* Social Links */}
             <div>
-              <h4 className="text-sm font-semibold mb-3 text-secondary-500">
-                Suivez-nous
-              </h4>
+              <h4 className="text-sm font-semibold mb-3 text-secondary-500">Suivez-nous</h4>
               <div className="flex space-x-3">
                 {socialLinks.map((social) => (
                   <a
@@ -170,9 +152,7 @@ const Footer = () => {
           <p className="text-gray-400 text-sm">
             © {new Date().getFullYear()} {CEPIC_INFO.shortName}. Tous droits réservés.
           </p>
-          <p className="text-gray-500 text-xs">
-            Développé avec ❤️ pour l'excellence en formation
-          </p>
+          <p className="text-gray-500 text-xs">Développé avec ❤️ pour l'excellence en formation</p>
         </div>
       </div>
     </footer>

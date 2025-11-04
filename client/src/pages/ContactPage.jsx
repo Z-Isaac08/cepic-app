@@ -257,7 +257,7 @@ const ContactPage = () => {
                   className="bg-white rounded-xl shadow-md p-6"
                 >
                   <div className="flex items-start space-x-4">
-                    <div className={`flex-shrink-0 w-12 h-12 ${info.color} bg-opacity-10 rounded-lg flex items-center justify-center`}>
+                    <div className={`flex-shrink-0 w-12 h-12 ${info.color}/10 rounded-lg flex items-center justify-center`}>
                       <Icon className={`w-6 h-6 ${info.color}`} />
                     </div>
                     <div className="flex-1">

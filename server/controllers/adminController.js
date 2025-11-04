@@ -560,12 +560,348 @@ const generateMockAnalytics = (timeRange, type) => {
   }));
 };
 
+// Obtenir un utilisateur par ID
+const getUser = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        isVerified: true,
+        isActive: true,
+        createdAt: true,
+        lastLogin: true,
+        _count: {
+          select: {
+            trainingEnrollments: true,
+            trainingReviews: true,
+            trainingBookmarks: true
+          }
+        }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'Utilisateur non trouvé'
+      });
+    }
+
+    res.json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Mettre à jour un utilisateur
+const updateUser = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const updateData = req.body;
+
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: updateData
+    });
+
+    res.json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Obtenir toutes les formations (admin)
+const getAllTrainingsAdmin = async (req, res, next) => {
+  try {
+    const trainings = await prisma.training.findMany({
+      include: {
+        category: true,
+        creator: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        },
+        _count: {
+          select: {
+            enrollments: true,
+            reviews: true,
+            bookmarks: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    res.json({ success: true, data: trainings });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Obtenir toutes les inscriptions
+const getAllEnrollments = async (req, res, next) => {
+  try {
+    const { status, page = 1, limit = 50 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const where = status ? { status } : {};
+
+    const [enrollments, total] = await Promise.all([
+      prisma.trainingEnrollment.findMany({
+        where,
+        include: {
+          user: {
+            select: {
+              firstName: true,
+              lastName: true,
+              email: true
+            }
+          },
+          training: {
+            select: {
+              title: true,
+              cost: true
+            }
+          },
+          payment: true
+        },
+        skip,
+        take: parseInt(limit),
+        orderBy: { enrolledAt: 'desc' }
+      }),
+      prisma.trainingEnrollment.count({ where })
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        enrollments,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          pages: Math.ceil(total / parseInt(limit))
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Mettre à jour le statut d'une inscription
+const updateEnrollmentStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const enrollment = await prisma.trainingEnrollment.update({
+      where: { id },
+      data: { status }
+    });
+
+    res.json({ success: true, data: enrollment });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Créer une catégorie
+const createCategory = async (req, res, next) => {
+  try {
+    const { name, description, icon } = req.body;
+
+    const category = await prisma.category.create({
+      data: { name, description, icon }
+    });
+
+    res.json({ success: true, data: category });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Mettre à jour une catégorie
+const updateCategory = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const category = await prisma.category.update({
+      where: { id },
+      data: updateData
+    });
+
+    res.json({ success: true, data: category });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Supprimer une catégorie
+const deleteCategory = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    await prisma.category.delete({
+      where: { id }
+    });
+
+    res.json({ success: true, message: 'Catégorie supprimée' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Upload photo galerie
+const uploadGalleryPhoto = async (req, res, next) => {
+  try {
+    const { title, description, category } = req.body;
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+    const photo = await prisma.galleryPhoto.create({
+      data: {
+        title,
+        description,
+        imageUrl,
+        category,
+        userId: req.user.id
+      }
+    });
+
+    res.json({ success: true, data: photo });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Mettre à jour photo galerie
+const updateGalleryPhoto = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const photo = await prisma.galleryPhoto.update({
+      where: { id },
+      data: updateData
+    });
+
+    res.json({ success: true, data: photo });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Supprimer photo galerie
+const deleteGalleryPhoto = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    await prisma.galleryPhoto.delete({
+      where: { id }
+    });
+
+    res.json({ success: true, message: 'Photo supprimée' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Obtenir tous les messages
+const getAllMessages = async (req, res, next) => {
+  try {
+    const { status, page = 1, limit = 50 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const where = status ? { status } : {};
+
+    const [messages, total] = await Promise.all([
+      prisma.contactMessage.findMany({
+        where,
+        skip,
+        take: parseInt(limit),
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.contactMessage.count({ where })
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        messages,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          pages: Math.ceil(total / parseInt(limit))
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Marquer message comme lu
+const markMessageAsRead = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const message = await prisma.contactMessage.update({
+      where: { id },
+      data: { status: 'READ' }
+    });
+
+    res.json({ success: true, data: message });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Supprimer message
+const deleteMessage = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    await prisma.contactMessage.delete({
+      where: { id }
+    });
+
+    res.json({ success: true, message: 'Message supprimé' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getUsers,
+  getUser,
+  updateUser,
   updateUserStatus,
   deleteUser,
   getSecurityLogs,
   getSystemHealth,
-  getAnalytics
+  getAnalytics,
+  getAllTrainingsAdmin,
+  getAllEnrollments,
+  updateEnrollmentStatus,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  uploadGalleryPhoto,
+  updateGalleryPhoto,
+  deleteGalleryPhoto,
+  getAllMessages,
+  markMessageAsRead,
+  deleteMessage
 };
