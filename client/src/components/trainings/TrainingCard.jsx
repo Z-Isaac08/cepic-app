@@ -8,9 +8,11 @@ import { useTrainingStore } from '../../stores/trainingStore';
 
 const TrainingCard = ({ training, showBookmark = true }) => {
   const { user } = useAuthStore();
-  const { toggleBookmark } = useTrainingStore();
-  const [isBookmarked, setIsBookmarked] = useState(training.isBookmarked || false);
+  const { toggleBookmark, trainings } = useTrainingStore();
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Récupérer le statut de bookmark depuis le store
+  const isBookmarked = training.isBookmarked || false;
 
   const handleBookmark = async (e) => {
     e.preventDefault();
@@ -25,36 +27,37 @@ const TrainingCard = ({ training, showBookmark = true }) => {
     setIsLoading(true);
     try {
       const response = await toggleBookmark(training.id);
-      setIsBookmarked(response.bookmarked);
       
-      // Toast feedback
+      // Le toast est maintenant géré dans le store
       if (response.bookmarked) {
         toast.success('Formation ajoutée aux favoris');
       } else {
         toast.info('Formation retirée des favoris');
       }
+      
+      return response;
     } catch (error) {
       console.error('Erreur bookmark:', error);
-      toast.error('Erreur lors de la mise à jour des favoris');
+      toast.error(error.response?.data?.error || 'Erreur lors de la mise à jour des favoris');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Formater le prix (convert from cents to FCFA)
-  const formatPrice = (priceInCents) => {
-    if (!priceInCents || priceInCents === 0) return 'Gratuit';
-    const priceInFCFA = priceInCents / 100;
+  // Formater le prix en FCFA
+  const formatPrice = (price) => {
+    if (price === 0 || price === null || price === undefined) return 'Gratuit';
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'XOF',
-      minimumFractionDigits: 0
-    }).format(priceInFCFA);
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(price);
   };
 
-  // Calculer la réduction
-  const discount = training.originalCost && training.cost < training.originalCost
-    ? Math.round(((training.originalCost - training.cost) / training.originalCost) * 100)
+  // Calculer la réduction (uniquement si originalCost est défini et supérieur au prix actuel)
+  const discount = training.originalCost && training.originalCost > training.price && training.price > 0
+    ? Math.round(((training.originalCost - training.price) / training.originalCost) * 100)
     : 0;
 
   return (
@@ -89,7 +92,7 @@ const TrainingCard = ({ training, showBookmark = true }) => {
             )}
 
             {/* Badge Réduction */}
-            {discount > 0 && (
+            {discount > 0 && training.price > 0 && (
               <div className="absolute top-3 right-3 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
                 -{discount}%
               </div>
@@ -147,23 +150,21 @@ const TrainingCard = ({ training, showBookmark = true }) => {
             <div className="space-y-2 mb-4">
               <div className="flex items-center text-sm text-gray-500">
                 <Clock className="w-4 h-4 mr-2" />
-                <span>{training.duration} {training.durationUnit === 'hours' ? 'heures' : 'jours'}</span>
+                <span>{training.duration}</span>
               </div>
               
-              {training.location && (
+              {training.schedule && (
                 <div className="flex items-center text-sm text-gray-500">
                   <MapPin className="w-4 h-4 mr-2" />
-                  <span>{training.location}</span>
+                  <span>{training.schedule}</span>
                 </div>
               )}
 
-              {training.deliveryMode && (
+              {training.instructor && (
                 <div className="flex items-center text-sm text-gray-500">
                   <Users className="w-4 h-4 mr-2" />
-                  <span>
-                    {training.deliveryMode === 'PRESENTIAL' && 'Présentiel'}
-                    {training.deliveryMode === 'ONLINE' && 'En ligne'}
-                    {training.deliveryMode === 'HYBRID' && 'Hybride'}
+                  <span className="truncate" title={training.instructor}>
+                    {training.instructor}
                   </span>
                 </div>
               )}
@@ -175,20 +176,16 @@ const TrainingCard = ({ training, showBookmark = true }) => {
             {/* Prix et CTA */}
             <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-100">
               <div>
-                {training.isFree ? (
-                  <span className="text-2xl font-bold text-green-600">Gratuit</span>
-                ) : (
-                  <div className="flex items-baseline space-x-2">
-                    <span className="text-2xl font-bold text-primary-800">
-                      {formatPrice(training.cost)}
+                <div className="flex items-baseline space-x-2">
+                  <span className={`text-xl font-bold ${training.price === 0 ? 'text-green-600' : 'text-primary-800'}`}>
+                    {formatPrice(training.price)}
+                  </span>
+                  {training.originalCost && training.originalCost > training.price && training.price > 0 && (
+                    <span className="text-sm text-gray-400 line-through">
+                      {formatPrice(training.originalCost)}
                     </span>
-                    {training.originalCost && training.originalCost > training.cost && (
-                      <span className="text-sm text-gray-400 line-through">
-                        {formatPrice(training.originalCost)}
-                      </span>
-                    )}
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
               <button className="px-4 py-2 bg-primary-800 text-white rounded-lg hover:bg-primary-900 transition-colors text-sm font-medium">

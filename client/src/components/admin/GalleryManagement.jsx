@@ -1,16 +1,16 @@
-import { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Image as ImageIcon,
-  Upload,
   Edit,
-  Trash2,
-  X,
+  FileImage,
+  Image as ImageIcon,
   RefreshCw,
   Search,
-  FileImage
+  Trash2,
+  Upload,
+  X,
 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { useAdminStore } from '../../stores/adminStore';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -25,7 +25,7 @@ const GalleryManagement = () => {
     fetchCategories,
     uploadGalleryImage,
     updateGalleryImage,
-    deleteGalleryImage
+    deleteGalleryImage,
   } = useAdminStore();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,7 +38,7 @@ const GalleryManagement = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: ''
+    category: '',
   });
   const [previewImage, setPreviewImage] = useState(null);
 
@@ -68,13 +68,15 @@ const GalleryManagement = () => {
   };
 
   const handleFileInput = (e) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files && e.target.files.length > 0) {
       handleFiles(e.target.files);
+      // Réinitialiser la valeur de l'input pour permettre de sélectionner à nouveau le même fichier
+      e.target.value = '';
     }
   };
 
   const handleFiles = async (files) => {
-    const validFiles = Array.from(files).filter(file => {
+    const validFiles = Array.from(files).filter((file) => {
       if (!ACCEPTED_FORMATS.includes(file.type)) {
         toast.error(`${file.name}: Format non supporté`);
         return false;
@@ -93,29 +95,20 @@ const GalleryManagement = () => {
 
     try {
       for (const file of validFiles) {
-        const reader = new FileReader();
-        await new Promise((resolve, reject) => {
-          reader.onloadend = async () => {
-            try {
-              const formData = new FormData();
-              formData.append('image', file);
-              formData.append('title', file.name.split('.')[0]);
-              formData.append('description', '');
-              
-              await uploadGalleryImage(formData);
-              resolve();
-            } catch (error) {
-              reject(error);
-            }
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('title', file.name.split('.')[0]);
+        formData.append('description', '');
+
+        await uploadGalleryImage(formData);
       }
+
+      // Recharger les images après l'upload
+      await fetchGalleryImages();
       toast.success(`${validFiles.length} image(s) uploadée(s)`, { id: toastId });
     } catch (error) {
       console.error('Error uploading:', error);
-      toast.error('Erreur lors de l\'upload', { id: toastId });
+      toast.error(error.response?.data?.error || "Erreur lors de l'upload", { id: toastId });
     } finally {
       setUploading(false);
     }
@@ -127,7 +120,7 @@ const GalleryManagement = () => {
       setFormData({
         title: image.title || '',
         description: image.description || '',
-        category: image.category || ''
+        category: image.category || '',
       });
       setPreviewImage(image.imageUrl);
     } else {
@@ -135,7 +128,7 @@ const GalleryManagement = () => {
       setFormData({
         title: '',
         description: '',
-        category: ''
+        category: '',
       });
       setPreviewImage(null);
     }
@@ -164,7 +157,7 @@ const GalleryManagement = () => {
       handleCloseModal();
     } catch (error) {
       console.error('Error saving image:', error);
-      toast.error(error.message || 'Erreur lors de l\'enregistrement');
+      toast.error(error.message || "Erreur lors de l'enregistrement");
     }
   };
 
@@ -180,12 +173,12 @@ const GalleryManagement = () => {
     }
   };
 
-  const filteredImages = galleryImages.filter(image => {
-    const matchSearch = searchTerm === '' ||
-      image.title?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+  const filteredImages = galleryImages.filter((image) => {
+    const matchSearch =
+      searchTerm === '' || image.title?.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchCategory = categoryFilter === 'all' || image.category === categoryFilter;
-    
+
     return matchSearch && matchCategory;
   });
 
@@ -251,8 +244,10 @@ const GalleryManagement = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           >
             <option value="all">Toutes les catégories</option>
-            {categories.map(cat => (
-              <option key={cat.id} value={cat.name}>{cat.name}</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.name}>
+                {cat.name}
+              </option>
             ))}
           </select>
         </div>
@@ -260,27 +255,30 @@ const GalleryManagement = () => {
 
       {/* Upload Zone */}
       <div
+        onClick={() => fileInputRef.current?.click()}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        className={`border-2 border-dashed rounded-xl p-8 transition-colors ${
-          dragActive
-            ? 'border-primary-500 bg-primary-50'
-            : 'border-gray-300 bg-gray-50'
+        className={`border-2 border-dashed rounded-xl p-8 transition-colors cursor-pointer ${
+          dragActive ? 'border-primary-500 bg-primary-50' : 'border-gray-300 bg-gray-50 hover:border-primary-400 hover:bg-gray-100'
         }`}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
       >
         <div className="text-center">
           <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-lg font-medium text-gray-700 mb-2">
-            Glissez-déposez vos images ici
-          </p>
+          <p className="text-lg font-medium text-gray-700 mb-2">Glissez-déposez vos images ici</p>
           <p className="text-sm text-gray-500 mb-4">
             ou cliquez sur "Ajouter des photos" ci-dessus
           </p>
-          <p className="text-xs text-gray-400">
-            Formats acceptés: JPG, PNG, WEBP (max 5MB)
-          </p>
+          <p className="text-xs text-gray-400">Formats acceptés: JPG, PNG, WEBP (max 5MB)</p>
         </div>
       </div>
 
@@ -293,12 +291,8 @@ const GalleryManagement = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="group relative aspect-square bg-gray-200 rounded-lg overflow-hidden cursor-pointer"
           >
-            <img
-              src={image.imageUrl}
-              alt={image.title}
-              className="w-full h-full object-cover"
-            />
-            
+            <img src={image.imageUrl} alt={image.title} className="w-full h-full object-cover" />
+
             {/* Overlay */}
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
               <div className="flex items-center gap-2">
@@ -380,14 +374,12 @@ const GalleryManagement = () => {
 
                 {/* Title */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Titre *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Titre *</label>
                   <input
                     type="text"
                     required
                     value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     placeholder="Titre de l'image"
                   />
@@ -401,7 +393,9 @@ const GalleryManagement = () => {
                   <textarea
                     rows={3}
                     value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, description: e.target.value }))
+                    }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     placeholder="Description de l'image..."
                   />
@@ -409,17 +403,17 @@ const GalleryManagement = () => {
 
                 {/* Category */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Catégorie
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
                   <select
                     value={formData.category}
-                    onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   >
                     <option value="">Aucune catégorie</option>
-                    {categories.map(cat => (
-                      <option key={cat.id} value={cat.name}>{cat.name}</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.name}
+                      </option>
                     ))}
                   </select>
                 </div>

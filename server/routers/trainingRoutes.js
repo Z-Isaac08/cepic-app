@@ -14,6 +14,7 @@ router.get('/bookmarks/me', authenticate, trainingController.getMyBookmarks);
 router.post('/', authenticate, authorize('ADMIN'), trainingController.createTraining);
 router.put('/:id', authenticate, authorize('ADMIN'), trainingController.updateTraining);
 router.delete('/:id', authenticate, authorize('ADMIN'), trainingController.deleteTraining);
+router.patch('/:id/toggle-publish', authenticate, authorize('ADMIN'), trainingController.togglePublish);
 
 // Routes publiques avec ID
 router.get('/:id', trainingController.getTrainingById);

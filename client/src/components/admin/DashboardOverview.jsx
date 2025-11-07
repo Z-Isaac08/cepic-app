@@ -202,33 +202,6 @@ const DashboardOverview = () => {
         </motion.div>
       </div>
 
-      {/* Quick Actions */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1 }}
-        className="bg-gradient-to-r from-primary-800 to-primary-900 rounded-xl shadow-lg p-6 text-white"
-      >
-        <h3 className="text-xl font-bold mb-4">Actions rapides</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-4 transition-all text-center">
-            <GraduationCap className="w-8 h-8 mx-auto mb-2" />
-            <span className="text-sm font-medium">Nouvelle formation</span>
-          </button>
-          <button className="bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-4 transition-all text-center">
-            <Users className="w-8 h-8 mx-auto mb-2" />
-            <span className="text-sm font-medium">Gérer utilisateurs</span>
-          </button>
-          <button className="bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-4 transition-all text-center">
-            <MessageSquare className="w-8 h-8 mx-auto mb-2" />
-            <span className="text-sm font-medium">Messages</span>
-          </button>
-          <button className="bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-4 transition-all text-center">
-            <TrendingUp className="w-8 h-8 mx-auto mb-2" />
-            <span className="text-sm font-medium">Statistiques</span>
-          </button>
-        </div>
-      </motion.div>
     </div>
   );
 };

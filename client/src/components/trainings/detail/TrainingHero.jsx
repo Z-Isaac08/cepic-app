@@ -135,41 +135,36 @@ const TrainingHero = ({ training }) => {
 
               <div className="p-6">
                 <div className="flex items-baseline justify-between mb-4">
-                  {training.isFree ? (
-                    <span className="text-3xl font-bold text-green-600">
-                      Gratuit
+                  <div className="flex flex-col">
+                    <span className={`text-3xl font-bold ${training.price === 0 ? 'text-green-600' : 'text-primary-800'}`}>
+                      {training.price === 0 ? 'Gratuit' : new Intl.NumberFormat("fr-FR", {
+                        style: "currency",
+                        currency: "XOF",
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                      }).format(training.price)}
                     </span>
-                  ) : (
-                    <div className="flex flex-col">
-                      <span className="text-3xl font-bold text-primary-800">
-                        {new Intl.NumberFormat("fr-FR", {
-                          style: "currency",
-                          currency: "XOF",
-                          minimumFractionDigits: 0,
-                        }).format(training.cost / 100)}
-                      </span>
-                      {training.originalCost &&
-                        training.originalCost > training.cost && (
-                          <span className="text-sm text-gray-400 line-through">
-                            {new Intl.NumberFormat("fr-FR", {
-                              style: "currency",
-                              currency: "XOF",
-                              minimumFractionDigits: 0,
-                            }).format(training.originalCost / 100)}
-                          </span>
-                        )}
-                    </div>
-                  )}
+                    {training.originalCost &&
+                      training.originalCost > training.price &&
+                      training.price > 0 && (
+                        <span className="text-sm text-gray-400 line-through">
+                          {new Intl.NumberFormat("fr-FR", {
+                            style: "currency",
+                            currency: "XOF",
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                          }).format(training.originalCost)}
+                        </span>
+                      )}
+                  </div>
                   {training.originalCost &&
-                    training.originalCost > training.cost && (
+                    training.originalCost > training.price &&
+                    training.price > 0 && (
                       <Badge variant="accent">
-                        -
-                        {Math.round(
-                          ((training.originalCost - training.cost) /
-                            training.originalCost) *
-                            100
-                        )}
-                        %
+                        -{Math.round(
+                          ((training.originalCost - training.price) /
+                            training.originalCost) * 100
+                        )}%
                       </Badge>
                     )}
                 </div>

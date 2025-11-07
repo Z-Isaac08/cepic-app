@@ -19,8 +19,8 @@ const helmetConfig = helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com'],
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-      imgSrc: ["'self'", 'data:', 'https:'],
-      connectSrc: ["'self'"],
+      imgSrc: ["'self'", 'data:', 'blob:', 'http:', 'https:'],
+      connectSrc: ["'self'", 'http:', 'https:'],
       mediaSrc: ["'self'"],
       objectSrc: ["'none'"],
       childSrc: ["'self'"],
@@ -31,7 +31,7 @@ const helmetConfig = helmet({
       manifestSrc: ["'self'"]
     },
   },
-  crossOriginEmbedderPolicy: false, // Disable for development
+  crossOriginResourcePolicy: { policy: "cross-origin" },
   hsts: {
     maxAge: 31536000,
     includeSubDomains: true,

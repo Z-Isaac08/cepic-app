@@ -48,6 +48,28 @@ const HomePage = () => {
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
+          {/* Indicateur de défilement à droite */}
+          <div className="fixed right-8 bottom-1/2 transform translate-y-1/2 z-50">
+            <div className="flex flex-col items-center space-y-4">
+              <span className="text-sm font-medium text-white bg-primary-600/80 backdrop-blur-sm px-3 py-1 rounded-full">
+                Défiler
+              </span>
+              <div className="w-px h-16 bg-gradient-to-b from-primary-400 to-transparent"></div>
+              <svg 
+                className="w-5 h-5 text-white animate-bounce" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M19 14l-7 7m0 0l-7-7m7 7V3" 
+                />
+              </svg>
+            </div>
+          </div>
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <motion.div

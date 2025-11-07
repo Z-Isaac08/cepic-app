@@ -140,8 +140,12 @@ const RegisterPage = () => {
             transition={{ delay: 0.2 }}
             className="text-center text-white"
           >
-            <GraduationCap className="w-24 h-24 mx-auto mb-8 text-secondary-500" />
-            <h1 className="text-4xl font-bold mb-4">Rejoignez CEPIC</h1>
+            <img 
+              src="/logo_cepic.jpg" 
+              alt="Logo CEPIC" 
+              className="w-32 h-32 mx-auto mb-6 rounded-full border-4 border-secondary-500 shadow-lg"
+            />
+            <h1 className="text-4xl font-bold mb-4">Rejoignez {CEPIC_INFO.shortName}</h1>
             <p className="text-xl text-primary-100 mb-8 max-w-md mx-auto">
               Commencez votre parcours de formation professionnelle dès
               aujourd'hui

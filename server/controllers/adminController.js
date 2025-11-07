@@ -1,4 +1,6 @@
 const prisma = require('../lib/prisma');
+const path = require('path');
+const fs = require('fs');
 
 // Obtenir les statistiques du dashboard
 const getDashboardStats = async (req, res, next) => {
@@ -9,12 +11,12 @@ const getDashboardStats = async (req, res, next) => {
       where: {
         isActive: true,
         lastLogin: {
-          gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // 30 jours
-        }
-      }
+          gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 jours
+        },
+      },
     });
     const verifiedUsers = await prisma.user.count({
-      where: { isVerified: true }
+      where: { isVerified: true },
     });
 
     // Croissance utilisateurs (30 derniers jours vs 30 jours précédents)
@@ -23,13 +25,13 @@ const getDashboardStats = async (req, res, next) => {
 
     const newUsersLast30 = await prisma.user.count({
       where: {
-        createdAt: { gte: thirtyDaysAgo }
-      }
+        createdAt: { gte: thirtyDaysAgo },
+      },
     });
     const newUsersPrev30 = await prisma.user.count({
       where: {
-        createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo }
-      }
+        createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
+      },
     });
 
     const userGrowth = calculateGrowthRate(newUsersLast30, newUsersPrev30);
@@ -45,16 +47,15 @@ const getDashboardStats = async (req, res, next) => {
       cpuUsage: '45%',
       memoryUsage: '62%',
       diskUsage: '34%',
-      activeConnections: Math.floor(Math.random() * 100) + 50
+      activeConnections: Math.floor(Math.random() * 100) + 50,
     };
 
     // Activité récente
     const recentActivity = {
       newUsers: newUsersLast30,
       completedTransactions: Math.floor(Math.random() * 150) + 50, // À remplacer par vraies données
-      eventRegistrations: Math.floor(Math.random() * 80) + 20
+      eventRegistrations: Math.floor(Math.random() * 80) + 20,
     };
-
 
     res.status(200).json({
       success: true,
@@ -65,14 +66,14 @@ const getDashboardStats = async (req, res, next) => {
           verifiedUsers,
           newUsersThisMonth: newUsersLast30,
           userGrowth,
-          activeUserGrowth: calculateGrowthRate(activeUsers, Math.floor(activeUsers * 0.9)) // Simulé
+          activeUserGrowth: calculateGrowthRate(activeUsers, Math.floor(activeUsers * 0.9)), // Simulé
         },
         security: securityStats,
         systemHealth,
         recent: recentActivity,
         onlineUsers: Math.floor(Math.random() * 50) + 10,
-        lastUpdated: new Date().toISOString()
-      }
+        lastUpdated: new Date().toISOString(),
+      },
     });
   } catch (error) {
     next(error);
@@ -82,26 +83,26 @@ const getDashboardStats = async (req, res, next) => {
 // Obtenir la liste des utilisateurs avec filtres
 const getUsers = async (req, res, next) => {
   try {
-    const { 
-      page = 1, 
-      limit = 50, 
-      search, 
-      status, 
+    const {
+      page = 1,
+      limit = 50,
+      search,
+      status,
       role,
       sortBy = 'createdAt',
-      sortOrder = 'desc'
+      sortOrder = 'desc',
     } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Construction des filtres
     const where = {};
-    
+
     if (search) {
       where.OR = [
         { email: { contains: search, mode: 'insensitive' } },
         { firstName: { contains: search, mode: 'insensitive' } },
-        { lastName: { contains: search, mode: 'insensitive' } }
+        { lastName: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -125,17 +126,16 @@ const getUsers = async (req, res, next) => {
           isVerified: true,
           lastLogin: true,
           createdAt: true,
-          updatedAt: true
+          updatedAt: true,
         },
         skip,
         take: parseInt(limit),
         orderBy: {
-          [sortBy]: sortOrder
-        }
+          [sortBy]: sortOrder,
+        },
       }),
-      prisma.user.count({ where })
+      prisma.user.count({ where }),
     ]);
-
 
     res.status(200).json({
       success: true,
@@ -146,9 +146,9 @@ const getUsers = async (req, res, next) => {
           totalPages: Math.ceil(totalCount / parseInt(limit)),
           totalCount,
           hasNext: skip + users.length < totalCount,
-          hasPrev: parseInt(page) > 1
-        }
-      }
+          hasPrev: parseInt(page) > 1,
+        },
+      },
     });
   } catch (error) {
     next(error);
@@ -164,13 +164,13 @@ const updateUserStatus = async (req, res, next) => {
     // Vérifier que l'utilisateur existe
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, isActive: true, isVerified: true }
+      select: { id: true, email: true, isActive: true, isVerified: true },
     });
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        error: 'Utilisateur non trouvé'
+        error: 'Utilisateur non trouvé',
       });
     }
 
@@ -178,7 +178,7 @@ const updateUserStatus = async (req, res, next) => {
     if (userId === req.user.id && isActive === false) {
       return res.status(400).json({
         success: false,
-        error: 'Vous ne pouvez pas vous désactiver vous-même'
+        error: 'Vous ne pouvez pas vous désactiver vous-même',
       });
     }
 
@@ -196,15 +196,14 @@ const updateUserStatus = async (req, res, next) => {
         firstName: true,
         lastName: true,
         isActive: true,
-        isVerified: true
-      }
+        isVerified: true,
+      },
     });
-
 
     res.status(200).json({
       success: true,
       data: { user: updatedUser },
-      message: 'Statut utilisateur mis à jour avec succès'
+      message: 'Statut utilisateur mis à jour avec succès',
     });
   } catch (error) {
     next(error);
@@ -219,13 +218,13 @@ const deleteUser = async (req, res, next) => {
     // Vérifier que l'utilisateur existe
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, role: true }
+      select: { id: true, email: true, role: true },
     });
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        error: 'Utilisateur non trouvé'
+        error: 'Utilisateur non trouvé',
       });
     }
 
@@ -233,7 +232,7 @@ const deleteUser = async (req, res, next) => {
     if (userId === req.user.id) {
       return res.status(400).json({
         success: false,
-        error: 'Vous ne pouvez pas supprimer votre propre compte'
+        error: 'Vous ne pouvez pas supprimer votre propre compte',
       });
     }
 
@@ -241,7 +240,7 @@ const deleteUser = async (req, res, next) => {
     if (user.role === 'ADMIN') {
       return res.status(400).json({
         success: false,
-        error: 'Impossible de supprimer un autre administrateur'
+        error: 'Impossible de supprimer un autre administrateur',
       });
     }
 
@@ -249,29 +248,28 @@ const deleteUser = async (req, res, next) => {
     await prisma.$transaction(async (tx) => {
       // Supprimer les sessions
       await tx.session.deleteMany({
-        where: { userId }
+        where: { userId },
       });
 
       // Supprimer les codes 2FA
       await tx.twoFACode.deleteMany({
-        where: { userId }
+        where: { userId },
       });
 
       // Supprimer les logs d'audit (optionnel)
       await tx.auditLog.deleteMany({
-        where: { userId }
+        where: { userId },
       });
 
       // Supprimer l'utilisateur
       await tx.user.delete({
-        where: { id: userId }
+        where: { id: userId },
       });
     });
 
-
     res.status(200).json({
       success: true,
-      message: 'Utilisateur supprimé avec succès'
+      message: 'Utilisateur supprimé avec succès',
     });
   } catch (error) {
     next(error);
@@ -281,14 +279,7 @@ const deleteUser = async (req, res, next) => {
 // Obtenir les statistiques de sécurité
 const getSecurityLogs = async (req, res, next) => {
   try {
-    const { 
-      page = 1, 
-      limit = 50, 
-      type, 
-      userId,
-      startDate,
-      endDate
-    } = req.query;
+    const { page = 1, limit = 50, type, userId, startDate, endDate } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
@@ -310,17 +301,16 @@ const getSecurityLogs = async (req, res, next) => {
             select: {
               email: true,
               firstName: true,
-              lastName: true
-            }
-          }
+              lastName: true,
+            },
+          },
         },
         skip,
         take: parseInt(limit),
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       }),
-      prisma.auditLog.count({ where })
+      prisma.auditLog.count({ where }),
     ]);
-
 
     res.status(200).json({
       success: true,
@@ -329,9 +319,9 @@ const getSecurityLogs = async (req, res, next) => {
         pagination: {
           currentPage: parseInt(page),
           totalPages: Math.ceil(totalCount / parseInt(limit)),
-          totalCount
-        }
-      }
+          totalCount,
+        },
+      },
     });
   } catch (error) {
     next(error);
@@ -343,14 +333,14 @@ const getSystemHealth = async (req, res, next) => {
   try {
     // Métriques de base de données
     const dbStats = await getDatabaseStats();
-    
+
     // Métriques de performance (simulées - à implémenter avec de vrais outils)
     const performanceMetrics = {
       uptime: process.uptime(),
       memoryUsage: process.memoryUsage(),
       cpuUsage: process.cpuUsage(),
       version: process.version,
-      platform: process.platform
+      platform: process.platform,
     };
 
     // Statut des services
@@ -358,9 +348,8 @@ const getSystemHealth = async (req, res, next) => {
       database: 'healthy',
       redis: 'healthy', // À implémenter si Redis est utilisé
       email: 'healthy',
-      storage: 'healthy'
+      storage: 'healthy',
     };
-
 
     res.status(200).json({
       success: true,
@@ -369,8 +358,8 @@ const getSystemHealth = async (req, res, next) => {
         database: dbStats,
         performance: performanceMetrics,
         services: serviceStatus,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   } catch (error) {
     next(error);
@@ -404,10 +393,9 @@ const getAnalytics = async (req, res, next) => {
         data = await getUserAnalytics(startDate, endDate, timeRange);
     }
 
-
     res.status(200).json({
       success: true,
-      data
+      data,
     });
   } catch (error) {
     next(error);
@@ -423,27 +411,27 @@ const calculateGrowthRate = (current, previous) => {
 
 const getSecurityStats = async () => {
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  
+
   const [totalLogins, failedAttempts] = await Promise.all([
     prisma.auditLog.count({
       where: {
         action: { contains: 'login_success' },
-        createdAt: { gte: oneDayAgo }
-      }
+        createdAt: { gte: oneDayAgo },
+      },
     }),
     prisma.auditLog.count({
       where: {
         action: { contains: 'login_failed' },
-        createdAt: { gte: oneDayAgo }
-      }
-    })
+        createdAt: { gte: oneDayAgo },
+      },
+    }),
   ]);
 
   return {
     totalLogins,
     failedAttempts,
     blockedIPs: Math.floor(Math.random() * 10), // À implémenter avec un vrai système de blocage
-    suspiciousActivity: Math.floor(Math.random() * 5)
+    suspiciousActivity: Math.floor(Math.random() * 5),
   };
 };
 
@@ -451,14 +439,14 @@ const getDatabaseStats = async () => {
   const [userCount, sessionCount, auditLogCount] = await Promise.all([
     prisma.user.count(),
     prisma.session.count(),
-    prisma.auditLog.count()
+    prisma.auditLog.count(),
   ]);
 
   return {
     totalUsers: userCount,
     activeSessions: sessionCount,
     auditLogs: auditLogCount,
-    connectionStatus: 'connected'
+    connectionStatus: 'connected',
   };
 };
 
@@ -495,12 +483,12 @@ const getUserAnalytics = async (startDate, endDate, timeRange) => {
     where: {
       createdAt: {
         gte: startDate,
-        lte: endDate
-      }
+        lte: endDate,
+      },
     },
     select: {
-      createdAt: true
-    }
+      createdAt: true,
+    },
   });
 
   // Grouper par période selon le timeRange
@@ -529,15 +517,15 @@ const groupDataByPeriod = (data, timeRange, dateField) => {
     '7d': 7,
     '30d': 30,
     '90d': 90,
-    '1y': 12
+    '1y': 12,
   };
 
   const periodCount = periods[timeRange] || 7;
-  
+
   return Array.from({ length: periodCount }, (_, i) => ({
     label: `P${i + 1}`,
     value: Math.floor(Math.random() * 50) + 10,
-    date: new Date(Date.now() - (periodCount - i) * 24 * 60 * 60 * 1000)
+    date: new Date(Date.now() - (periodCount - i) * 24 * 60 * 60 * 1000),
   }));
 };
 
@@ -547,16 +535,16 @@ const generateMockAnalytics = (timeRange, type) => {
     '7d': 7,
     '30d': 30,
     '90d': 90,
-    '1y': 12
+    '1y': 12,
   };
 
   const periodCount = periods[timeRange] || 7;
   const multiplier = type === 'revenue' ? 100 : 1;
-  
+
   return Array.from({ length: periodCount }, (_, i) => ({
     label: `P${i + 1}`,
     value: (Math.floor(Math.random() * 50) + 10) * multiplier,
-    date: new Date(Date.now() - (periodCount - i) * 24 * 60 * 60 * 1000)
+    date: new Date(Date.now() - (periodCount - i) * 24 * 60 * 60 * 1000),
   }));
 };
 
@@ -564,7 +552,7 @@ const generateMockAnalytics = (timeRange, type) => {
 const getUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -581,16 +569,16 @@ const getUser = async (req, res, next) => {
           select: {
             trainingEnrollments: true,
             trainingReviews: true,
-            trainingBookmarks: true
-          }
-        }
-      }
+            trainingBookmarks: true,
+          },
+        },
+      },
     });
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        error: 'Utilisateur non trouvé'
+        error: 'Utilisateur non trouvé',
       });
     }
 
@@ -608,7 +596,7 @@ const updateUser = async (req, res, next) => {
 
     const user = await prisma.user.update({
       where: { id: userId },
-      data: updateData
+      data: updateData,
     });
 
     res.json({ success: true, data: user });
@@ -627,22 +615,23 @@ const getAllTrainingsAdmin = async (req, res, next) => {
           select: {
             firstName: true,
             lastName: true,
-            email: true
-          }
+            email: true,
+          },
         },
         _count: {
           select: {
-            enrollments: true,
+            enrollments_rel: true, // Utilisation du bon nom de relation
             reviews: true,
-            bookmarks: true
-          }
-        }
+            bookmarks: true,
+          },
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
 
     res.json({ success: true, data: trainings });
   } catch (error) {
+    console.error('Error in getAllTrainingsAdmin:', error);
     next(error);
   }
 };
@@ -663,22 +652,22 @@ const getAllEnrollments = async (req, res, next) => {
             select: {
               firstName: true,
               lastName: true,
-              email: true
-            }
+              email: true,
+            },
           },
           training: {
             select: {
               title: true,
-              cost: true
-            }
+              cost: true,
+            },
           },
-          payment: true
+          payment: true,
         },
         skip,
         take: parseInt(limit),
-        orderBy: { enrolledAt: 'desc' }
+        orderBy: { enrolledAt: 'desc' },
       }),
-      prisma.trainingEnrollment.count({ where })
+      prisma.trainingEnrollment.count({ where }),
     ]);
 
     res.json({
@@ -689,9 +678,9 @@ const getAllEnrollments = async (req, res, next) => {
           page: parseInt(page),
           limit: parseInt(limit),
           total,
-          pages: Math.ceil(total / parseInt(limit))
-        }
-      }
+          pages: Math.ceil(total / parseInt(limit)),
+        },
+      },
     });
   } catch (error) {
     next(error);
@@ -706,7 +695,7 @@ const updateEnrollmentStatus = async (req, res, next) => {
 
     const enrollment = await prisma.trainingEnrollment.update({
       where: { id },
-      data: { status }
+      data: { status },
     });
 
     res.json({ success: true, data: enrollment });
@@ -715,49 +704,134 @@ const updateEnrollmentStatus = async (req, res, next) => {
   }
 };
 
-// Créer une catégorie
+// Créer une catégorie de formation
 const createCategory = async (req, res, next) => {
   try {
-    const { name, description, icon } = req.body;
+    const { name, description, icon, color, order, isActive } = req.body;
 
-    const category = await prisma.category.create({
-      data: { name, description, icon }
+    // Validation des champs requis
+    if (!name) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Le nom de la catégorie est requis' 
+      });
+    }
+
+    // Générer un slug à partir du nom
+    const slug = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    // Vérifier si la catégorie existe déjà
+    const existingCategory = await prisma.trainingCategory.findUnique({
+      where: { name }
     });
 
-    res.json({ success: true, data: category });
+    if (existingCategory) {
+      return res.status(400).json({
+        success: false,
+        error: 'Une catégorie avec ce nom existe déjà'
+      });
+    }
+
+    const category = await prisma.trainingCategory.create({
+      data: { 
+        name,
+        slug,
+        description: description || null,
+        icon: icon || null,
+        color: color || "#3B82F6",
+        order: order || 0,
+        isActive: isActive !== undefined ? isActive : true
+      },
+    });
+
+    res.status(201).json({ 
+      success: true, 
+      data: category 
+    });
   } catch (error) {
+    console.error('Error creating category:', error);
     next(error);
   }
 };
 
-// Mettre à jour une catégorie
+// Mettre à jour une catégorie de formation
 const updateCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const { name, description, icon, color, order, isActive } = req.body;
 
-    const category = await prisma.category.update({
+    const updateData = {};
+    
+    // Mettre à jour le slug si le nom change
+    if (name) {
+      updateData.name = name;
+      updateData.slug = name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+    }
+    
+    // Ajouter les champs optionnels s'ils sont fournis
+    if (description !== undefined) updateData.description = description;
+    if (icon !== undefined) updateData.icon = icon;
+    if (color !== undefined) updateData.color = color;
+    if (order !== undefined) updateData.order = order;
+    if (isActive !== undefined) updateData.isActive = isActive;
+
+    const category = await prisma.trainingCategory.update({
       where: { id },
-      data: updateData
+      data: updateData,
     });
 
     res.json({ success: true, data: category });
   } catch (error) {
+    console.error('Error updating category:', error);
+    if (error.code === 'P2025') {
+      return res.status(404).json({
+        success: false,
+        error: 'Catégorie non trouvée'
+      });
+    }
     next(error);
   }
 };
 
-// Supprimer une catégorie
+// Supprimer une catégorie de formation
 const deleteCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    await prisma.category.delete({
-      where: { id }
+    // Vérifier si la catégorie est utilisée par des formations
+    const trainings = await prisma.training.findMany({
+      where: { categoryId: id },
     });
 
-    res.json({ success: true, message: 'Catégorie supprimée' });
+    if (trainings.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Impossible de supprimer cette catégorie car elle est utilisée par des formations'
+      });
+    }
+
+    await prisma.trainingCategory.delete({
+      where: { id },
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'Catégorie supprimée avec succès' 
+    });
   } catch (error) {
+    console.error('Error deleting category:', error);
+    if (error.code === 'P2025') {
+      return res.status(404).json({
+        success: false,
+        error: 'Catégorie non trouvée'
+      });
+    }
     next(error);
   }
 };
@@ -766,20 +840,50 @@ const deleteCategory = async (req, res, next) => {
 const uploadGalleryPhoto = async (req, res, next) => {
   try {
     const { title, description, category } = req.body;
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+    
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'Aucun fichier téléchargé' });
+    }
+    
+    // S'assurer que l'URL commence par /uploads/ et contient l'extension
+    const imageUrl = `/uploads/${req.file.filename}`;
+    const fileExt = path.extname(req.file.originalname).toLowerCase();
+    
+    // Vérifier que le fichier a une extension valide
+    const validExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+    if (!validExtensions.includes(fileExt)) {
+      // Supprimer le fichier uploadé s'il n'a pas une extension valide
+      fs.unlinkSync(path.join(__dirname, '..', 'uploads', req.file.filename));
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Format de fichier non supporté. Utilisez JPG, PNG ou GIF.' 
+      });
+    }
 
     const photo = await prisma.galleryPhoto.create({
       data: {
-        title,
-        description,
+        title: title || path.parse(req.file.originalname).name,
+        description: description || '',
         imageUrl,
-        category,
-        userId: req.user.id
-      }
+        category: category || 'Autre',
+        uploader: {
+          connect: { id: req.user.id },
+        },
+      },
+      include: {
+        uploader: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
     });
 
     res.json({ success: true, data: photo });
   } catch (error) {
+    console.error('Error uploading gallery photo:', error);
     next(error);
   }
 };
@@ -792,7 +896,7 @@ const updateGalleryPhoto = async (req, res, next) => {
 
     const photo = await prisma.galleryPhoto.update({
       where: { id },
-      data: updateData
+      data: updateData,
     });
 
     res.json({ success: true, data: photo });
@@ -807,7 +911,7 @@ const deleteGalleryPhoto = async (req, res, next) => {
     const { id } = req.params;
 
     await prisma.galleryPhoto.delete({
-      where: { id }
+      where: { id },
     });
 
     res.json({ success: true, message: 'Photo supprimée' });
@@ -829,9 +933,9 @@ const getAllMessages = async (req, res, next) => {
         where,
         skip,
         take: parseInt(limit),
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       }),
-      prisma.contactMessage.count({ where })
+      prisma.contactMessage.count({ where }),
     ]);
 
     res.json({
@@ -842,9 +946,9 @@ const getAllMessages = async (req, res, next) => {
           page: parseInt(page),
           limit: parseInt(limit),
           total,
-          pages: Math.ceil(total / parseInt(limit))
-        }
-      }
+          pages: Math.ceil(total / parseInt(limit)),
+        },
+      },
     });
   } catch (error) {
     next(error);
@@ -858,7 +962,7 @@ const markMessageAsRead = async (req, res, next) => {
 
     const message = await prisma.contactMessage.update({
       where: { id },
-      data: { status: 'READ' }
+      data: { status: 'READ' },
     });
 
     res.json({ success: true, data: message });
@@ -873,12 +977,86 @@ const deleteMessage = async (req, res, next) => {
     const { id } = req.params;
 
     await prisma.contactMessage.delete({
-      where: { id }
+      where: { id },
     });
 
     res.json({ success: true, message: 'Message supprimé' });
   } catch (error) {
     next(error);
+  }
+};
+
+// Supprimer une formation
+const deleteTraining = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Vérifier si la formation existe
+    const training = await prisma.training.findUnique({
+      where: { id },
+    });
+
+    if (!training) {
+      return res.status(404).json({
+        success: false,
+        error: 'Formation non trouvée',
+      });
+    }
+
+    // Supprimer la formation
+    await prisma.training.delete({
+      where: { id },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {},
+      message: 'Formation supprimée avec succès',
+    });
+  } catch (error) {
+    console.error('Error deleting training:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors de la suppression de la formation',
+    });
+  }
+};
+
+// Basculer l'état de publication d'une formation
+const toggleTrainingPublish = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Vérifier si la formation existe
+    const training = await prisma.training.findUnique({
+      where: { id },
+    });
+
+    if (!training) {
+      return res.status(404).json({
+        success: false,
+        error: 'Formation non trouvée',
+      });
+    }
+
+    // Inverser le statut de publication
+    const updatedTraining = await prisma.training.update({
+      where: { id },
+      data: {
+        isPublished: !training.isPublished,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: updatedTraining,
+    });
+  } catch (error) {
+    console.error('Error toggling training publish status:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors du changement de statut de publication',
+    });
   }
 };
 
@@ -893,6 +1071,8 @@ module.exports = {
   getSystemHealth,
   getAnalytics,
   getAllTrainingsAdmin,
+  toggleTrainingPublish,
+  deleteTraining,
   getAllEnrollments,
   updateEnrollmentStatus,
   createCategory,
@@ -903,5 +1083,5 @@ module.exports = {
   deleteGalleryPhoto,
   getAllMessages,
   markMessageAsRead,
-  deleteMessage
+  deleteMessage,
 };

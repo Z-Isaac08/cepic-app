@@ -384,82 +384,145 @@ export const useAdminStore = create((set, get) => ({
   // ============================================
 
   // Récupérer toutes les formations (admin)
-  fetchTrainings: async () => {
+  fetchTrainings: async (filters = {}) => {
     set({ loading: true, error: null });
     try {
-      const response = await adminAPI.getAllTrainingsAdmin();
-      set({ trainings: response.data || [], loading: false });
-    } catch (error) {
-      set({
-        error: error.response?.data?.error || 'Erreur lors du chargement des formations',
-        loading: false,
+      const response = await adminAPI.getTrainings(filters);
+      set({ 
+        trainings: Array.isArray(response) ? response : (response.data || []),
+        loading: false 
       });
+      return response;
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || 
+                         error.response?.data?.message || 
+                         'Erreur lors du chargement des formations';
+      set({ 
+        error: errorMessage,
+        loading: false 
+      });
+      throw new Error(errorMessage);
     }
   },
 
   // Créer une formation
   createTraining: async (trainingData) => {
+    set({ loading: true, error: null });
     try {
+      // Validation des champs requis
+      const requiredFields = ['title', 'description', 'categoryId'];
+      const missingFields = requiredFields.filter(field => !trainingData[field]);
+      
+      if (missingFields.length > 0) {
+        throw new Error(`Champs manquants : ${missingFields.join(', ')}`);
+      }
+
       const response = await adminAPI.createTraining(trainingData);
-
-      // Ajouter la nouvelle formation à la liste
       set((state) => ({
-        trainings: [...state.trainings, response.data],
+        trainings: [response, ...state.trainings],
+        loading: false
       }));
-
       return response;
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erreur lors de la création');
+      const errorMessage = error.response?.data?.error || 
+                         error.response?.data?.message || 
+                         error.message || 
+                         'Erreur lors de la création de la formation';
+      set({ 
+        error: errorMessage,
+        loading: false 
+      });
+      throw new Error(errorMessage);
     }
   },
 
   // Modifier une formation
   updateTraining: async (id, trainingData) => {
+    set({ loading: true, error: null });
     try {
       const response = await adminAPI.updateTraining(id, trainingData);
-
-      // Mettre à jour la formation dans la liste
       set((state) => ({
         trainings: state.trainings.map((training) =>
-          training.id === id ? { ...training, ...response.data } : training
+          training.id === id ? { ...training, ...response } : training
         ),
+        loading: false
       }));
-
       return response;
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erreur lors de la modification');
+      const errorMessage = error.response?.data?.error || 
+                         error.response?.data?.message || 
+                         'Erreur lors de la mise à jour de la formation';
+      set({ 
+        error: errorMessage,
+        loading: false 
+      });
+      throw new Error(errorMessage);
     }
   },
 
   // Supprimer une formation
   deleteTraining: async (id) => {
+    set({ loading: true, error: null });
     try {
       await adminAPI.deleteTraining(id);
-
-      // Supprimer la formation de la liste
       set((state) => ({
         trainings: state.trainings.filter((training) => training.id !== id),
+        loading: false
       }));
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erreur lors de la suppression');
+      const errorMessage = error.response?.data?.error || 
+                         error.response?.data?.message || 
+                         'Erreur lors de la suppression de la formation';
+      set({ 
+        error: errorMessage,
+        loading: false 
+      });
+      throw new Error(errorMessage);
     }
   },
 
   // Toggle publié/non publié
-  toggleTrainingPublish: async (id, isPublished) => {
+  toggleTrainingPublish: async (id, currentStatus) => {
+    set({ loading: true, error: null });
     try {
-      const response = await adminAPI.updateTraining(id, { isPublished: !isPublished });
-
-      // Mettre à jour dans la liste
+      // Mettre à jour l'état local immédiatement pour un retour visuel instantané
       set((state) => ({
         trainings: state.trainings.map((training) =>
-          training.id === id ? { ...training, isPublished: !isPublished } : training
-        ),
+          training.id === id 
+            ? { ...training, isPublished: !currentStatus } 
+            : training
+        )
       }));
-
+      
+      // Appeler l'API
+      const response = await adminAPI.toggleTrainingPublish(id);
+      
+      // Mettre à jour l'état avec la réponse du serveur
+      set((state) => ({
+        trainings: state.trainings.map((training) =>
+          training.id === id 
+            ? { ...training, isPublished: response.isPublished } 
+            : training
+        ),
+        loading: false
+      }));
+      
       return response;
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erreur lors de la modification');
+      // En cas d'erreur, restaurer l'état précédent
+      set((state) => ({
+        trainings: state.trainings.map((training) =>
+          training.id === id 
+            ? { ...training, isPublished: currentStatus } 
+            : training
+        ),
+        loading: false,
+        error: error.response?.data?.error || 
+               error.response?.data?.message || 
+               'Erreur lors de la modification du statut de publication'
+      }));
+      
+      throw error;
     }
   },
 

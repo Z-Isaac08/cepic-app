@@ -38,6 +38,7 @@ model User {
   trainingReviews     TrainingReview[]
   trainingEnrollments TrainingEnrollment[]
   galleryPhotos       GalleryPhoto[]
+  payments            Payment[]
 
   @@map("users")
 }
@@ -98,46 +99,34 @@ model TrainingCategory {
 
 // 2. FORMATIONS
 model Training {
-  id             String   @id @default(cuid())
-  title          String
-  slug           String   @unique
-  description    String?  @db.Text
-  objectives     String[] // Objectifs pédagogiques
-  prerequisites  String[] // Prérequis
-  targetAudience String? // Public cible
-  program        String?  @db.Text // Programme détaillé
-  coverImage     String?
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?  @db.Text
+  program     String?  @db.Text // Programme détaillé
+  coverImage  String?
 
-  // Détails pratiques
-  duration     Int // Durée en heures
-  durationUnit String  @default("hours") // hours, days, weeks
-  cost         Int // Coût en FCFA (centimes)
-  originalCost Int? // Prix original (pour réductions)
-  isFree       Boolean @default(false)
+  // Détails essentiels
+  duration String // Ex: "40h", "2 jours", "3 semaines"
+  level    TrainingLevel @default(DEBUTANT)
+  price    Int           @default(0) // Prix en FCFA
 
-  // Modalités
-  deliveryMode    DeliveryMode @default(PRESENTIAL)
-  location        String? // Lieu (si présentiel)
-  maxParticipants Int? // Nombre max de participants
-  minParticipants Int? // Nombre min pour ouvrir
+  // Modalités simplifiées
+  capacity   Int?     @default(20) // Nombre max de participants
+  instructor String?
+  schedule   String? // Ex: "Lun-Ven 9h-17h"
+  startDate  DateTime?
+  endDate    DateTime?
 
-  // Dates et horaires
-  schedule  String? // Ex: "Lun-Ven 9h-17h"
-  startDate DateTime?
-  endDate   DateTime?
-
-  // Formateur
-  instructor      String?
-  instructorBio   String? @db.Text
-  instructorPhoto String?
+  // Contenu structuré (JSON plus flexible)
+  objectives     String[] @default([]) // ["Objectif 1", "Objectif 2"]
+  prerequisites  String[] @default([]) // ["Prérequis 1", "Prérequis 2"]
+  targetAudience String? // "Développeurs débutants, Étudiants en informatique"
 
   // Métadonnées
-  isPublished Boolean  @default(false)
-  isActive    Boolean  @default(true)
-  isFeatured  Boolean  @default(false) // Formation à la une
+  isPublished Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
   views       Int      @default(0)
-  enrollments Int      @default(0)
-  rating      Float?   @default(0)
   tags        String[] @default([])
 
   createdAt DateTime @default(now())
@@ -156,7 +145,7 @@ model Training {
 
   @@index([categoryId])
   @@index([slug])
-  @@index([isPublished, isActive])
+  @@index([isPublished])
   @@map("trainings")
 }
 
@@ -209,14 +198,16 @@ model TrainingEnrollment {
   // Notes
   notes      String?
   adminNotes String?
+  
+  // Relations
+  payment    Payment?
 
-  // Relation paiement (1:1)
-  payment Payment?
-
-  @@unique([userId, trainingId])
+  // Index
   @@index([userId])
   @@index([trainingId])
   @@index([status])
+  @@index([paymentStatus])
+  @@index([enrolledAt])
   @@map("training_enrollments")
 }
 
@@ -239,11 +230,11 @@ model TrainingReview {
   id         String   @id @default(cuid())
   rating     Int // 1-5 étoiles
   comment    String?  @db.Text
-  isPublic   Boolean  @default(true)
+  isPublic   Boolean  
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   trainingId String
-  training   Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  training   Training @relation(fields: [trainingId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -295,6 +286,10 @@ model Payment {
   id           String             @id @default(cuid())
   enrollmentId String             @unique
   enrollment   TrainingEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // CinetPay
   transactionId String @unique // ID transaction CinetPay
@@ -384,4 +379,12 @@ enum MessageStatus {
   READ // Lu
   REPLIED // Répondu
   ARCHIVED // Archivé
+}
+
+// Niveaux de formation
+enum TrainingLevel {
+  DEBUTANT     // Débutant
+  INTERMEDIAIRE // Intermédiaire
+  AVANCE     // Avancé
+  EXPERT       // Expert
 }

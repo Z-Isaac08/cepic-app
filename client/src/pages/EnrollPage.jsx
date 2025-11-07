@@ -141,7 +141,10 @@ const EnrollPage = () => {
                 Informations de paiement
               </h2>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                handlePaymentSubmit();
+              }} className="space-y-6">
                 {/* Informations de l'utilisateur */}
                 <div>
                   <h3 className="text-sm font-medium text-gray-900 mb-4">

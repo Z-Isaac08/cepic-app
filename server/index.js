@@ -1,7 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
+
+// Créer le dossier uploads s'il n'existe pas
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log(`Dossier uploads créé à: ${uploadDir}`);
+}
 
 // Valider les variables d'environnement au démarrage
 const { validateEnv } = require('./utils/validateEnv');
@@ -42,7 +51,7 @@ app.use(hpp);
 app.use(mongoSanitize);
 
 // CORS configuration
-app.use(cors({
+const corsOptions = {
   origin: [
     process.env.CLIENT_URL || 'http://localhost:5173',
     'http://localhost:3000',
@@ -50,10 +59,14 @@ app.use(cors({
     'http://localhost:5174'
   ],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Set-Cookie']
-}));
+};
+app.use(cors(corsOptions));
+
+// Ajouter les en-têtes CORS pour les requêtes OPTIONS (prévol)
+app.options('*', cors(corsOptions));
 
 // Rate limiting and speed limiting
 app.use(globalLimiter);
@@ -71,6 +84,28 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Cookie parsing
 app.use(cookieParser(process.env.COOKIE_SECRET));
+
+// Servir les fichiers statiques du dossier uploads avec les bons en-têtes CORS
+app.use('/uploads', (req, res, next) => {
+  // Définir les en-têtes CORS pour les fichiers statiques
+  res.header('Access-Control-Allow-Origin', corsOptions.origin.join(','));
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Désactiver la politique de même origine pour les images
+  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+  
+  // Servir le fichier statique
+  express.static(path.join(__dirname, 'uploads'), {
+    setHeaders: (res, path) => {
+      // Définir les en-têtes pour le cache
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
+      // Désactiver la politique de sécurité du contenu (CSP) pour les images
+      res.setHeader('Content-Security-Policy', "default-src 'self'");
+    }
+  })(req, res, next);
+});
 
 // Security validation middleware
 app.use(inputValidation);

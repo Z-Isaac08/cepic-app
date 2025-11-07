@@ -19,11 +19,18 @@ import { useTrainingStore } from '../../../stores/trainingStore';
 
 const PricingCard = ({ training }) => {
   const { user } = useAuthStore();
-  const { toggleBookmark } = useTrainingStore();
-  const [isBookmarked, setIsBookmarked] = useState(training.isBookmarked || false);
+  const { toggleBookmark, trainings } = useTrainingStore();
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Récupérer le statut de bookmark depuis le store
+  const isBookmarked = training.isBookmarked || false;
 
-  const handleBookmark = async () => {
+  const handleBookmark = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     if (!user) {
       window.location.href = '/connexion';
       return;
@@ -32,17 +39,18 @@ const PricingCard = ({ training }) => {
     setIsLoading(true);
     try {
       const response = await toggleBookmark(training.id);
-      setIsBookmarked(response.bookmarked);
       
-      // Toast feedback
+      // Le toast est géré dans le store
       if (response.bookmarked) {
         toast.success('Formation ajoutée aux favoris');
       } else {
         toast.info('Formation retirée des favoris');
       }
+      
+      return response;
     } catch (error) {
       console.error('Erreur bookmark:', error);
-      toast.error('Erreur lors de la mise à jour des favoris');
+      toast.error(error.response?.data?.error || 'Erreur lors de la mise à jour des favoris');
     } finally {
       setIsLoading(false);
     }
@@ -71,19 +79,22 @@ const PricingCard = ({ training }) => {
     window.location.href = `/enroll/${training.id}`;
   };
 
-  // Format price (convert from cents to FCFA)
-  const formatPrice = (priceInCents) => {
-    const priceInFCFA = priceInCents / 100;
+  // Format price (en FCFA)
+  const formatPrice = (price) => {
+    if (price === 0 || price === null || price === undefined) {
+      return 'Gratuit';
+    }
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'XOF',
-      minimumFractionDigits: 0
-    }).format(priceInFCFA);
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(price);
   };
 
-  // Calculate discount
-  const discount = training.originalCost && training.originalCost > training.cost
-    ? Math.round(((training.originalCost - training.cost) / training.originalCost) * 100)
+  // Calculate discount (only if originalCost is defined and greater than current price)
+  const discount = training.originalCost && training.originalCost > training.price && training.price > 0
+    ? Math.round(((training.originalCost - training.price) / training.originalCost) * 100)
     : 0;
 
   return (
@@ -96,20 +107,16 @@ const PricingCard = ({ training }) => {
       {/* Price Section */}
       <div className="p-6 bg-gradient-to-br from-primary-50 to-white">
         <div className="flex items-baseline justify-between mb-4">
-          {training.isFree ? (
-            <span className="text-4xl font-bold text-green-600">Gratuit</span>
-          ) : (
-            <div className="flex flex-col">
-              <span className="text-4xl font-bold text-primary-800">
-                {formatPrice(training.cost)}
+          <div className="flex flex-col">
+            <span className={`text-4xl font-bold ${training.price === 0 ? 'text-green-600' : 'text-primary-800'}`}>
+              {formatPrice(training.price)}
+            </span>
+            {training.originalCost && training.originalCost > training.price && training.price > 0 && (
+              <span className="text-lg text-gray-400 line-through">
+                {formatPrice(training.originalCost)}
               </span>
-              {training.originalCost && training.originalCost > training.cost && (
-                <span className="text-lg text-gray-400 line-through">
-                  {formatPrice(training.originalCost)}
-                </span>
-              )}
-            </div>
-          )}
+            )}
+          </div>
           {discount > 0 && (
             <Badge variant="accent" className="text-lg px-3 py-1">
               -{discount}%

@@ -121,13 +121,6 @@ const Footer = () => {
               ))}
             </ul>
 
-            {/* Informations légales */}
-            <div className="space-y-1 mb-6">
-              <p className="text-xs text-gray-500">RCCM: {CEPIC_INFO.rccm}</p>
-              <p className="text-xs text-gray-500">IDU: {CEPIC_INFO.idu}</p>
-              <p className="text-xs text-gray-500">NCC: {CEPIC_INFO.ncc}</p>
-            </div>
-
             {/* Social Links */}
             <div>
               <h4 className="text-sm font-semibold mb-3 text-secondary-500">Suivez-nous</h4>

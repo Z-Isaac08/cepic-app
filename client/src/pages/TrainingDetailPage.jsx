@@ -1,20 +1,24 @@
 // client/src/pages/TrainingDetailPage.jsx
-import { useEffect } from "react";
-import { useParams } from "react-router";
-import { motion } from "framer-motion";
-import { 
-  BookOpen, 
-  Target, 
-  Users, 
+import { motion } from 'framer-motion';
+import {
   Award,
-  CheckCircle 
-} from "lucide-react";
-import TrainingHero from "../components/trainings/detail/TrainingHero";
-import ProgramAccordion from "../components/trainings/detail/ProgramAccordion";
-import ReviewSection from "../components/trainings/detail/ReviewSection";
-import PricingCard from "../components/trainings/detail/PricingCard";
-import { LoadingSpinner } from "../components/ui";
-import { useTrainingStore } from "../stores/trainingStore";
+  BookOpen,
+  Calendar,
+  CheckCircle,
+  Clock,
+  MapPin,
+  Target,
+  User,
+  Users,
+} from 'lucide-react';
+import { useEffect } from 'react';
+import { useParams } from 'react-router';
+import PricingCard from '../components/trainings/detail/PricingCard';
+import ProgramAccordion from '../components/trainings/detail/ProgramAccordion';
+import ReviewSection from '../components/trainings/detail/ReviewSection';
+import TrainingHero from '../components/trainings/detail/TrainingHero';
+import { LoadingSpinner } from '../components/ui';
+import { useTrainingStore } from '../stores/trainingStore';
 
 export default function TrainingDetailPage() {
   const { id } = useParams();
@@ -45,9 +49,7 @@ export default function TrainingDetailPage() {
               animate={{ opacity: 1, y: 0 }}
               className="bg-white rounded-xl shadow-md p-6"
             >
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Description
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
               <div className="prose prose-sm max-w-none text-gray-700">
                 <p>{currentTraining.description}</p>
               </div>
@@ -66,8 +68,8 @@ export default function TrainingDetailPage() {
                   Ce que vous allez apprendre
                 </h2>
                 <div className="grid md:grid-cols-2 gap-3">
-                  {(typeof currentTraining.objectives === 'string' 
-                    ? JSON.parse(currentTraining.objectives) 
+                  {(typeof currentTraining.objectives === 'string'
+                    ? JSON.parse(currentTraining.objectives)
                     : currentTraining.objectives
                   ).map((objective, index) => (
                     <div key={index} className="flex items-start">
@@ -117,8 +119,8 @@ export default function TrainingDetailPage() {
                 className="bg-white rounded-xl shadow-md p-6"
               >
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <Users className="w-6 h-6 mr-2 text-primary-600" />
-                  À qui s'adresse cette formation ?
+                  <Users className="w-6 h-6 mr-2 text-primary-600" />À qui s'adresse cette formation
+                  ?
                 </h2>
                 <p className="text-gray-700">{currentTraining.targetAudience}</p>
               </motion.div>
@@ -141,22 +143,136 @@ export default function TrainingDetailPage() {
                       Certificat de fin de formation
                     </h3>
                     <p className="text-gray-700">
-                      Obtenez un certificat reconnu à l'issue de cette formation. 
-                      Ce certificat atteste de vos nouvelles compétences et peut être 
-                      partagé sur votre profil LinkedIn ou ajouté à votre CV.
+                      Obtenez un certificat reconnu à l'issue de cette formation. Ce certificat
+                      atteste de vos nouvelles compétences et peut être partagé sur votre profil
+                      LinkedIn ou ajouté à votre CV.
                     </p>
                   </div>
                 </div>
               </motion.div>
             )}
 
+            {/* Objectifs de la formation */}
+            <motion.div
+              className="bg-white rounded-lg shadow-sm p-6 mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Objectifs de la formation</h2>
+              <ul className="space-y-2">
+                {currentTraining.objectives?.map((objective, index) => (
+                  <li key={index} className="flex items-start">
+                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
+                    <span className="text-gray-700">{objective}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* Prérequis */}
+            {currentTraining.prerequisites?.length > 0 && (
+              <motion.div
+                className="bg-white rounded-lg shadow-sm p-6 mb-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Prérequis</h2>
+                <ul className="list-disc pl-5 space-y-1 text-gray-700">
+                  {currentTraining.prerequisites.map((req, index) => (
+                    <li key={index}>{req}</li>
+                  ))}
+                </ul>
+              </motion.div>
+            )}
+
             {/* Reviews */}
-            <ReviewSection training={currentTraining} />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              <ReviewSection training={currentTraining} />
+            </motion.div>
           </div>
 
           {/* Right Column - Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-6">
             <PricingCard training={currentTraining} />
+
+            {/* Informations pratiques */}
+            <motion.div
+              className="bg-white rounded-lg shadow-sm p-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Informations pratiques</h3>
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <Clock className="w-5 h-5 text-gray-500 mr-3 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-gray-500">Durée</p>
+                    <p className="font-medium">{currentTraining.duration || 'Non spécifiée'}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <Calendar className="w-5 h-5 text-gray-500 mr-3 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-gray-500">Prochaine session</p>
+                    <p className="font-medium">
+                      {currentTraining.startDate
+                        ? new Date(currentTraining.startDate).toLocaleDateString('fr-FR', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                          })
+                        : 'Dates à venir'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <MapPin className="w-5 h-5 text-gray-500 mr-3 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-gray-500">Lieu</p>
+                    <p className="font-medium">{currentTraining.schedule || 'À définir'}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <User className="w-5 h-5 text-gray-500 mr-3 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-gray-500">Formateur</p>
+                    <p className="font-medium">{currentTraining.instructor || 'À confirmer'}</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Tags */}
+            {currentTraining.tags?.length > 0 && (
+              <motion.div
+                className="bg-white rounded-lg shadow-sm p-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Compétences visées</h3>
+                <div className="flex flex-wrap gap-2">
+                  {currentTraining.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>

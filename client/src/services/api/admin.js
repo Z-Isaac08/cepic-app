@@ -95,13 +95,18 @@ export const toggleUserStatus = async (id) => {
 // ============================================
 
 /**
- * Récupérer toutes les formations (admin)
- * @param {Object} params - Paramètres de filtrage
+ * Récupérer toutes les formations
+ * @param {Object} params - Paramètres de filtrage et de pagination
  * @returns {Promise}
  */
-export const getAllTrainingsAdmin = async (params = {}) => {
-  const response = await api.get('/admin/trainings', { params });
-  return response.data;
+export const getTrainings = async (params = {}) => {
+  try {
+    const response = await api.get('/admin/trainings', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching trainings:', error);
+    throw error;
+  }
 };
 
 /**
@@ -110,8 +115,13 @@ export const getAllTrainingsAdmin = async (params = {}) => {
  * @returns {Promise}
  */
 export const createTraining = async (data) => {
-  const response = await api.post('/trainings', data);
-  return response.data;
+  try {
+    const response = await api.post('/trainings', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating training:', error);
+    throw error;
+  }
 };
 
 /**
@@ -121,8 +131,13 @@ export const createTraining = async (data) => {
  * @returns {Promise}
  */
 export const updateTraining = async (id, data) => {
-  const response = await api.put(`/trainings/${id}`, data);
-  return response.data;
+  try {
+    const response = await api.put(`/admin/trainings/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating training ${id}:`, error);
+    throw error;
+  }
 };
 
 /**
@@ -131,8 +146,13 @@ export const updateTraining = async (id, data) => {
  * @returns {Promise}
  */
 export const deleteTraining = async (id) => {
-  const response = await api.delete(`/trainings/${id}`);
-  return response.data;
+  try {
+    const response = await api.delete(`/admin/trainings/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error deleting training ${id}:`, error);
+    throw error;
+  }
 };
 
 /**
@@ -235,8 +255,9 @@ export const getAllGalleryImages = async () => {
 export const uploadGalleryPhoto = async (formData) => {
   const response = await api.post('/admin/gallery', formData, {
     headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+      'Content-Type': 'multipart/form-data',
+    },
+    withCredentials: true,
   });
   return response.data;
 };
@@ -303,7 +324,7 @@ export default {
   updateUser,
   deleteUser,
   toggleUserStatus,
-  getAllTrainingsAdmin,
+  getTrainings,
   createTraining,
   updateTraining,
   deleteTraining,

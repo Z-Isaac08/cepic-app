@@ -11,8 +11,10 @@ import {
   Settings,
   Users,
   X,
+  Home,
+  ArrowLeft
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router';
 import { useAuthStore } from '../stores/authStore';
 
@@ -22,14 +24,30 @@ import CategoriesManagement from '../components/admin/CategoriesManagement';
 import DashboardOverview from '../components/admin/DashboardOverview';
 import GalleryManagement from '../components/admin/GalleryManagement';
 import MessagesManagement from '../components/admin/MessagesManagement';
-import SettingsPanel from '../components/admin/SettingsPanel';
 import TrainingsManagement from '../components/admin/TrainingsManagement';
 import UsersManagement from '../components/admin/UsersManagement';
 
 const AdminPage = () => {
   const { user, logout } = useAuthStore();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
+
+  // Gérer la visibilité de la barre latérale en fonction de la taille de l'écran
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+
+    // Ajouter l'écouteur d'événement
+    window.addEventListener('resize', handleResize);
+    
+    // Nettoyer l'écouteur d'événement lors du démontage du composant
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Check if user is admin
   if (!user || user.role !== 'ADMIN') {
@@ -43,8 +61,7 @@ const AdminPage = () => {
     { id: 'categories', label: 'Catégories', icon: BookOpen },
     { id: 'gallery', label: 'Galerie', icon: ImageIcon },
     { id: 'messages', label: 'Messages', icon: MessageSquare },
-    { id: 'analytics', label: 'Analytiques', icon: BarChart3 },
-    { id: 'settings', label: 'Paramètres', icon: Settings },
+    { id: 'statistiques', label: 'Statistiques', icon: BarChart3 },
   ];
 
   const renderContent = () => {
@@ -61,10 +78,8 @@ const AdminPage = () => {
         return <GalleryManagement />;
       case 'messages':
         return <MessagesManagement />;
-      case 'analytics':
+      case 'statistiques':
         return <AnalyticsPanel />;
-      case 'settings':
-        return <SettingsPanel />;
       default:
         return <DashboardOverview />;
     }
@@ -83,6 +98,14 @@ const AdminPage = () => {
         animate={{ x: sidebarOpen ? 0 : -300 }}
         className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-primary-900 to-primary-800 text-white shadow-xl transition-transform duration-300`}
       >
+        {/* Bouton de retour au site */}
+        <a
+          href="/"
+          className="flex items-center px-6 py-4 text-sm font-medium text-white hover:bg-primary-700 transition-colors duration-200"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          Retour au site
+        </a>
         {/* Logo */}
         <div className="p-6 border-b border-primary-700">
           <div className="flex items-center space-x-3">

@@ -44,15 +44,17 @@ const LoginPage = () => {
           className="max-w-md w-full space-y-8"
         >
           {/* Logo */}
-          <div className="text-center">
-            <Link to="/" className="inline-flex items-center space-x-2">
-              <div className="w-12 h-12 bg-primary-800 rounded-lg flex items-center justify-center">
-                <GraduationCap className="w-7 h-7 text-secondary-500" />
-              </div>
-              <div className="text-left">
-                <div className="text-2xl font-bold text-primary-800">CEPIC</div>
-                <div className="text-xs text-gray-500">
-                  Formation professionnelle
+          <div className="text-center mb-8">
+            <Link to="/" className="inline-flex flex-col items-center">
+              <img 
+                src="/logo_cepic.jpg" 
+                alt="Logo CEPIC" 
+                className="w-32 h-32 object-contain mb-4 rounded-full border-2 border-primary-100 shadow-md"
+              />
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary-800">{CEPIC_INFO.shortName}</div>
+                <div className="text-sm text-gray-500">
+                  {CEPIC_INFO.fullName}
                 </div>
               </div>
             </Link>

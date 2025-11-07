@@ -1,41 +1,29 @@
 import { motion } from 'framer-motion';
-import { 
-  Award, 
-  Users, 
-  Lightbulb, 
-  Heart, 
-  Target,
-  TrendingUp,
-  CheckCircle,
-  Building2
-} from 'lucide-react';
+import { Award, CheckCircle, Heart, Lightbulb, Target, TrendingUp, Users } from 'lucide-react';
 import { PageHeader } from '../components/ui';
-import { CEPIC_INFO, VALUES, ACHIEVEMENTS } from '../config/cepic';
+import { ACHIEVEMENTS, CEPIC_INFO, VALUES } from '../config/cepic';
 
 const AboutPage = () => {
   const stats = [
-    { label: 'Années d\'expérience', value: '2+', icon: TrendingUp },
+    { label: "Années d'expérience", value: '2+', icon: TrendingUp },
     { label: 'Formations réalisées', value: '50+', icon: Award },
     { label: 'Participants formés', value: '200+', icon: Users },
-    { label: 'Taux de satisfaction', value: '95%', icon: Heart }
+    { label: 'Taux de satisfaction', value: '95%', icon: Heart },
   ];
 
   const iconMap = {
     Award,
     Users,
     Lightbulb,
-    Heart
+    Heart,
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <PageHeader 
+      <PageHeader
         title="À propos de CEPIC"
         subtitle={CEPIC_INFO.fullName}
-        breadcrumbs={[
-          { label: 'Accueil', href: '/' },
-          { label: 'À propos' }
-        ]}
+        breadcrumbs={[{ label: 'Accueil', href: '/' }, { label: 'À propos' }]}
       />
 
       {/* Mission Section */}
@@ -46,16 +34,13 @@ const AboutPage = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Notre Mission
-            </h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Notre Mission</h2>
             <div className="w-20 h-1 bg-gradient-to-r from-primary-600 to-secondary-500 mx-auto mb-6"></div>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-              CEPIC est un cabinet spécialisé dans la formation professionnelle, 
-              l'accompagnement des entreprises et l'intermédiation commerciale. 
-              Nous nous engageons à fournir des formations de qualité qui répondent 
-              aux besoins du marché et contribuent au développement des compétences 
-              en Côte d'Ivoire et en Afrique.
+              CEPIC est un cabinet spécialisé dans la formation professionnelle, l'accompagnement
+              des entreprises et l'intermédiation commerciale. Nous nous engageons à fournir des
+              formations de qualité qui répondent aux besoins du marché et contribuent au
+              développement des compétences en Côte d'Ivoire et en Afrique.
             </p>
           </motion.div>
 
@@ -72,9 +57,7 @@ const AboutPage = () => {
                   className="bg-gradient-to-br from-primary-50 to-white p-6 rounded-xl text-center"
                 >
                   <Icon className="w-8 h-8 text-primary-600 mx-auto mb-3" />
-                  <div className="text-3xl font-bold text-gray-900 mb-1">
-                    {stat.value}
-                  </div>
+                  <div className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</div>
                   <div className="text-sm text-gray-600">{stat.label}</div>
                 </motion.div>
               );
@@ -91,9 +74,7 @@ const AboutPage = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Nos Valeurs
-            </h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Nos Valeurs</h2>
             <div className="w-20 h-1 bg-gradient-to-r from-primary-600 to-secondary-500 mx-auto"></div>
           </motion.div>
 
@@ -111,12 +92,8 @@ const AboutPage = () => {
                   <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
                     <Icon className="w-6 h-6 text-primary-600" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    {value.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    {value.description}
-                  </p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{value.title}</h3>
+                  <p className="text-gray-600 text-sm">{value.description}</p>
                 </motion.div>
               );
             })}
@@ -132,9 +109,7 @@ const AboutPage = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Nos Réalisations
-            </h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Nos Réalisations</h2>
             <div className="w-20 h-1 bg-gradient-to-r from-primary-600 to-secondary-500 mx-auto mb-6"></div>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Quelques exemples de nos formations et prestations réalisées
@@ -155,23 +130,13 @@ const AboutPage = () => {
                     <CheckCircle className="w-6 h-6 text-green-600" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
-                      {achievement.title}
-                    </h3>
-                    <p className="text-sm text-gray-700 mb-3">
-                      {achievement.description}
-                    </p>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">{achievement.title}</h3>
+                    <p className="text-sm text-gray-700 mb-3">{achievement.description}</p>
                     <div className="flex flex-wrap gap-2 text-xs text-gray-600">
-                      <span className="bg-white px-3 py-1 rounded-full">
-                        {achievement.period}
-                      </span>
-                      <span className="bg-white px-3 py-1 rounded-full">
-                        {achievement.client}
-                      </span>
+                      <span className="bg-white px-3 py-1 rounded-full">{achievement.period}</span>
+                      <span className="bg-white px-3 py-1 rounded-full">{achievement.client}</span>
                       {achievement.cost && (
-                        <span className="bg-white px-3 py-1 rounded-full">
-                          {achievement.cost}
-                        </span>
+                        <span className="bg-white px-3 py-1 rounded-full">{achievement.cost}</span>
                       )}
                     </div>
                   </div>
@@ -186,27 +151,7 @@ const AboutPage = () => {
       <section className="py-16 bg-gradient-to-br from-primary-900 to-primary-800 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-            >
-              <div className="flex items-center mb-6">
-                <Building2 className="w-8 h-8 mr-3" />
-                <h2 className="text-2xl font-bold">Informations Légales</h2>
-              </div>
-              <div className="space-y-3 text-primary-100">
-                <p><span className="font-semibold text-white">Forme juridique:</span> {CEPIC_INFO.legalForm}</p>
-                <p><span className="font-semibold text-white">RCCM:</span> {CEPIC_INFO.rccm}</p>
-                <p><span className="font-semibold text-white">IDU:</span> {CEPIC_INFO.idu}</p>
-                <p><span className="font-semibold text-white">NCC:</span> {CEPIC_INFO.ncc}</p>
-                <p><span className="font-semibold text-white">Capital:</span> {CEPIC_INFO.capital}</p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-            >
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
               <div className="flex items-center mb-6">
                 <Target className="w-8 h-8 mr-3" />
                 <h2 className="text-2xl font-bold">Direction</h2>
