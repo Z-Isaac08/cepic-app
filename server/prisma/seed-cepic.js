@@ -349,8 +349,10 @@ async function main() {
     const category = createdCategories[training.categorySlug];
     const { categorySlug, ...trainingData } = training;
 
-    await prisma.training.create({
-      data: {
+    await prisma.training.upsert({
+      where: { slug: training.slug },
+      update: {},
+      create: {
         ...trainingData,
         categoryId: category.id,
         createdBy: admin.id,
@@ -396,41 +398,50 @@ async function main() {
     },
   ];
 
-  for (const photo of galleryPhotos) {
-    await prisma.galleryPhoto.create({
-      data: photo,
-    });
+  // Only create gallery photos if none exist
+  const existingPhotos = await prisma.galleryPhoto.count();
+  if (existingPhotos === 0) {
+    for (const photo of galleryPhotos) {
+      await prisma.galleryPhoto.create({
+        data: photo,
+      });
+    }
+    console.log('✅ 4 photos de galerie créées');
+  } else {
+    console.log('⏭️  Photos de galerie déjà existantes, ignorées');
   }
 
-  console.log('✅ 4 photos de galerie créées');
+  // 5. Créer quelques messages de contact pour tester (only if none exist)
+  const existingMessages = await prisma.contactMessage.count();
+  if (existingMessages === 0) {
+    const contactMessages = [
+      {
+        name: 'Kouassi Michel',
+        email: 'michel@example.com',
+        phone: '+225 07 00 00 00 00',
+        subject: "Demande d'information sur la formation Agile",
+        message:
+          "Bonjour, je souhaite avoir plus d'informations sur la formation Agile et Scrum. Quelles sont les dates disponibles ?",
+        status: 'NEW',
+      },
+      {
+        name: 'Adjoua Prisca',
+        email: 'prisca@example.com',
+        subject: 'Inscription formation SPSS',
+        message: "Je souhaite m'inscrire à la prochaine session SPSS. Comment procéder ?",
+        status: 'READ',
+      },
+    ];
 
-  // 5. Créer quelques messages de contact pour tester
-  const contactMessages = [
-    {
-      name: 'Kouassi Michel',
-      email: 'michel@example.com',
-      phone: '+225 07 00 00 00 00',
-      subject: "Demande d'information sur la formation Agile",
-      message:
-        "Bonjour, je souhaite avoir plus d'informations sur la formation Agile et Scrum. Quelles sont les dates disponibles ?",
-      status: 'NEW',
-    },
-    {
-      name: 'Adjoua Prisca',
-      email: 'prisca@example.com',
-      subject: 'Inscription formation SPSS',
-      message: "Je souhaite m'inscrire à la prochaine session SPSS. Comment procéder ?",
-      status: 'READ',
-    },
-  ];
-
-  for (const message of contactMessages) {
-    await prisma.contactMessage.create({
-      data: message,
-    });
+    for (const message of contactMessages) {
+      await prisma.contactMessage.create({
+        data: message,
+      });
+    }
+    console.log('✅ 2 messages de contact créés');
+  } else {
+    console.log('⏭️  Messages de contact déjà existants, ignorés');
   }
-
-  console.log('✅ 2 messages de contact créés');
 
   console.log('\n🎉 Seeding terminé avec succès!');
   console.log('\n📊 Résumé:');
