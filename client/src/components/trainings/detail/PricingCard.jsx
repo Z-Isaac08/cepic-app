@@ -96,11 +96,11 @@ const PricingCard = ({ training }) => {
       className="bg-white rounded-xl shadow-lg overflow-hidden"
     >
       {/* Price Section */}
-      <div className="p-6 bg-gradient-to-br from-primary-50 to-white">
-        <div className="flex items-baseline justify-between mb-4">
+      <div className="p-4 sm:p-6 bg-gradient-to-br from-primary-50 to-white">
+        <div className="flex items-baseline justify-between gap-2 mb-3 sm:mb-4">
           <div className="flex flex-col">
             <span
-              className={`text-4xl font-bold ${
+              className={`text-2xl sm:text-3xl lg:text-4xl font-bold ${
                 training.price === 0 ? 'text-green-600' : 'text-primary-800'
               }`}
             >
@@ -109,21 +109,21 @@ const PricingCard = ({ training }) => {
             {training.originalCost &&
               training.originalCost > training.price &&
               training.price > 0 && (
-                <span className="text-lg text-gray-400 line-through">
+                <span className="text-sm sm:text-base lg:text-lg text-gray-400 line-through">
                   {formatPrice(training.originalCost)}
                 </span>
               )}
           </div>
           {discount > 0 && (
-            <Badge variant="accent" className="text-lg px-3 py-1">
+            <Badge variant="accent" className="text-sm sm:text-base lg:text-lg px-2 sm:px-3 py-1 flex-shrink-0">
               -{discount}%
             </Badge>
           )}
         </div>
 
         {/* CTA Buttons */}
-        <div className="space-y-3">
-          <Button size="lg" className="w-full" onClick={handleEnroll}>
+        <div className="space-y-2 sm:space-y-3">
+          <Button size="lg" className="w-full min-h-[48px]" onClick={handleEnroll}>
             S'inscrire maintenant
           </Button>
 
@@ -133,71 +133,72 @@ const PricingCard = ({ training }) => {
               size="sm"
               onClick={handleBookmark}
               disabled={isLoading}
-              className="w-full"
+              className="w-full min-h-[44px] text-xs sm:text-sm"
             >
               {isBookmarked ? (
-                <BookmarkCheck className="w-4 h-4 mr-1" />
+                <BookmarkCheck className="w-4 h-4 mr-1 flex-shrink-0" />
               ) : (
-                <Bookmark className="w-4 h-4 mr-1" />
+                <Bookmark className="w-4 h-4 mr-1 flex-shrink-0" />
               )}
-              {isBookmarked ? 'Sauvegardé' : 'Sauvegarder'}
+              <span className="truncate">{isBookmarked ? 'Sauvegardé' : 'Sauvegarder'}</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={handleShare} className="w-full">
-              <Share2 className="w-4 h-4 mr-1" />
-              Partager
+            <Button variant="outline" size="sm" onClick={handleShare} className="w-full min-h-[44px] text-xs sm:text-sm">
+              <Share2 className="w-4 h-4 mr-1 flex-shrink-0" />
+              <span>Partager</span>
             </Button>
           </div>
         </div>
       </div>
 
       {/* Features */}
-      <div className="p-6 bg-white border-t border-gray-100">
-        <h4 className="text-sm font-medium text-gray-900 mb-4">Ce qui est inclus :</h4>
-        <ul className="space-y-3">
+      <div className="p-4 sm:p-6 bg-white border-t border-gray-100">
+        <h4 className="text-xs sm:text-sm font-medium text-gray-900 mb-3 sm:mb-4">Ce qui est inclus :</h4>
+        <ul className="space-y-2 sm:space-y-3">
           <li className="flex items-start">
-            <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
-            <span className="text-sm text-gray-700">Accès illimité au contenu</span>
+            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mr-2 sm:mr-3 flex-shrink-0 mt-0.5" />
+            <span className="text-xs sm:text-sm text-gray-700">Accès illimité au contenu</span>
           </li>
           <li className="flex items-start">
-            <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
-            <span className="text-sm text-gray-700">Certificat de fin de formation</span>
+            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mr-2 sm:mr-3 flex-shrink-0 mt-0.5" />
+            <span className="text-xs sm:text-sm text-gray-700">Certificat de fin de formation</span>
           </li>
           <li className="flex items-start">
-            <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
-            <span className="text-sm text-gray-700">Support et assistance</span>
+            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mr-2 sm:mr-3 flex-shrink-0 mt-0.5" />
+            <span className="text-xs sm:text-sm text-gray-700">Support et assistance</span>
           </li>
           {training.hasDownloadableResources && (
             <li className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
-              <span className="text-sm text-gray-700">Ressources téléchargeables</span>
+              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mr-2 sm:mr-3 flex-shrink-0 mt-0.5" />
+              <span className="text-xs sm:text-sm text-gray-700">Ressources téléchargeables</span>
             </li>
           )}
           {training.deliveryMode === 'ONLINE' && (
             <li className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
-              <span className="text-sm text-gray-700">Accessible sur mobile et tablette</span>
+              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mr-2 sm:mr-3 flex-shrink-0 mt-0.5" />
+              <span className="text-xs sm:text-sm text-gray-700">Accessible sur mobile et tablette</span>
             </li>
           )}
         </ul>
       </div>
 
       {/* Quick Info */}
-      <div className="p-6 bg-gray-50 border-t border-gray-200">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-sm">
+      <div className="p-4 sm:p-6 bg-gray-50 border-t border-gray-200">
+        <div className="space-y-2 sm:space-y-3">
+          <div className="flex items-center justify-between text-xs sm:text-sm">
             <span className="text-gray-600 flex items-center">
-              <Users className="w-4 h-4 mr-2" />
+              <Users className="w-4 h-4 mr-2 flex-shrink-0" />
               Participants
             </span>
             <span className="font-semibold text-gray-900">
               {training._count?.enrollments_rel || 0}
             </span>
           </div>
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-xs sm:text-sm">
+            <span className="text-gray-600">Niveau</span>
             <span className="font-semibold text-gray-900">{training.level}</span>
           </div>
           {training.language && (
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-xs sm:text-sm">
               <span className="text-gray-600">Langue</span>
               <span className="font-semibold text-gray-900">{training.language}</span>
             </div>
@@ -207,11 +208,11 @@ const PricingCard = ({ training }) => {
 
       {/* Download Syllabus */}
       {training.syllabus && (
-        <div className="p-6 border-t border-gray-200">
+        <div className="p-4 sm:p-6 border-t border-gray-200">
           <Button
             variant="outline"
             size="sm"
-            className="w-full"
+            className="w-full min-h-[44px]"
             onClick={() => window.open(training.syllabus, '_blank')}
           >
             <Download className="w-4 h-4 mr-2" />

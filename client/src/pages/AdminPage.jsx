@@ -99,9 +99,9 @@ const AdminPage = () => {
         {/* Bouton de retour au site */}
         <a
           href="/"
-          className="flex items-center px-6 py-4 text-sm font-medium text-white hover:bg-primary-700 transition-colors duration-200 flex-shrink-0"
+          className="flex items-center px-4 sm:px-6 py-3 sm:py-4 text-sm font-medium text-white hover:bg-primary-700 transition-colors duration-200 flex-shrink-0 min-h-[48px]"
         >
-          <ArrowLeft className="w-5 h-5 mr-2" />
+          <ArrowLeft className="w-5 h-5 mr-2 flex-shrink-0" />
           Retour au site
         </a>
 
@@ -117,7 +117,7 @@ const AdminPage = () => {
         </div>
 
         {/* Menu Items - Scrollable */}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 p-3 sm:p-4 space-y-1.5 sm:space-y-2 overflow-y-auto">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -125,25 +125,28 @@ const AdminPage = () => {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
+                onClick={() => {
+                  setActiveTab(item.id);
+                  if (window.innerWidth < 1024) setSidebarOpen(false);
+                }}
+                className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-3 rounded-lg transition-all min-h-[48px] ${
                   isActive
                     ? 'bg-secondary-500 text-primary-900 shadow-lg'
                     : 'text-primary-100 hover:bg-primary-700'
                 }`}
               >
-                <Icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                <span className="font-medium text-sm sm:text-base">{item.label}</span>
               </button>
             );
           })}
         </nav>
 
         {/* User Info & Logout - Fixed at bottom */}
-        <div className="p-4 border-t border-primary-700 bg-primary-900/50 flex-shrink-0">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-primary-700 rounded-full flex items-center justify-center">
-              <span className="text-sm font-bold">
+        <div className="p-3 sm:p-4 border-t border-primary-700 bg-primary-900/50 flex-shrink-0">
+          <div className="flex items-center space-x-3 mb-2 sm:mb-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary-700 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-xs sm:text-sm font-bold">
                 {user.firstName?.[0]}
                 {user.lastName?.[0]}
               </span>
@@ -157,7 +160,7 @@ const AdminPage = () => {
           </div>
           <button
             onClick={handleLogout}
-            className="w-full inline-flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+            className="w-full inline-flex items-center justify-center space-x-2 px-4 py-2.5 sm:py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors min-h-[44px]"
           >
             <LogOut className="w-4 h-4" />
             <span className="text-sm font-medium">Déconnexion</span>
@@ -169,11 +172,12 @@ const AdminPage = () => {
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Top Bar */}
         <header className="bg-white shadow-sm sticky top-0 z-40">
-          <div className="flex items-center justify-between px-6 py-4">
-            <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4">
+            <div className="flex items-center space-x-3 sm:space-x-4">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="lg:hidden p-2.5 hover:bg-gray-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label="Toggle menu"
               >
                 {sidebarOpen ? (
                   <X className="w-6 h-6 text-gray-600" />
@@ -182,24 +186,24 @@ const AdminPage = () => {
                 )}
               </button>
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
                   {menuItems.find((item) => item.id === activeTab)?.label}
                 </h2>
-                <p className="text-sm text-gray-500">Gérez votre plateforme de formation</p>
+                <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">Gérez votre plateforme de formation</p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
-              <div className="hidden md:flex items-center space-x-2 px-4 py-2 bg-primary-50 rounded-lg">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <div className="flex items-center space-x-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-primary-50 rounded-lg">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm text-primary-800 font-medium">En ligne</span>
+                <span className="text-xs sm:text-sm text-primary-800 font-medium hidden sm:inline">En ligne</span>
               </div>
             </div>
           </div>
         </header>
 
         {/* Content Area */}
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-auto">
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, y: 20 }}

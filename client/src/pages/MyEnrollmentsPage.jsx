@@ -113,9 +113,9 @@ const MyEnrollmentsPage = () => {
         breadcrumbs={[{ label: 'Accueil', href: '/' }, { label: 'Mes Inscriptions' }]}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         {/* Filter Tabs */}
-        <div className="flex flex-wrap gap-3 mb-8">
+        <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
           {[
             { id: 'all', label: 'Toutes' },
             { id: 'active', label: 'En cours' },
@@ -125,14 +125,14 @@ const MyEnrollmentsPage = () => {
             <button
               key={tab.id}
               onClick={() => setFilter(tab.id)}
-              className={`px-6 py-2 rounded-lg font-medium transition-all ${
+              className={`px-4 sm:px-6 py-2.5 sm:py-2 rounded-lg font-medium transition-all text-sm sm:text-base min-h-[44px] ${
                 filter === tab.id
                   ? 'bg-primary-800 text-white shadow-lg'
                   : 'bg-white text-gray-700 hover:bg-gray-100'
               }`}
             >
               {tab.label}
-              <span className="ml-2 text-sm">
+              <span className="ml-1.5 sm:ml-2 text-xs sm:text-sm">
                 (
                 {
                   enrollments.filter((e) => {
@@ -173,59 +173,59 @@ const MyEnrollmentsPage = () => {
             }
           />
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {filteredEnrollments.map((enrollment, index) => (
               <motion.div
                 key={enrollment.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                className="bg-white rounded-lg sm:rounded-xl shadow-sm sm:shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     {/* Training Info */}
                     <div className="flex-1">
-                      <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-start justify-between mb-2 sm:mb-3">
                         <div>
                           <Link
                             to={`/formations/${enrollment.training.id}`}
-                            className="text-xl font-bold text-gray-900 hover:text-primary-800 transition-colors"
+                            className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 hover:text-primary-800 transition-colors line-clamp-2"
                           >
                             {enrollment.training.title}
                           </Link>
-                          <p className="text-sm text-gray-600 mt-1">
+                          <p className="text-xs sm:text-sm text-gray-600 mt-1">
                             {enrollment.training.category?.name}
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                      <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
                         <div className="flex items-center">
-                          <Calendar className="w-4 h-4 mr-2" />
-                          Inscrit le {formatDate(enrollment.enrolledAt)}
+                          <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 flex-shrink-0" />
+                          <span className="truncate">Inscrit le {formatDate(enrollment.enrolledAt)}</span>
                         </div>
                         <div className="flex items-center">
-                          <Clock className="w-4 h-4 mr-2" />
+                          <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 flex-shrink-0" />
                           {enrollment.training.duration}{' '}
                           {enrollment.training.durationUnit === 'hours' ? 'heures' : 'jours'}
                         </div>
                         <div className="flex items-center">
-                          <CreditCard className="w-4 h-4 mr-2" />
+                          <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 flex-shrink-0" />
                           {formatPrice(enrollment.amount)}
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-2 mt-4">
+                      <div className="flex flex-wrap gap-2 mt-3 sm:mt-4">
                         {getStatusBadge(enrollment.status)}
                         {getPaymentBadge(enrollment.paymentStatus)}
                       </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex flex-col gap-2 lg:w-48">
-                      <Link to={`/formations/${enrollment.training.id}`}>
-                        <Button variant="outline" size="sm" className="w-full">
+                    <div className="flex flex-row sm:flex-col gap-2 lg:w-48 mt-2 sm:mt-0">
+                      <Link to={`/formations/${enrollment.training.id}`} className="flex-1 sm:flex-none">
+                        <Button variant="outline" size="sm" className="w-full min-h-[44px]">
                           Voir la formation
                         </Button>
                       </Link>
@@ -234,7 +234,7 @@ const MyEnrollmentsPage = () => {
                         <Button
                           variant="primary"
                           size="sm"
-                          className="w-full"
+                          className="flex-1 sm:flex-none w-full min-h-[44px]"
                           onClick={() => window.open(enrollment.certificateUrl, '_blank')}
                         >
                           <Download className="w-4 h-4 mr-2" />
@@ -247,7 +247,7 @@ const MyEnrollmentsPage = () => {
                           <Button
                             variant="primary"
                             size="sm"
-                            className="w-full"
+                            className="flex-1 sm:flex-none w-full min-h-[44px]"
                             onClick={() => navigate(`/rejoindre/${enrollment.training.id}`)}
                           >
                             Payer maintenant
@@ -258,12 +258,12 @@ const MyEnrollmentsPage = () => {
 
                   {/* Progress Bar (for active enrollments) */}
                   {enrollment.status === 'ACTIVE' && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                    <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
+                      <div className="flex items-center justify-between text-xs sm:text-sm text-gray-600 mb-2">
                         <span>Progression</span>
                         <span className="font-semibold">75%</span>
                       </div>
-                      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-primary-600 to-secondary-500 transition-all duration-300"
                           style={{ width: '75%' }}

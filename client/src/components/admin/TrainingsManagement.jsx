@@ -315,19 +315,19 @@ const TrainingsManagement = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <GraduationCap className="w-8 h-8 text-primary-800" />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          <GraduationCap className="w-6 h-6 sm:w-8 sm:h-8 text-primary-800 flex-shrink-0" />
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Gestion des Formations</h2>
-            <p className="text-sm text-gray-600">{filteredTrainings.length} formation(s)</p>
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Gestion des Formations</h2>
+            <p className="text-xs sm:text-sm text-gray-600">{filteredTrainings.length} formation(s)</p>
           </div>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="flex items-center space-x-2 px-4 py-2 bg-primary-800 text-white rounded-lg hover:bg-primary-900 transition-colors"
+          className="flex items-center justify-center space-x-2 px-4 py-2.5 sm:py-2 bg-primary-800 text-white rounded-lg hover:bg-primary-900 transition-colors min-h-[44px] text-sm sm:text-base"
         >
           <Plus className="w-5 h-5" />
           <span>Nouvelle formation</span>
@@ -335,8 +335,8 @@ const TrainingsManagement = () => {
       </div>
 
       {/* Search & Filters */}
-      <div className="bg-white rounded-xl shadow-md p-4">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="bg-white rounded-lg sm:rounded-xl shadow-sm sm:shadow-md p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
@@ -344,13 +344,13 @@ const TrainingsManagement = () => {
               placeholder="Rechercher une formation..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="w-full pl-10 pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-base min-h-[44px]"
             />
           </div>
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            className="px-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-base min-h-[44px]"
           >
             <option key="all" value="all">
               Toutes les catégories
@@ -366,7 +366,7 @@ const TrainingsManagement = () => {
       </div>
 
       {/* Trainings Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {filteredTrainings.map((training) => (
           <motion.div
             key={training.id}
@@ -375,7 +375,7 @@ const TrainingsManagement = () => {
             className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
           >
             {/* Image */}
-            <div className="relative h-48 bg-gray-200">
+            <div className="relative h-36 sm:h-44 lg:h-48 bg-gray-200">
               {training.coverImage ? (
                 <img
                   src={training.coverImage}
@@ -384,12 +384,12 @@ const TrainingsManagement = () => {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <GraduationCap className="w-16 h-16 text-gray-400" />
+                  <GraduationCap className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400" />
                 </div>
               )}
-              <div className="absolute top-2 right-2 flex gap-2">
+              <div className="absolute top-2 right-2 flex gap-1.5 sm:gap-2">
                 {/* Badge niveau */}
-                <span className="px-2 py-1 bg-white/90 text-xs font-medium rounded">
+                <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-white/90 text-[10px] sm:text-xs font-medium rounded">
                   {training.level === 'DEBUTANT' && 'Débutant'}
                   {training.level === 'INTERMEDIAIRE' && 'Intermédiaire'}
                   {training.level === 'AVANCE' && 'Avancé'}
@@ -397,7 +397,7 @@ const TrainingsManagement = () => {
                 </span>
                 <button
                   onClick={() => handleTogglePublish(training.id, training.isPublished)}
-                  className={`p-2 rounded-full ${
+                  className={`p-1.5 sm:p-2 rounded-full min-w-[32px] min-h-[32px] sm:min-w-[36px] sm:min-h-[36px] flex items-center justify-center ${
                     training.isPublished
                       ? 'bg-green-500 hover:bg-green-600'
                       : 'bg-gray-500 hover:bg-gray-600'
@@ -405,25 +405,25 @@ const TrainingsManagement = () => {
                   title={training.isPublished ? 'Publié' : 'Non publié'}
                 >
                   {training.isPublished ? (
-                    <Eye className="w-4 h-4" />
+                    <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   ) : (
-                    <EyeOff className="w-4 h-4" />
+                    <EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   )}
                 </button>
               </div>
             </div>
 
             {/* Content */}
-            <div className="p-4">
-              <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+            <div className="p-3 sm:p-4">
+              <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 mb-1.5 sm:mb-2 line-clamp-2">
                 {training.title}
               </h3>
-              <p className="text-sm text-gray-600 mb-3 line-clamp-2">{training.description}</p>
+              <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 line-clamp-2">{training.description}</p>
 
               {/* Stats */}
-              <div className="flex items-center gap-4 mb-3 text-sm text-gray-500">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-2 sm:mb-3 text-xs sm:text-sm text-gray-500">
                 <div className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
+                  <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span>{training.capacity || 'N/A'}</span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -432,35 +432,35 @@ const TrainingsManagement = () => {
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
+                  <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span>{training.duration}</span>
                 </div>
               </div>
 
               {/* Category */}
               {training.category && (
-                <div className="mb-3">
-                  <span className="inline-block px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
+                <div className="mb-2 sm:mb-3">
+                  <span className="inline-block px-2 py-0.5 sm:py-1 bg-primary-100 text-primary-800 text-[10px] sm:text-xs rounded-full">
                     {training.category.name}
                   </span>
                 </div>
               )}
 
               {/* Actions */}
-              <div className="flex items-center gap-2 pt-3 border-t border-gray-200">
+              <div className="flex items-center gap-2 pt-2 sm:pt-3 border-t border-gray-200">
                 <button
                   onClick={() => handleOpenModal(training)}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors min-h-[40px]"
                 >
-                  <Edit className="w-4 h-4" />
-                  <span className="text-sm font-medium">Éditer</span>
+                  <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span className="text-xs sm:text-sm font-medium">Éditer</span>
                 </button>
                 <button
                   onClick={() => handleDelete(training.id)}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors min-h-[40px]"
                 >
-                  <Trash2 className="w-4 h-4" />
-                  <span className="text-sm font-medium">Supprimer</span>
+                  <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span className="text-xs sm:text-sm font-medium">Supprimer</span>
                 </button>
               </div>
             </div>
@@ -469,9 +469,9 @@ const TrainingsManagement = () => {
       </div>
 
       {filteredTrainings.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-xl shadow-md">
-          <GraduationCap className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">Aucune formation trouvée</p>
+        <div className="text-center py-8 sm:py-12 bg-white rounded-lg sm:rounded-xl shadow-sm sm:shadow-md">
+          <GraduationCap className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-3 sm:mb-4" />
+          <p className="text-sm sm:text-base text-gray-500">Aucune formation trouvée</p>
         </div>
       )}
 
@@ -482,7 +482,7 @@ const TrainingsManagement = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 sm:p-4"
             onClick={handleCloseModal}
             aria-hidden="true"
           >
@@ -492,7 +492,7 @@ const TrainingsManagement = () => {
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9, y: 20 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+                className="bg-white rounded-lg sm:rounded-xl shadow-xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="modal-title"
@@ -503,13 +503,13 @@ const TrainingsManagement = () => {
                 }}
               >
                 {/* Modal Header */}
-                <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-                  <h3 id="modal-title" className="text-xl font-bold text-gray-900">
+                <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
+                  <h3 id="modal-title" className="text-base sm:text-lg lg:text-xl font-bold text-gray-900">
                     {editingTraining ? 'Éditer la formation' : 'Nouvelle formation'}
                   </h3>
                   <button
                     onClick={handleCloseModal}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="p-2.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                     aria-label="Fermer la fenêtre"
                   >
                     <X className="w-5 h-5" aria-hidden="true" />
@@ -517,7 +517,7 @@ const TrainingsManagement = () => {
                 </div>
 
               {/* Modal Body */}
-              <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                 {/* Section 1: Informations de base */}
                 <div className="space-y-4">
                   <h4 className="font-semibold text-gray-900 flex items-center gap-2">
@@ -864,17 +864,17 @@ const TrainingsManagement = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-3 pt-6 border-t">
+                <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 pt-4 sm:pt-6 border-t">
                   <button
                     type="button"
                     onClick={handleCloseModal}
-                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                    className="w-full sm:flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium min-h-[48px] order-2 sm:order-1"
                   >
                     Annuler
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-3 bg-primary-800 text-white rounded-lg hover:bg-primary-900 transition-colors font-medium"
+                    className="w-full sm:flex-1 px-4 py-3 bg-primary-800 text-white rounded-lg hover:bg-primary-900 transition-colors font-medium min-h-[48px] order-1 sm:order-2"
                   >
                     {editingTraining ? 'Mettre à jour' : 'Créer la formation'}
                   </button>

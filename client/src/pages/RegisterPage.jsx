@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Check, Eye, EyeOff, Lock, Mail, Phone, Shield, User } from 'lucide-react';
+import { ArrowLeft, Check, Eye, EyeOff, Lock, Mail, Phone, Shield, User } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -114,10 +114,26 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Image/Branding */}
+    <div className="min-h-screen flex flex-col lg:flex-row">
+      {/* Mobile Header with Logo and Welcome Message */}
+      <div className="lg:hidden bg-gradient-to-br from-primary-900 via-primary-800 to-secondary-600 py-8 px-4 text-center relative">
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-4 left-4 p-2 text-white/80 hover:text-white transition-colors"
+          aria-label="Retour"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+        <Link to="/" className="inline-flex items-center justify-center space-x-2 mb-4">
+          <img src="/logo.jpg" alt="CEPIC" className="w-16 h-16 rounded-full border-2 border-secondary-500 shadow-lg" />
+        </Link>
+        <h1 className="text-xl font-bold text-white mb-2">Rejoignez {CEPIC_INFO.shortName}</h1>
+        <p className="text-sm text-primary-100 max-w-xs mx-auto">Commencez votre parcours de formation professionnelle</p>
+      </div>
+
+      {/* Left Side - Image/Branding (Desktop only) */}
       <div className="hidden lg:block lg:flex-1 relative bg-gradient-to-br from-primary-900 via-primary-800 to-secondary-600">
-        <div className="absolute inset-0 flex items-center justify-center p-12">
+        <div className="absolute inset-0 flex items-center justify-center p-8 xl:p-12">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -127,30 +143,30 @@ const RegisterPage = () => {
             <img
               src="/logo.jpg"
               alt="Logo CEPIC"
-              className="w-32 h-32 mx-auto mb-6 rounded-full border-4 border-secondary-500 shadow-lg"
+              className="w-24 xl:w-32 h-24 xl:h-32 mx-auto mb-4 xl:mb-6 rounded-full border-4 border-secondary-500 shadow-lg"
             />
-            <h1 className="text-4xl font-bold mb-4">Rejoignez {CEPIC_INFO.shortName}</h1>
-            <p className="text-xl text-primary-100 mb-8 max-w-md mx-auto">
+            <h1 className="text-3xl xl:text-4xl font-bold mb-3 xl:mb-4">Rejoignez {CEPIC_INFO.shortName}</h1>
+            <p className="text-lg xl:text-xl text-primary-100 mb-6 xl:mb-8 max-w-md mx-auto">
               Commencez votre parcours de formation professionnelle dès aujourd'hui
             </p>
-            <div className="space-y-4 text-left max-w-md mx-auto">
+            <div className="space-y-3 xl:space-y-4 text-left max-w-md mx-auto">
               <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-1">
+                <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-0.5">
                   <Check className="w-4 h-4 text-primary-900" />
                 </div>
-                <p className="text-primary-100">Accès à plus de 50 formations</p>
+                <p className="text-primary-100 text-sm xl:text-base">Accès à plus de 50 formations</p>
               </div>
               <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-1">
+                <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-0.5">
                   <Check className="w-4 h-4 text-primary-900" />
                 </div>
-                <p className="text-primary-100">Certificats reconnus</p>
+                <p className="text-primary-100 text-sm xl:text-base">Certificats reconnus</p>
               </div>
               <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-1">
+                <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-0.5">
                   <Check className="w-4 h-4 text-primary-900" />
                 </div>
-                <p className="text-primary-100">Support et accompagnement personnalisé</p>
+                <p className="text-primary-100 text-sm xl:text-base">Support et accompagnement personnalisé</p>
               </div>
             </div>
           </motion.div>
@@ -158,18 +174,18 @@ const RegisterPage = () => {
       </div>
 
       {/* Right Side - Form */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 bg-gray-50">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-md w-full space-y-8 py-12"
+          className="max-w-md w-full space-y-6 sm:space-y-8"
         >
           {/* Title */}
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
               {awaitingTwoFA ? 'Vérification 2FA' : 'Créer un compte'}
             </h2>
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-sm sm:text-base text-gray-600">
               {awaitingTwoFA
                 ? 'Entrez le code de vérification envoyé à votre email'
                 : 'Inscrivez-vous gratuitement pour commencer'}
@@ -181,7 +197,7 @@ const RegisterPage = () => {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg"
+              className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm"
             >
               {error}
             </motion.div>
@@ -190,10 +206,10 @@ const RegisterPage = () => {
           {/* Conditional Forms */}
           {awaitingTwoFA ? (
             /* 2FA Verification Form */
-            <form onSubmit={handleVerifyTwoFA} className="mt-8 space-y-6">
+            <form onSubmit={handleVerifyTwoFA} className="mt-6 sm:mt-8 space-y-5 sm:space-y-6">
               <div className="flex justify-center">
-                <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center">
-                  <Shield className="w-10 h-10 text-primary-800" />
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary-100 rounded-full flex items-center justify-center">
+                  <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-primary-800" />
                 </div>
               </div>
 
@@ -207,14 +223,15 @@ const RegisterPage = () => {
                 <input
                   id="twoFACode"
                   type="text"
+                  inputMode="numeric"
                   value={twoFACode}
                   onChange={(e) => setTwoFACode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className="block w-full px-4 py-3 text-center text-2xl tracking-widest border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors"
+                  className="block w-full px-4 py-3 sm:py-4 text-center text-xl sm:text-2xl tracking-widest border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors min-h-[56px]"
                   placeholder="000000"
                   maxLength={6}
                   required
                 />
-                <p className="mt-2 text-sm text-gray-500 text-center">
+                <p className="mt-2 text-xs sm:text-sm text-gray-500 text-center">
                   Entrez le code à 6 chiffres envoyé à votre email
                 </p>
               </div>
@@ -223,7 +240,7 @@ const RegisterPage = () => {
                 type="submit"
                 size="lg"
                 disabled={loading || twoFACode.length !== 6}
-                className="w-full"
+                className="w-full min-h-[48px]"
               >
                 {loading ? (
                   <>
@@ -238,19 +255,19 @@ const RegisterPage = () => {
                 )}
               </Button>
 
-              <div className="flex flex-col space-y-3">
+              <div className="flex flex-col space-y-3 items-center">
                 <button
                   type="button"
                   onClick={handleResendCode}
                   disabled={loading}
-                  className="text-sm text-primary-800 hover:text-primary-900 font-medium"
+                  className="text-sm text-primary-800 hover:text-primary-900 font-medium py-2 min-h-[44px]"
                 >
                   Renvoyer le code
                 </button>
                 <button
                   type="button"
                   onClick={handleCancelTwoFA}
-                  className="text-sm text-gray-600 hover:text-gray-900"
+                  className="text-sm text-gray-600 hover:text-gray-900 py-2 min-h-[44px]"
                 >
                   Annuler et recommencer
                 </button>
@@ -258,13 +275,13 @@ const RegisterPage = () => {
             </form>
           ) : (
             /* Registration Form */
-            <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+            <form onSubmit={handleSubmit} className="mt-6 sm:mt-8 space-y-4">
               {/* Name Fields */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label
                     htmlFor="firstName"
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2"
                   >
                     Prénom *
                   </label>
@@ -279,7 +296,7 @@ const RegisterPage = () => {
                       required
                       value={formData.firstName}
                       onChange={handleChange}
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors"
+                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px]"
                       placeholder="Jean"
                     />
                   </div>
@@ -288,7 +305,7 @@ const RegisterPage = () => {
                 <div>
                   <label
                     htmlFor="lastName"
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2"
                   >
                     Nom *
                   </label>
@@ -299,7 +316,7 @@ const RegisterPage = () => {
                     required
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors"
+                    className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px]"
                     placeholder="Dupont"
                   />
                 </div>
@@ -307,7 +324,7 @@ const RegisterPage = () => {
 
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                   Adresse email *
                 </label>
                 <div className="relative">
@@ -321,7 +338,7 @@ const RegisterPage = () => {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors"
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px]"
                     placeholder="votre@email.com"
                   />
                 </div>
@@ -329,7 +346,7 @@ const RegisterPage = () => {
 
               {/* Phone */}
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                   Téléphone
                 </label>
                 <div className="relative">
@@ -342,7 +359,7 @@ const RegisterPage = () => {
                     type="tel"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors"
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px]"
                     placeholder="+225 XX XX XX XX XX"
                   />
                 </div>
@@ -350,7 +367,7 @@ const RegisterPage = () => {
 
               {/* Password */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                   Mot de passe *
                 </label>
                 <div className="relative">
@@ -364,7 +381,7 @@ const RegisterPage = () => {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors ${
+                    className={`block w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
                       formErrors.password ? 'border-red-300' : 'border-gray-300'
                     }`}
                     placeholder="••••••••"
@@ -372,7 +389,8 @@ const RegisterPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center min-w-[44px] justify-center"
+                    aria-label={showPassword ? 'Masquer' : 'Afficher'}
                   >
                     {showPassword ? (
                       <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -382,7 +400,7 @@ const RegisterPage = () => {
                   </button>
                 </div>
                 {formErrors.password && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.password}</p>
+                  <p className="mt-1 text-xs sm:text-sm text-red-600">{formErrors.password}</p>
                 )}
               </div>
 
@@ -390,7 +408,7 @@ const RegisterPage = () => {
               <div>
                 <label
                   htmlFor="confirmPassword"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2"
                 >
                   Confirmer le mot de passe *
                 </label>
@@ -405,7 +423,7 @@ const RegisterPage = () => {
                     required
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors ${
+                    className={`block w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
                       formErrors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                     }`}
                     placeholder="••••••••"
@@ -413,7 +431,8 @@ const RegisterPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center min-w-[44px] justify-center"
+                    aria-label={showConfirmPassword ? 'Masquer' : 'Afficher'}
                   >
                     {showConfirmPassword ? (
                       <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -423,20 +442,20 @@ const RegisterPage = () => {
                   </button>
                 </div>
                 {formErrors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.confirmPassword}</p>
+                  <p className="mt-1 text-xs sm:text-sm text-red-600">{formErrors.confirmPassword}</p>
                 )}
               </div>
 
               {/* Terms */}
-              <div className="flex items-start">
+              <div className="flex items-start py-2">
                 <input
                   id="terms"
                   name="terms"
                   type="checkbox"
                   required
-                  className="h-4 w-4 text-primary-800 focus:ring-primary-600 border-gray-300 rounded mt-1"
+                  className="h-5 w-5 text-primary-800 focus:ring-primary-600 border-gray-300 rounded mt-0.5"
                 />
-                <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
+                <label htmlFor="terms" className="ml-2 block text-xs sm:text-sm text-gray-700 leading-relaxed">
                   J'accepte les{' '}
                   <Link
                     to="/conditions"
@@ -455,7 +474,7 @@ const RegisterPage = () => {
               </div>
 
               {/* Submit Button */}
-              <Button type="submit" size="lg" disabled={loading} className="w-full">
+              <Button type="submit" size="lg" disabled={loading} className="w-full min-h-[48px]">
                 {loading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
@@ -467,7 +486,7 @@ const RegisterPage = () => {
               </Button>
 
               {/* Login Link */}
-              <div className="text-center">
+              <div className="text-center pt-2">
                 <p className="text-sm text-gray-600">
                   Vous avez déjà un compte ?{' '}
                   <Link

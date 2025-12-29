@@ -112,45 +112,76 @@ const EnrollPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <Link
             to={`/formations/${id}`}
-            className="inline-flex items-center text-primary-800 hover:text-primary-900 mb-4"
+            className="inline-flex items-center text-primary-800 hover:text-primary-900 mb-3 sm:mb-4 py-2 min-h-[44px]"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Retour à la formation
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Inscription à la formation</h1>
-          <p className="mt-2 text-gray-600">Complétez votre inscription et procédez au paiement</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Inscription à la formation</h1>
+          <p className="mt-2 text-sm sm:text-base text-gray-600">Complétez votre inscription et procédez au paiement</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          {/* Mobile: Récapitulatif en premier */}
+          <div className="lg:hidden">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-lg shadow-sm p-4 sm:p-6"
+            >
+              <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Récapitulatif</h2>
+              <div className="space-y-3 sm:space-y-4">
+                <div>
+                  <h3 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">{training.title}</h3>
+                  <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-600">
+                    <div className="flex items-center">
+                      <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span>{training.duration}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span>{training.schedule || 'En ligne / Présentiel'}</span>
+                    </div>
+                  </div>
+                </div>
+                <hr />
+                <div className="flex justify-between text-base sm:text-lg font-bold">
+                  <span>Total</span>
+                  <span className="text-primary-800">{training.price.toLocaleString()} FCFA</span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
           {/* Formulaire de paiement */}
           <div className="lg:col-span-2">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-lg shadow-sm p-6"
+              className="bg-white rounded-lg shadow-sm p-4 sm:p-6"
             >
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Informations de paiement</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Informations de paiement</h2>
 
-              <div className="space-y-6">
+              <div className="space-y-5 sm:space-y-6">
                 {/* Informations de l'utilisateur */}
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-4">Vos informations</h3>
-                  <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                  <h3 className="text-sm font-medium text-gray-900 mb-3 sm:mb-4">Vos informations</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
                     <div>
-                      <p className="text-sm text-gray-600">Nom complet</p>
-                      <p className="font-medium">
+                      <p className="text-xs sm:text-sm text-gray-600">Nom complet</p>
+                      <p className="font-medium text-sm sm:text-base">
                         {user.firstName} {user.lastName}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Email</p>
-                      <p className="font-medium">{user.email}</p>
+                      <p className="text-xs sm:text-sm text-gray-600">Email</p>
+                      <p className="font-medium text-sm sm:text-base truncate">{user.email}</p>
                     </div>
                   </div>
                 </div>
@@ -179,12 +210,12 @@ const EnrollPage = () => {
                   )}
 
                   {/* Bouton de simulation pour le développement */}
-                  <div className="mt-8 pt-6 border-t border-gray-200">
+                  <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
                     <button
                       type="button"
                       onClick={() => handlePaymentSubmit({ isSimulation: true })}
                       disabled={paymentLoading}
-                      className="w-full py-3 px-4 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 transition-colors flex items-center justify-center"
+                      className="w-full py-3 px-4 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 transition-colors flex items-center justify-center min-h-[48px] text-sm sm:text-base"
                     >
                       {paymentLoading ? 'Traitement...' : '🛠️ Simuler un paiement réussi (Test)'}
                     </button>
@@ -197,8 +228,8 @@ const EnrollPage = () => {
             </motion.div>
           </div>
 
-          {/* Récapitulatif */}
-          <div className="lg:col-span-1">
+          {/* Récapitulatif - Desktop */}
+          <div className="hidden lg:block lg:col-span-1">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -212,15 +243,15 @@ const EnrollPage = () => {
                   <h3 className="font-medium text-gray-900 mb-2">{training.title}</h3>
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-2" />
+                      <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
                       {training.duration}
                     </div>
                     <div className="flex items-center">
-                      <MapPin className="w-4 h-4 mr-2" />
+                      <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
                       {training.schedule || 'En ligne / Présentiel'}
                     </div>
                     <div className="flex items-center">
-                      <Users className="w-4 h-4 mr-2" />
+                      <Users className="w-4 h-4 mr-2 flex-shrink-0" />
                       Max {training.capacity} participants
                     </div>
                   </div>

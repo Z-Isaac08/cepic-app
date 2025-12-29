@@ -38,56 +38,56 @@ const HomePage = () => {
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-24 lg:py-32">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left Content */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
+              className="text-center lg:text-left"
             >
-              <div className="inline-block px-4 py-2 bg-secondary-500/20 backdrop-blur-sm rounded-full mb-6">
-                <span className="text-secondary-500 font-semibold">
+              <div className="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-secondary-500/20 backdrop-blur-sm rounded-full mb-4 sm:mb-6">
+                <span className="text-secondary-500 font-semibold text-xs sm:text-sm">
                   Excellence en Formation Professionnelle
                 </span>
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight">
                 Développez vos <span className="text-secondary-500">compétences</span> avec CEPIC
               </h1>
 
-              <p className="text-xl text-white/90 mb-8 leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
                 {CEPIC_INFO.fullName} - Votre partenaire pour une formation de qualité en Côte
                 d'Ivoire
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/formations">
-                  <Button size="lg" variant="secondary" className="w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
+                <Link to="/formations" className="w-full sm:w-auto">
+                  <Button size="lg" variant="secondary" className="w-full sm:w-auto min-h-[48px]">
                     Découvrir nos formations
-                    {/* <ArrowRight className="w-5 h-5" /> */}
                   </Button>
                 </Link>
-                <Link to="/a-propos">
-                  <Button size="lg" variant="outline-white" className="w-full sm:w-auto">
+                <Link to="/a-propos" className="w-full sm:w-auto">
+                  <Button size="lg" variant="outline-white" className="w-full sm:w-auto min-h-[48px]">
                     En savoir plus
                   </Button>
                 </Link>
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-3 gap-6 mt-12">
-                <div>
-                  <div className="text-3xl font-bold text-secondary-500">{stats.trainings}+</div>
-                  <div className="text-sm text-white/80">Formations</div>
+              <div className="grid grid-cols-3 gap-4 sm:gap-6 mt-8 sm:mt-12">
+                <div className="text-center lg:text-left">
+                  <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-secondary-500">{stats.trainings}+</div>
+                  <div className="text-xs sm:text-sm text-white/80">Formations</div>
                 </div>
-                <div>
-                  <div className="text-3xl font-bold text-secondary-500">{stats.students}+</div>
-                  <div className="text-sm text-white/80">Participants</div>
+                <div className="text-center lg:text-left">
+                  <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-secondary-500">{stats.students}+</div>
+                  <div className="text-xs sm:text-sm text-white/80">Participants</div>
                 </div>
-                <div>
-                  <div className="text-3xl font-bold text-secondary-500">{stats.satisfaction}%</div>
-                  <div className="text-sm text-white/80">Satisfaction</div>
+                <div className="text-center lg:text-left">
+                  <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-secondary-500">{stats.satisfaction}%</div>
+                  <div className="text-xs sm:text-sm text-white/80">Satisfaction</div>
                 </div>
               </div>
             </motion.div>
@@ -97,43 +97,43 @@ const HomePage = () => {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="hidden md:block"
+              className="hidden lg:block"
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-secondary-500/20 rounded-3xl blur-3xl" />
-                <div className="relative bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
-                  <GraduationCap className="w-full h-64 text-secondary-500" />
+                <div className="relative bg-white/10 backdrop-blur-lg rounded-3xl p-6 md:p-8 border border-white/20">
+                  <GraduationCap className="w-full h-48 md:h-64 text-secondary-500" />
                 </div>
               </div>
             </motion.div>
           </div>
         </div>
 
-        {/* Modern Scroll Indicator */}
+        {/* Modern Scroll Indicator - Hidden on very small screens */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1, duration: 0.6 }}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 cursor-pointer"
+          className="hidden lg:flex absolute bottom-6 lg:bottom-8 left-1/2 transform -translate-x-1/2 z-10 cursor-pointer"
           onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
         >
-          <div className="flex flex-col items-center gap-3 group">
-            <span className="text-xs font-medium text-secondary-500 uppercase tracking-wider group-hover:text-secondary-400 transition-colors drop-shadow-lg">
+          <div className="flex flex-col items-center gap-2 sm:gap-3 group">
+            <span className="text-[10px] sm:text-xs font-medium text-secondary-500 uppercase tracking-wider group-hover:text-secondary-400 transition-colors drop-shadow-lg">
               Défiler
             </span>
             {/* Mouse Icon */}
-            <div className="relative w-6 h-10 border-2 border-secondary-500 rounded-full group-hover:border-secondary-400 transition-colors shadow-lg">
+            <div className="relative w-5 sm:w-6 h-8 sm:h-10 border-2 border-secondary-500 rounded-full group-hover:border-secondary-400 transition-colors shadow-lg">
               <motion.div
-                animate={{ y: [0, 12, 0] }}
+                animate={{ y: [0, 10, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute top-2 left-1/2 transform -translate-x-1/2 w-1 h-2 bg-secondary-500 rounded-full"
+                className="absolute top-1.5 sm:top-2 left-1/2 transform -translate-x-1/2 w-1 h-1.5 sm:h-2 bg-secondary-500 rounded-full"
               />
             </div>
             {/* Down Arrow */}
             <motion.svg
               animate={{ y: [0, 5, 0] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }}
-              className="w-4 h-4 text-secondary-500 group-hover:text-secondary-400 transition-colors drop-shadow-lg"
+              className="w-3 sm:w-4 h-3 sm:h-4 text-secondary-500 group-hover:text-secondary-400 transition-colors drop-shadow-lg"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -150,7 +150,7 @@ const HomePage = () => {
 
         {/* Wave Divider */}
         <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
             <path
               d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
               fill="white"
@@ -160,18 +160,18 @@ const HomePage = () => {
       </section>
 
       {/* FORMATIONS À LA UNE */}
-      <section className="py-20 bg-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-8 sm:mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
               Formations à la une
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
               Découvrez nos formations les plus populaires et développez vos compétences
             </p>
           </motion.div>
@@ -179,7 +179,7 @@ const HomePage = () => {
           {loading ? (
             <LoadingSpinner size="lg" text="Chargement des formations..." />
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
               {featuredTrainings.map((training, index) => (
                 <TrainingCard key={training.id} training={training} />
               ))}
@@ -187,10 +187,9 @@ const HomePage = () => {
           )}
 
           <div className="text-center">
-            <Link to="/formations">
-              <Button variant="outline" size="lg">
+            <Link to="/formations" className="inline-block w-full sm:w-auto">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto min-h-[48px]">
                 Voir toutes les formations
-                {/* <ArrowRight className="ml-2 w-5 h-5" /> */}
               </Button>
             </Link>
           </div>
@@ -198,23 +197,23 @@ const HomePage = () => {
       </section>
 
       {/* CATÉGORIES */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-8 sm:mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
               Nos domaines de formation
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
               Explorez nos différentes catégories de formations professionnelles
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {categories.slice(0, 4).map((category, index) => (
               <CategoryCard key={category.id} category={category} index={index} />
             ))}
@@ -223,23 +222,23 @@ const HomePage = () => {
       </section>
 
       {/* POURQUOI CEPIC */}
-      <section className="py-20 bg-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-8 sm:mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
               Pourquoi choisir CEPIC ?
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
               Notre engagement pour votre réussite professionnelle
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {VALUES.map((value, index) => {
               const IconComponent =
                 {
@@ -258,11 +257,11 @@ const HomePage = () => {
                   transition={{ delay: index * 0.1 }}
                   className="text-center"
                 >
-                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <IconComponent className="w-8 h-8 text-primary-800" />
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                    <IconComponent className="w-6 h-6 sm:w-8 sm:h-8 text-primary-800" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{value.title}</h3>
-                  <p className="text-gray-600">{value.description}</p>
+                  <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-1 sm:mb-2">{value.title}</h3>
+                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{value.description}</p>
                 </motion.div>
               );
             })}
@@ -271,17 +270,17 @@ const HomePage = () => {
       </section>
 
       {/* CHIFFRES CLÉS */}
-      <section className="py-20 bg-gradient-to-br from-primary-800 to-primary-900 text-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-primary-800 to-primary-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 text-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
             >
-              <TrendingUp className="w-12 h-12 text-secondary-500 mx-auto mb-4" />
-              <div className="text-4xl font-bold mb-2">{stats.trainings}+</div>
-              <div className="text-white/80">Formations disponibles</div>
+              <TrendingUp className="w-8 h-8 sm:w-10 md:w-12 sm:h-10 md:h-12 text-secondary-500 mx-auto mb-2 sm:mb-4" />
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">{stats.trainings}+</div>
+              <div className="text-xs sm:text-sm md:text-base text-white/80">Formations disponibles</div>
             </motion.div>
 
             <motion.div
@@ -290,9 +289,9 @@ const HomePage = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
             >
-              <Users className="w-12 h-12 text-secondary-500 mx-auto mb-4" />
-              <div className="text-4xl font-bold mb-2">{stats.students}+</div>
-              <div className="text-white/80">Participants formés</div>
+              <Users className="w-8 h-8 sm:w-10 md:w-12 sm:h-10 md:h-12 text-secondary-500 mx-auto mb-2 sm:mb-4" />
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">{stats.students}+</div>
+              <div className="text-xs sm:text-sm md:text-base text-white/80">Participants formés</div>
             </motion.div>
 
             <motion.div
@@ -301,9 +300,9 @@ const HomePage = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
-              <Target className="w-12 h-12 text-secondary-500 mx-auto mb-4" />
-              <div className="text-4xl font-bold mb-2">{stats.satisfaction}%</div>
-              <div className="text-white/80">Taux de satisfaction</div>
+              <Target className="w-8 h-8 sm:w-10 md:w-12 sm:h-10 md:h-12 text-secondary-500 mx-auto mb-2 sm:mb-4" />
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">{stats.satisfaction}%</div>
+              <div className="text-xs sm:text-sm md:text-base text-white/80">Taux de satisfaction</div>
             </motion.div>
 
             <motion.div
@@ -312,56 +311,56 @@ const HomePage = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
             >
-              <Award className="w-12 h-12 text-secondary-500 mx-auto mb-4" />
-              <div className="text-4xl font-bold mb-2">{stats.years}+</div>
-              <div className="text-white/80">Années d'expérience</div>
+              <Award className="w-8 h-8 sm:w-10 md:w-12 sm:h-10 md:h-12 text-secondary-500 mx-auto mb-2 sm:mb-4" />
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">{stats.years}+</div>
+              <div className="text-xs sm:text-sm md:text-base text-white/80">Années d'expérience</div>
             </motion.div>
           </div>
         </div>
       </section>
 
       {/* CTA FINAL */}
-      <section className="py-20 bg-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
               Prêt à développer vos compétences ?
             </h2>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 max-w-xl mx-auto">
               Rejoignez des centaines de professionnels qui ont fait confiance à CEPIC pour leur
               formation
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/formations">
-                <Button size="lg" variant="primary">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <Link to="/formations" className="w-full sm:w-auto">
+                <Button size="lg" variant="primary" className="w-full sm:w-auto min-h-[48px]">
                   Parcourir les formations
                 </Button>
               </Link>
-              <Link to="/contact">
-                <Button size="lg" variant="outline">
+              <Link to="/contact" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto min-h-[48px]">
                   Nous contacter
                 </Button>
               </Link>
             </div>
 
             {/* Contact Info */}
-            <div className="mt-12 pt-8 border-t border-gray-200">
-              <p className="text-gray-600 mb-4">Besoin d'informations ?</p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center text-sm">
+            <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-gray-200">
+              <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">Besoin d'informations ?</p>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 justify-center text-sm sm:text-base">
                 <a
                   href={`tel:${CEPIC_INFO.phone.primary}`}
-                  className="text-primary-800 hover:text-primary-900 font-medium"
+                  className="text-primary-800 hover:text-primary-900 font-medium py-2 min-h-[44px] inline-flex items-center justify-center"
                 >
                   {CEPIC_INFO.phone.primary}
                 </a>
                 <a
                   href={`mailto:${CEPIC_INFO.email}`}
-                  className="text-primary-800 hover:text-primary-900 font-medium"
+                  className="text-primary-800 hover:text-primary-900 font-medium py-2 min-h-[44px] inline-flex items-center justify-center"
                 >
                   {CEPIC_INFO.email}
                 </a>

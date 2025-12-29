@@ -93,7 +93,7 @@ const TrainingsPage = () => {
 
   return (
     <div>
-      <PageHeader 
+      <PageHeader
         title="Nos Formations"
         subtitle="Découvrez toutes nos formations professionnelles"
         breadcrumbs={[
@@ -102,10 +102,10 @@ const TrainingsPage = () => {
         ]}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         {/* Barre de recherche et filtres */}
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4">
             {/* Recherche */}
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -114,17 +114,17 @@ const TrainingsPage = () => {
                 placeholder="Rechercher une formation..."
                 value={searchTerm}
                 onChange={handleSearch}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 sm:py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base min-h-[48px]"
               />
             </div>
 
             {/* Bouton filtres */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors min-h-[48px] sm:min-w-[140px]"
             >
               <SlidersHorizontal className="w-5 h-5" />
-              <span>Filtres</span>
+              <span className="font-medium">Filtres</span>
               {activeFiltersCount > 0 && (
                 <Badge variant="primary" size="sm">{activeFiltersCount}</Badge>
               )}
@@ -137,9 +137,9 @@ const TrainingsPage = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="bg-gray-50 rounded-lg p-6 mb-4"
+              className="bg-gray-50 rounded-lg p-4 sm:p-6 mb-4 overflow-hidden"
             >
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Catégorie */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -148,7 +148,7 @@ const TrainingsPage = () => {
                   <select
                     value={localFilters.categoryId}
                     onChange={(e) => handleFilterChange('categoryId', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-base min-h-[44px]"
                   >
                     <option value="">Toutes les catégories</option>
                     {categories.map(cat => (
@@ -165,7 +165,7 @@ const TrainingsPage = () => {
                   <select
                     value={localFilters.deliveryMode}
                     onChange={(e) => handleFilterChange('deliveryMode', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-base min-h-[44px]"
                   >
                     <option value="">Tous les modes</option>
                     <option value="PRESENTIAL">Présentiel</option>
@@ -182,7 +182,7 @@ const TrainingsPage = () => {
                   <select
                     value={localFilters.isFree === null ? '' : localFilters.isFree}
                     onChange={(e) => handleFilterChange('isFree', e.target.value === '' ? null : e.target.value === 'true')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-base min-h-[44px]"
                   >
                     <option value="">Tous les prix</option>
                     <option value="true">Gratuit</option>
@@ -198,7 +198,7 @@ const TrainingsPage = () => {
                   <select
                     value={localFilters.sortBy}
                     onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-base min-h-[44px]"
                   >
                     <option value="createdAt">Plus récent</option>
                     <option value="title">Nom (A-Z)</option>
@@ -213,7 +213,7 @@ const TrainingsPage = () => {
                 <div className="mt-4 flex justify-end">
                   <button
                     onClick={handleResetFilters}
-                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 py-2 px-3 rounded-lg hover:bg-gray-100 transition-colors min-h-[44px]"
                   >
                     <X className="w-4 h-4" />
                     Réinitialiser les filtres
@@ -224,8 +224,8 @@ const TrainingsPage = () => {
           )}
 
           {/* Résultats */}
-          <div className="flex items-center justify-between text-sm text-gray-600">
-            <span>
+          <div className="flex items-center justify-between text-sm text-gray-600 py-2">
+            <span className="font-medium">
               {trainings.length} formation{trainings.length > 1 ? 's' : ''} trouvée{trainings.length > 1 ? 's' : ''}
             </span>
           </div>
@@ -239,13 +239,13 @@ const TrainingsPage = () => {
             title="Aucune formation trouvée"
             description="Essayez de modifier vos critères de recherche ou vos filtres"
             action={
-              <Button onClick={handleResetFilters} variant="primary">
+              <Button onClick={handleResetFilters} variant="primary" className="min-h-[48px]">
                 Réinitialiser les filtres
               </Button>
             }
           />
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {trainings.map((training) => (
               <TrainingCard key={training.id} training={training} />
             ))}
