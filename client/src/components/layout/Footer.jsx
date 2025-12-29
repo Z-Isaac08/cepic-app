@@ -38,7 +38,7 @@ const Footer = () => {
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-2">
               <img
-                src="/logo_cepic.jpg"
+                src="/logo_cepic.jpeg"
                 alt="CEPIC"
                 className="w-10 h-10 rounded-lg object-cover"
               />

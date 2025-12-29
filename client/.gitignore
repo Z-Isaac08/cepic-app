@@ -148,7 +148,7 @@ next-env.d.ts
 
 # Gatsby (si utilisé)
 .cache/
-public
+# public  # Commented out - Vite uses public folder for static assets
 
 # ================================
 # STORYBOOK
