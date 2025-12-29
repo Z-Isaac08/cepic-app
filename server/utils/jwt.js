@@ -36,19 +36,21 @@ const createSendToken = async (user, statusCode, res, req, message = 'Success') 
   }
 
   // Set secure HTTP-only cookies
+  // Use sameSite: 'none' for cross-site cookies in production (client and server on different domains)
+  const isProduction = process.env.NODE_ENV === 'production';
   const cookieOptions = {
     expires: jwtExpires,
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     path: '/'
   };
 
   const refreshCookieOptions = {
     expires: refreshExpires,
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     path: '/api/auth'
   };
 
@@ -85,17 +87,18 @@ const verifyToken = (token) => {
 };
 
 const clearAuthCookies = (res) => {
+  const isProduction = process.env.NODE_ENV === 'production';
   res.clearCookie('auth_token', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     path: '/'
   });
-  
+
   res.clearCookie('refresh_token', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     path: '/api/auth'
   });
 };

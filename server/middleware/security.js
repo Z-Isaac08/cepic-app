@@ -207,7 +207,7 @@ const getCsrfToken = (req, res, next) => {
   res.cookie('XSRF-TOKEN', token, {
     httpOnly: false, // Allow JavaScript to read it for header inclusion
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
     maxAge: 3600000, // 1 hour
   });
 

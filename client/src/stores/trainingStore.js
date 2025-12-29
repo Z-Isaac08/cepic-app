@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import * as trainingsAPI from '../services/api/trainings';
+import { useAuthStore } from './authStore';
+
+// Helper to check if user is authenticated
+const isAuthenticated = () => !!useAuthStore.getState().user;
 
 const useTrainingStore = create(
   devtools(
@@ -25,17 +29,18 @@ const useTrainingStore = create(
           // Récupérer les formations
           const response = await trainingsAPI.getAllTrainings(params || get().filters);
 
-          // Récupérer les favoris de l'utilisateur connecté
+          // Récupérer les favoris uniquement si l'utilisateur est connecté
           let bookmarks = [];
 
-          // Vérifier si l'utilisateur est connecté via l'API
-          try {
-            const bookmarksResponse = await trainingsAPI.getMyBookmarks();
-            if (bookmarksResponse && bookmarksResponse.data) {
-              bookmarks = bookmarksResponse.data;
+          if (isAuthenticated()) {
+            try {
+              const bookmarksResponse = await trainingsAPI.getMyBookmarks();
+              if (bookmarksResponse && bookmarksResponse.data) {
+                bookmarks = bookmarksResponse.data;
+              }
+            } catch (err) {
+              // Silently fail for bookmarks - not critical
             }
-          } catch (err) {
-            console.error('Erreur lors du chargement des favoris:', err);
           }
 
           // Mettre à jour l'état avec les formations et les favoris
@@ -62,30 +67,25 @@ const useTrainingStore = create(
           // Récupérer les détails de la formation
           const response = await trainingsAPI.getTrainingById(id);
 
-          // Vérifier si l'utilisateur a mis en favori cette formation
-          try {
-            const bookmarksResponse = await trainingsAPI.getMyBookmarks();
-            const isBookmarked = bookmarksResponse?.data?.some((b) => b.trainingId === id) || false;
+          // Vérifier si l'utilisateur a mis en favori cette formation (seulement si connecté)
+          let isBookmarked = false;
 
-            // Mettre à jour la formation avec le statut de bookmark
-            set({
-              currentTraining: {
-                ...response.data,
-                isBookmarked,
-              },
-              loading: false,
-            });
-          } catch (bookmarkError) {
-            console.error('Erreur lors du chargement des favoris:', bookmarkError);
-            // Si erreur, charger la formation sans le statut de bookmark
-            set({
-              currentTraining: {
-                ...response.data,
-                isBookmarked: false,
-              },
-              loading: false,
-            });
+          if (isAuthenticated()) {
+            try {
+              const bookmarksResponse = await trainingsAPI.getMyBookmarks();
+              isBookmarked = bookmarksResponse?.data?.some((b) => b.trainingId === id) || false;
+            } catch (bookmarkError) {
+              // Silently fail for bookmarks - not critical
+            }
           }
+
+          set({
+            currentTraining: {
+              ...response.data,
+              isBookmarked,
+            },
+            loading: false,
+          });
         } catch (error) {
           console.error('Erreur lors du chargement de la formation:', error);
           set({

@@ -10,6 +10,7 @@
     "db:push": "npx prisma db push",
     "db:seed": "npx prisma db push && node prisma/seed-cepic.js",
     "prod": "npx prisma db push --skip-generate && node index.js",
+    "build": "npx prisma generate && npx prisma db push && node prisma/seed-cepic.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
