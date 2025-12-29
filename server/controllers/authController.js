@@ -8,6 +8,7 @@ const {
   clearAuthCookies,
 } = require('../utils/jwt');
 const emailService = require('../utils/email');
+const { SKIP_EMAIL_VERIFICATION } = require('../config/app.config');
 
 // Check if email exists
 const checkEmail = async (req, res, next) => {
@@ -65,7 +66,7 @@ const loginExistingUser = async (req, res, next) => {
   }
 };
 
-// Register new user (with 2FA)
+// Register new user
 const registerNewUser = async (req, res, next) => {
   try {
     const { email, firstName, lastName, password, phone } = req.validatedData;
@@ -85,7 +86,24 @@ const registerNewUser = async (req, res, next) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create new user (not verified yet)
+    // If email verification is skipped, create verified user and login directly
+    if (SKIP_EMAIL_VERIFICATION) {
+      const newUser = await prisma.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          firstName,
+          lastName,
+          phone: phone || null,
+          role: 'USER',
+          isVerified: true,
+        },
+      });
+
+      return await createSendToken(newUser, 201, res, req, 'Compte créé avec succès');
+    }
+
+    // Otherwise, use 2FA email verification flow
     const newUser = await prisma.user.create({
       data: {
         email,
@@ -94,38 +112,41 @@ const registerNewUser = async (req, res, next) => {
         lastName,
         phone: phone || null,
         role: 'USER',
-        isVerified: false, // Will be verified after 2FA
+        isVerified: false,
       },
     });
 
-    // Generate 2FA code for email verification
+    // Generate 2FA code and temp token
     const code = generate2FACode();
     const tempToken = generateTempToken();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
+    // Save 2FA code
     await prisma.twoFACode.create({
       data: {
-        userId: newUser.id,
         code,
         tempToken,
         type: 'REGISTRATION',
-        expiresAt,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+        userId: newUser.id,
       },
     });
 
-    // Send verification email
-    if (process.env.NODE_ENV === 'production') {
-      await emailService.send2FACode(email, code, `${firstName} ${lastName}`);
-    } else {
-      console.log(`Verification Code for ${email}: ${code}`);
-    }
+    // Send verification email (non-blocking)
+    emailService.send2FACode(
+      email,
+      code,
+      `${firstName} ${lastName}`
+    ).catch((err) => {
+      console.error('Failed to send 2FA code:', err.message);
+    });
 
     res.status(201).json({
       success: true,
-      message: 'Compte créé avec succès. Veuillez vérifier votre email.',
+      message: 'Compte créé. Veuillez vérifier votre email.',
       data: {
         tempToken,
-        requires2FA: true,
+        email,
+        requiresVerification: true,
       },
     });
   } catch (error) {
@@ -173,12 +194,14 @@ const verify2FA = async (req, res, next) => {
       },
     });
 
-    // Send welcome email for new registrations
+    // Send welcome email for new registrations (non-blocking)
     if (process.env.NODE_ENV === 'production' && twoFARecord.type === 'REGISTRATION') {
-      await emailService.sendWelcomeEmail(
+      emailService.sendWelcomeEmail(
         updatedUser.email,
         `${updatedUser.firstName} ${updatedUser.lastName}`
-      );
+      ).catch((err) => {
+        console.error('Failed to send welcome email:', err.message);
+      });
     }
 
     // Generate JWT and send response with cookies
@@ -219,13 +242,15 @@ const resend2FA = async (req, res, next) => {
       },
     });
 
-    // Send new code
+    // Send new code (non-blocking)
     if (process.env.NODE_ENV === 'production') {
-      await emailService.send2FACode(
+      emailService.send2FACode(
         existingRecord.user.email,
         newCode,
         `${existingRecord.user.firstName} ${existingRecord.user.lastName}`
-      );
+      ).catch((err) => {
+        console.error('Failed to resend 2FA code:', err.message);
+      });
     } else {
       console.log(`New 2FA Code for ${existingRecord.user.email}: ${newCode}`);
     }
