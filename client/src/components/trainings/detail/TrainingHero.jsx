@@ -1,10 +1,11 @@
 // client/src/components/trainings/detail/TrainingHero.jsx
 import { motion } from 'framer-motion';
 import { Clock, MapPin, Monitor, Users, Zap } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Badge, Button } from '../../ui';
 
 const TrainingHero = ({ training, user }) => {
+  const navigate = useNavigate();
   const getDeliveryIcon = (mode) => {
     switch (mode) {
       case 'ONLINE':
@@ -18,11 +19,10 @@ const TrainingHero = ({ training, user }) => {
 
   const handleEnroll = () => {
     if (!user) {
-      window.location.href = '/connexion';
+      navigate('/connexion');
       return;
     }
-    // Navigate to enrollment page or open modal
-    window.location.href = `/inscription/${training.id}`;
+    navigate(`/rejoindre/${training.id}`);
   };
 
   return (

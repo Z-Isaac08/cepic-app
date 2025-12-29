@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion';
 import { Bookmark, BookmarkCheck, CheckCircle, Download, Share2, Users } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { useAuthStore } from '../../../stores/authStore';
 import { useTrainingStore } from '../../../stores/trainingStore';
 import { Badge, Button } from '../../ui';
 
 const PricingCard = ({ training }) => {
+  const navigate = useNavigate();
   const { user } = useAuthStore();
   const { toggleBookmark, trainings } = useTrainingStore();
   const [isLoading, setIsLoading] = useState(false);
@@ -21,7 +23,7 @@ const PricingCard = ({ training }) => {
     }
 
     if (!user) {
-      window.location.href = '/connexion';
+      navigate('/connexion');
       return;
     }
 
@@ -61,11 +63,10 @@ const PricingCard = ({ training }) => {
 
   const handleEnroll = () => {
     if (!user) {
-      window.location.href = '/connexion';
+      navigate('/connexion');
       return;
     }
-    // Navigate to enrollment page or open modal
-    window.location.href = `/inscription/${training.id}`;
+    navigate(`/rejoindre/${training.id}`);
   };
 
   // Format price (en FCFA)

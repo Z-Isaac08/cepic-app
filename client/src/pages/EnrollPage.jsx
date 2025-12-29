@@ -24,7 +24,7 @@ const EnrollPage = () => {
     if (!user) {
       navigate('/connexion', {
         state: {
-          from: `/inscription/${id}`,
+          from: `/rejoindre/${id}`,
           message: 'Veuillez vous connecter pour vous inscrire à cette formation',
         },
       });
@@ -75,7 +75,7 @@ const EnrollPage = () => {
       // 3. Rediriger vers la page de paiement CinetPay ou terminer si simulation
       if (paymentResponse.data.isSimulation) {
         toast.success('Paiement simulé avec succès !', { id: toastId });
-        navigate('/mes-inscriptions');
+        navigate('/mes-formations');
         return;
       }
 

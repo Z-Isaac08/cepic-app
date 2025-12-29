@@ -144,12 +144,12 @@ const NavBar = () => {
                     {userMenuOpen && (
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
                         <Link
-                          to="/mes-inscriptions"
+                          to="/mes-formations"
                           onClick={() => setUserMenuOpen(false)}
                           className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-800 transition-colors"
                         >
                           <GraduationCap className="w-4 h-4" />
-                          <span>Mes Inscriptions</span>
+                          <span>Mes Formations</span>
                         </Link>
                         <Link
                           to="/favoris"

@@ -10,12 +10,13 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Badge, Button, EmptyState, LoadingSpinner, PageHeader } from '../components/ui';
 import { useAuthStore } from '../stores/authStore';
 import { useEnrollmentStore } from '../stores/enrollmentStore';
 
 const MyEnrollmentsPage = () => {
+  const navigate = useNavigate();
   const { user } = useAuthStore();
   const { enrollments, loading, fetchMyEnrollments } = useEnrollmentStore();
   const [filter, setFilter] = useState('all'); // all, active, completed, cancelled
@@ -84,7 +85,7 @@ const MyEnrollmentsPage = () => {
             title="Connexion requise"
             description="Vous devez être connecté pour voir vos inscriptions."
             action={
-              <Button onClick={() => (window.location.href = '/connexion')}>Se connecter</Button>
+              <Button onClick={() => navigate('/connexion')}>Se connecter</Button>
             }
           />
         </div>
@@ -247,7 +248,7 @@ const MyEnrollmentsPage = () => {
                             variant="primary"
                             size="sm"
                             className="w-full"
-                            onClick={() => (window.location.href = `/inscription/${enrollment.id}`)}
+                            onClick={() => navigate(`/rejoindre/${enrollment.training.id}`)}
                           >
                             Payer maintenant
                           </Button>

@@ -14,7 +14,7 @@ const Footer = () => {
       { name: 'À propos', href: '/a-propos' },
       { name: 'Galerie', href: '/galerie' },
       { name: 'Contact', href: '/contact' },
-      { name: 'Mes inscriptions', href: '/mes-inscriptions' },
+      { name: 'Mes formations', href: '/mes-formations' },
     ],
     legal: [
       { name: "Conditions d'utilisation", href: '/conditions' },

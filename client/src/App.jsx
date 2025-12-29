@@ -138,10 +138,10 @@ const AppContent = () => {
             }
           />
 
-          {/* Routes protégées */}
-          <Route path="/inscription/:id" element={<EnrollPage />} />
+          {/* Routes protégées - Enrollments */}
+          <Route path="/rejoindre/:id" element={<EnrollPage />} />
           <Route
-            path="/mes-inscriptions"
+            path="/mes-formations"
             element={
               <Layout>
                 <MyEnrollmentsPage />
