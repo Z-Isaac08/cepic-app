@@ -22,53 +22,11 @@ const {
   deleteCategory,
   uploadGalleryPhoto,
   updateGalleryPhoto,
-  deleteGalleryPhoto
+  deleteGalleryPhoto,
 } = require('../controllers/adminController');
 const { protect, requireAdmin } = require('../middleware/auth');
 const { authLimiter } = require('../middleware/security');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-
-// Créer le dossier uploads s'il n'existe pas
-const uploadDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Configuration de Multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    // Conserver le nom d'origine du fichier (sans l'extension)
-    const nameWithoutExt = path.parse(file.originalname).name;
-    // Générer un nom unique avec l'extension d'origine
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `${nameWithoutExt}-${uniqueSuffix}${ext}`);
-  }
-});
-
-// Filtre pour n'accepter que les images
-const fileFilter = (req, file, cb) => {
-  const filetypes = /jpeg|jpg|png|gif/;
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = filetypes.test(file.mimetype);
-  
-  if (mimetype && extname) {
-    return cb(null, true);
-  } else {
-    cb(new Error('Seules les images sont autorisées (jpeg, jpg, png, gif)'));
-  }
-};
-
-const upload = multer({ 
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB max
-});
+const { uploadImage, handleMulterError } = require('../config/multer.config');
 
 const router = express.Router();
 
@@ -101,9 +59,12 @@ router.put('/categories/:id', authLimiter, updateCategory);
 router.delete('/categories/:id', authLimiter, deleteCategory);
 
 // Routes de gestion de la galerie
-router.post('/gallery', upload.single('image'), uploadGalleryPhoto);
+router.post('/gallery', uploadImage.single('image'), uploadGalleryPhoto);
 router.put('/gallery/:id', authLimiter, updateGalleryPhoto);
 router.delete('/gallery/:id', authLimiter, deleteGalleryPhoto);
+
+// Gestionnaire d'erreurs pour les uploads de fichiers (doit être après les routes d'upload)
+router.use(handleMulterError);
 
 // Routes de gestion des messages
 router.get('/messages', authLimiter, getAllMessages);

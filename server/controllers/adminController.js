@@ -711,9 +711,9 @@ const createCategory = async (req, res, next) => {
 
     // Validation des champs requis
     if (!name) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Le nom de la catégorie est requis' 
+      return res.status(400).json({
+        success: false,
+        error: 'Le nom de la catégorie est requis',
       });
     }
 
@@ -725,31 +725,31 @@ const createCategory = async (req, res, next) => {
 
     // Vérifier si la catégorie existe déjà
     const existingCategory = await prisma.trainingCategory.findUnique({
-      where: { name }
+      where: { name },
     });
 
     if (existingCategory) {
       return res.status(400).json({
         success: false,
-        error: 'Une catégorie avec ce nom existe déjà'
+        error: 'Une catégorie avec ce nom existe déjà',
       });
     }
 
     const category = await prisma.trainingCategory.create({
-      data: { 
+      data: {
         name,
         slug,
         description: description || null,
         icon: icon || null,
-        color: color || "#3B82F6",
+        color: color || '#3B82F6',
         order: order || 0,
-        isActive: isActive !== undefined ? isActive : true
+        isActive: isActive !== undefined ? isActive : true,
       },
     });
 
-    res.status(201).json({ 
-      success: true, 
-      data: category 
+    res.status(201).json({
+      success: true,
+      data: category,
     });
   } catch (error) {
     console.error('Error creating category:', error);
@@ -764,7 +764,7 @@ const updateCategory = async (req, res, next) => {
     const { name, description, icon, color, order, isActive } = req.body;
 
     const updateData = {};
-    
+
     // Mettre à jour le slug si le nom change
     if (name) {
       updateData.name = name;
@@ -773,7 +773,7 @@ const updateCategory = async (req, res, next) => {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
     }
-    
+
     // Ajouter les champs optionnels s'ils sont fournis
     if (description !== undefined) updateData.description = description;
     if (icon !== undefined) updateData.icon = icon;
@@ -792,7 +792,7 @@ const updateCategory = async (req, res, next) => {
     if (error.code === 'P2025') {
       return res.status(404).json({
         success: false,
-        error: 'Catégorie non trouvée'
+        error: 'Catégorie non trouvée',
       });
     }
     next(error);
@@ -812,7 +812,7 @@ const deleteCategory = async (req, res, next) => {
     if (trainings.length > 0) {
       return res.status(400).json({
         success: false,
-        error: 'Impossible de supprimer cette catégorie car elle est utilisée par des formations'
+        error: 'Impossible de supprimer cette catégorie car elle est utilisée par des formations',
       });
     }
 
@@ -820,16 +820,16 @@ const deleteCategory = async (req, res, next) => {
       where: { id },
     });
 
-    res.json({ 
-      success: true, 
-      message: 'Catégorie supprimée avec succès' 
+    res.json({
+      success: true,
+      message: 'Catégorie supprimée avec succès',
     });
   } catch (error) {
     console.error('Error deleting category:', error);
     if (error.code === 'P2025') {
       return res.status(404).json({
         success: false,
-        error: 'Catégorie non trouvée'
+        error: 'Catégorie non trouvée',
       });
     }
     next(error);
@@ -840,23 +840,23 @@ const deleteCategory = async (req, res, next) => {
 const uploadGalleryPhoto = async (req, res, next) => {
   try {
     const { title, description, category } = req.body;
-    
+
     if (!req.file) {
       return res.status(400).json({ success: false, error: 'Aucun fichier téléchargé' });
     }
-    
+
     // S'assurer que l'URL commence par /uploads/ et contient l'extension
     const imageUrl = `/uploads/${req.file.filename}`;
     const fileExt = path.extname(req.file.originalname).toLowerCase();
-    
+
     // Vérifier que le fichier a une extension valide
     const validExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
     if (!validExtensions.includes(fileExt)) {
       // Supprimer le fichier uploadé s'il n'a pas une extension valide
       fs.unlinkSync(path.join(__dirname, '..', 'uploads', req.file.filename));
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Format de fichier non supporté. Utilisez JPG, PNG ou GIF.' 
+      return res.status(400).json({
+        success: false,
+        error: 'Format de fichier non supporté. Utilisez JPG, PNG ou GIF.',
       });
     }
 

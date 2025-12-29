@@ -7,7 +7,7 @@ const cinetpay = require('../utils/cinetpay');
  */
 exports.initiatePayment = async (req, res, next) => {
   try {
-    const { enrollmentId } = req.body;
+    const { enrollmentId, phone, isSimulation } = req.body;
     const userId = req.user.id;
 
     // Récupérer l'inscription
@@ -15,14 +15,14 @@ exports.initiatePayment = async (req, res, next) => {
       where: { id: enrollmentId },
       include: {
         training: true,
-        user: true
-      }
+        user: true,
+      },
     });
 
     if (!enrollment) {
       return res.status(404).json({
         success: false,
-        error: 'Inscription non trouvée'
+        error: 'Inscription non trouvée',
       });
     }
 
@@ -30,7 +30,7 @@ exports.initiatePayment = async (req, res, next) => {
     if (enrollment.userId !== userId) {
       return res.status(403).json({
         success: false,
-        error: 'Non autorisé'
+        error: 'Non autorisé',
       });
     }
 
@@ -38,32 +38,74 @@ exports.initiatePayment = async (req, res, next) => {
     if (enrollment.paymentStatus === 'PAID') {
       return res.status(400).json({
         success: false,
-        error: 'Cette inscription est déjà payée'
+        error: 'Cette inscription est déjà payée',
       });
     }
 
     // Générer un ID de transaction unique
     const transactionId = cinetpay.generateTransactionId();
 
+    // MODE SIMULATION
+    if (isSimulation) {
+      // Créer le paiement directement comme COMPLETED
+      const payment = await prisma.payment.create({
+        data: {
+          enrollmentId: enrollmentId,
+          userId: userId,
+          transactionId: transactionId,
+          paymentMethod: 'SIMULATION',
+          gateway: 'SIMULATOR',
+          amount: enrollment.amount,
+          currency: 'XOF',
+          status: 'COMPLETED',
+          paymentUrl: null,
+          paymentData: { simulated: true, date: new Date() },
+          ipAddress: req.ip,
+          userAgent: req.get('user-agent'),
+          completedAt: new Date(),
+        },
+      });
+
+      // Mettre à jour l'inscription
+      await prisma.trainingEnrollment.update({
+        where: { id: enrollmentId },
+        data: {
+          paymentStatus: 'PAID',
+          status: 'CONFIRMED',
+          paidAt: new Date(),
+        },
+      });
+
+      return res.json({
+        success: true,
+        data: {
+          paymentId: payment.id,
+          paymentUrl: null, // Pas d'URL de redirection pour la simulation
+          transactionId: transactionId,
+          isSimulation: true,
+        },
+      });
+    }
+
     // Initialiser le paiement avec CinetPay
     const paymentResult = await cinetpay.initiatePayment({
       transactionId: transactionId,
-      amount: enrollment.amount / 100, // Convertir centimes en FCFA
+      amount: enrollment.amount, // Montant en FCFA
       currency: 'XOF',
       description: `Formation: ${enrollment.training.title}`,
       customerName: enrollment.user.firstName,
       customerSurname: enrollment.user.lastName,
       customerEmail: enrollment.user.email,
-      customerPhone: '0000000000', // TODO: Ajouter champ phone dans User
+      customerPhone: phone || '0000000000',
       notifyUrl: process.env.CINETPAY_NOTIFY_URL,
       returnUrl: `${process.env.CINETPAY_RETURN_URL}?enrollmentId=${enrollmentId}`,
-      channels: 'ALL' // Orange Money, MTN, Moov, Wave, Cartes
+      channels: 'ALL', // Orange Money, MTN, Moov, Wave, Cartes
     });
 
     if (!paymentResult.success) {
       return res.status(500).json({
         success: false,
-        error: paymentResult.error
+        error: paymentResult.error,
       });
     }
 
@@ -71,6 +113,7 @@ exports.initiatePayment = async (req, res, next) => {
     const payment = await prisma.payment.create({
       data: {
         enrollmentId: enrollmentId,
+        userId: userId,
         transactionId: transactionId,
         paymentMethod: 'PENDING', // Sera mis à jour après paiement
         gateway: 'CINETPAY',
@@ -80,8 +123,8 @@ exports.initiatePayment = async (req, res, next) => {
         paymentUrl: paymentResult.data.paymentUrl,
         paymentData: paymentResult.data,
         ipAddress: req.ip,
-        userAgent: req.get('user-agent')
-      }
+        userAgent: req.get('user-agent'),
+      },
     });
 
     res.json({
@@ -89,8 +132,8 @@ exports.initiatePayment = async (req, res, next) => {
       data: {
         paymentId: payment.id,
         paymentUrl: paymentResult.data.paymentUrl,
-        transactionId: transactionId
-      }
+        transactionId: transactionId,
+      },
     });
   } catch (error) {
     next(error);
@@ -112,7 +155,7 @@ exports.handleWebhook = async (req, res, next) => {
       console.error('Invalid webhook signature');
       return res.status(401).json({
         success: false,
-        error: 'Signature invalide'
+        error: 'Signature invalide',
       });
     }
 
@@ -122,7 +165,7 @@ exports.handleWebhook = async (req, res, next) => {
       cpm_amount: amount,
       cpm_currency: currency,
       payment_method: paymentMethod,
-      operator_id: operatorId
+      operator_id: operatorId,
     } = webhookData;
 
     // Récupérer le paiement
@@ -132,17 +175,17 @@ exports.handleWebhook = async (req, res, next) => {
         enrollment: {
           include: {
             training: true,
-            user: true
-          }
-        }
-      }
+            user: true,
+          },
+        },
+      },
     });
 
     if (!payment) {
       console.error('Payment not found:', transactionId);
       return res.status(404).json({
         success: false,
-        error: 'Paiement non trouvé'
+        error: 'Paiement non trouvé',
       });
     }
 
@@ -158,8 +201,8 @@ exports.handleWebhook = async (req, res, next) => {
             paymentMethod: paymentMethod,
             operatorId: operatorId,
             completedAt: new Date(),
-            paymentData: webhookData
-          }
+            paymentData: webhookData,
+          },
         }),
         // Mettre à jour l'inscription
         prisma.trainingEnrollment.update({
@@ -167,14 +210,13 @@ exports.handleWebhook = async (req, res, next) => {
           data: {
             paymentStatus: 'PAID',
             status: 'CONFIRMED',
-            paidAt: new Date()
-          }
-        })
+            paidAt: new Date(),
+          },
+        }),
       ]);
 
       // TODO: Envoyer email de confirmation
       console.log('Payment successful:', transactionId);
-
     } else if (status === '01' || status === 'REFUSED') {
       // Paiement refusé
       await prisma.payment.update({
@@ -182,8 +224,8 @@ exports.handleWebhook = async (req, res, next) => {
         data: {
           status: 'FAILED',
           failedAt: new Date(),
-          paymentData: webhookData
-        }
+          paymentData: webhookData,
+        },
       });
 
       console.log('Payment failed:', transactionId);
@@ -192,7 +234,7 @@ exports.handleWebhook = async (req, res, next) => {
     // Répondre à CinetPay
     res.json({
       success: true,
-      message: 'Webhook traité'
+      message: 'Webhook traité',
     });
   } catch (error) {
     console.error('Webhook error:', error);
@@ -214,7 +256,7 @@ exports.verifyPayment = async (req, res, next) => {
     if (!statusResult.success) {
       return res.status(404).json({
         success: false,
-        error: statusResult.error
+        error: statusResult.error,
       });
     }
 
@@ -222,14 +264,14 @@ exports.verifyPayment = async (req, res, next) => {
     const payment = await prisma.payment.findUnique({
       where: { transactionId: transactionId },
       include: {
-        enrollment: true
-      }
+        enrollment: true,
+      },
     });
 
     if (!payment) {
       return res.status(404).json({
         success: false,
-        error: 'Paiement non trouvé'
+        error: 'Paiement non trouvé',
       });
     }
 
@@ -241,17 +283,17 @@ exports.verifyPayment = async (req, res, next) => {
           data: {
             status: 'COMPLETED',
             paymentMethod: statusResult.data.paymentMethod,
-            completedAt: new Date()
-          }
+            completedAt: new Date(),
+          },
         }),
         prisma.trainingEnrollment.update({
           where: { id: payment.enrollmentId },
           data: {
             paymentStatus: 'PAID',
             status: 'CONFIRMED',
-            paidAt: new Date()
-          }
-        })
+            paidAt: new Date(),
+          },
+        }),
       ]);
     }
 
@@ -261,8 +303,8 @@ exports.verifyPayment = async (req, res, next) => {
         transactionId: transactionId,
         status: statusResult.data.status,
         amount: statusResult.data.amount,
-        paymentMethod: statusResult.data.paymentMethod
-      }
+        paymentMethod: statusResult.data.paymentMethod,
+      },
     });
   } catch (error) {
     next(error);

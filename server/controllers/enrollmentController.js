@@ -8,34 +8,36 @@ exports.createEnrollment = async (req, res, next) => {
 
     // Vérifier que la formation existe
     const training = await prisma.training.findUnique({
-      where: { id: trainingId }
+      where: { id: trainingId },
     });
 
     if (!training) {
       return res.status(404).json({
         success: false,
-        error: 'Formation non trouvée'
+        error: 'Formation non trouvée',
       });
     }
 
-    if (!training.isPublished || !training.isActive) {
+    if (!training.isPublished) {
       return res.status(400).json({
         success: false,
-        error: 'Cette formation n\'est pas disponible'
+        error: "Cette formation n'est pas disponible",
       });
     }
 
     // Vérifier si déjà inscrit
-    const existing = await prisma.trainingEnrollment.findUnique({
+    // Vérifier si déjà inscrit
+    const existing = await prisma.trainingEnrollment.findFirst({
       where: {
-        userId_trainingId: { userId, trainingId }
-      }
+        userId,
+        trainingId,
+      },
     });
 
     if (existing) {
       return res.status(400).json({
         success: false,
-        error: 'Vous êtes déjà inscrit à cette formation'
+        error: 'Vous êtes déjà inscrit à cette formation',
       });
     }
 
@@ -44,29 +46,29 @@ exports.createEnrollment = async (req, res, next) => {
       data: {
         userId,
         trainingId,
-        amount: training.cost,
+        amount: training.price || 0,
         status: 'PENDING',
-        paymentStatus: 'UNPAID'
+        paymentStatus: 'UNPAID',
       },
       include: {
         training: {
           include: {
-            category: true
-          }
-        }
-      }
+            category: true,
+          },
+        },
+      },
     });
 
-    // Incrémenter le compteur d'inscriptions
-    await prisma.training.update({
-      where: { id: trainingId },
-      data: { enrollments: { increment: 1 } }
-    });
+    // Incrémenter le compteur d'inscriptions - SUPPRIMÉ car le champ n'existe pas dans le schéma
+    // await prisma.training.update({
+    //   where: { id: trainingId },
+    //   data: { enrollmentCount: { increment: 1 } },
+    // });
 
-    res.status(201).json({
+    res.json({
       success: true,
       data: enrollment,
-      message: 'Inscription créée avec succès. Procédez au paiement pour confirmer.'
+      message: 'Inscription créée avec succès. Procédez au paiement pour confirmer.',
     });
   } catch (error) {
     next(error);
@@ -89,17 +91,17 @@ exports.getMyEnrollments = async (req, res, next) => {
       include: {
         training: {
           include: {
-            category: true
-          }
+            category: true,
+          },
         },
-        payment: true
+        payment: true,
       },
-      orderBy: { enrolledAt: 'desc' }
+      orderBy: { enrolledAt: 'desc' },
     });
 
     res.json({
       success: true,
-      data: enrollments
+      data: enrollments,
     });
   } catch (error) {
     next(error);
@@ -117,20 +119,20 @@ exports.getEnrollmentById = async (req, res, next) => {
       include: {
         training: {
           include: {
-            category: true
-          }
+            category: true,
+          },
         },
         payment: true,
         user: {
-          select: { firstName: true, lastName: true, email: true }
-        }
-      }
+          select: { firstName: true, lastName: true, email: true },
+        },
+      },
     });
 
     if (!enrollment) {
       return res.status(404).json({
         success: false,
-        error: 'Inscription non trouvée'
+        error: 'Inscription non trouvée',
       });
     }
 
@@ -138,13 +140,13 @@ exports.getEnrollmentById = async (req, res, next) => {
     if (enrollment.userId !== userId && req.user.role !== 'ADMIN') {
       return res.status(403).json({
         success: false,
-        error: 'Non autorisé'
+        error: 'Non autorisé',
       });
     }
 
     res.json({
       success: true,
-      data: enrollment
+      data: enrollment,
     });
   } catch (error) {
     next(error);
@@ -158,27 +160,27 @@ exports.cancelEnrollment = async (req, res, next) => {
     const userId = req.user.id;
 
     const enrollment = await prisma.trainingEnrollment.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!enrollment) {
       return res.status(404).json({
         success: false,
-        error: 'Inscription non trouvée'
+        error: 'Inscription non trouvée',
       });
     }
 
     if (enrollment.userId !== userId) {
       return res.status(403).json({
         success: false,
-        error: 'Non autorisé'
+        error: 'Non autorisé',
       });
     }
 
     if (enrollment.paymentStatus === 'PAID') {
       return res.status(400).json({
         success: false,
-        error: 'Impossible d\'annuler une inscription déjà payée. Contactez l\'administration.'
+        error: "Impossible d'annuler une inscription déjà payée. Contactez l'administration.",
       });
     }
 
@@ -186,14 +188,14 @@ exports.cancelEnrollment = async (req, res, next) => {
       where: { id },
       data: {
         status: 'CANCELLED',
-        cancelledAt: new Date()
-      }
+        cancelledAt: new Date(),
+      },
     });
 
     res.json({
       success: true,
       data: updated,
-      message: 'Inscription annulée'
+      message: 'Inscription annulée',
     });
   } catch (error) {
     next(error);
@@ -206,20 +208,20 @@ exports.completeEnrollment = async (req, res, next) => {
     const { id } = req.params;
 
     const enrollment = await prisma.trainingEnrollment.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!enrollment) {
       return res.status(404).json({
         success: false,
-        error: 'Inscription non trouvée'
+        error: 'Inscription non trouvée',
       });
     }
 
     if (enrollment.paymentStatus !== 'PAID') {
       return res.status(400).json({
         success: false,
-        error: 'Le paiement doit être confirmé avant de marquer comme complété'
+        error: 'Le paiement doit être confirmé avant de marquer comme complété',
       });
     }
 
@@ -227,14 +229,14 @@ exports.completeEnrollment = async (req, res, next) => {
       where: { id },
       data: {
         status: 'COMPLETED',
-        completedAt: new Date()
-      }
+        completedAt: new Date(),
+      },
     });
 
     res.json({
       success: true,
       data: updated,
-      message: 'Formation marquée comme complétée'
+      message: 'Formation marquée comme complétée',
     });
   } catch (error) {
     next(error);

@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
-import { toast } from 'sonner';
-import { Clock, MapPin, Users, Star, Bookmark, BookmarkCheck } from 'lucide-react';
-import { Link } from 'react-router';
+import { Bookmark, BookmarkCheck, Clock, MapPin, Star, Users } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router';
+import { toast } from 'sonner';
 import { useAuthStore } from '../../stores/authStore';
 import { useTrainingStore } from '../../stores/trainingStore';
 
@@ -10,14 +10,14 @@ const TrainingCard = ({ training, showBookmark = true }) => {
   const { user } = useAuthStore();
   const { toggleBookmark, trainings } = useTrainingStore();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Récupérer le statut de bookmark depuis le store
   const isBookmarked = training.isBookmarked || false;
 
   const handleBookmark = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!user) {
       // Rediriger vers connexion
       window.location.href = '/connexion';
@@ -27,14 +27,14 @@ const TrainingCard = ({ training, showBookmark = true }) => {
     setIsLoading(true);
     try {
       const response = await toggleBookmark(training.id);
-      
+
       // Le toast est maintenant géré dans le store
       if (response.bookmarked) {
         toast.success('Formation ajoutée aux favoris');
       } else {
         toast.info('Formation retirée des favoris');
       }
-      
+
       return response;
     } catch (error) {
       console.error('Erreur bookmark:', error);
@@ -51,14 +51,15 @@ const TrainingCard = ({ training, showBookmark = true }) => {
       style: 'currency',
       currency: 'XOF',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(price);
   };
 
   // Calculer la réduction (uniquement si originalCost est défini et supérieur au prix actuel)
-  const discount = training.originalCost && training.originalCost > training.price && training.price > 0
-    ? Math.round(((training.originalCost - training.price) / training.originalCost) * 100)
-    : 0;
+  const discount =
+    training.originalCost && training.originalCost > training.price && training.price > 0
+      ? Math.round(((training.originalCost - training.price) / training.originalCost) * 100)
+      : 0;
 
   return (
     <motion.div
@@ -83,7 +84,7 @@ const TrainingCard = ({ training, showBookmark = true }) => {
                 <Users className="w-16 h-16 text-primary-300" />
               </div>
             )}
-            
+
             {/* Badge Featured */}
             {training.isFeatured && (
               <div className="absolute top-3 left-3 bg-secondary-500 text-primary-900 px-3 py-1 rounded-full text-xs font-semibold">
@@ -121,7 +122,7 @@ const TrainingCard = ({ training, showBookmark = true }) => {
               <span className="inline-block px-3 py-1 bg-primary-50 text-primary-800 rounded-full text-xs font-medium">
                 {training.category?.name || 'Formation'}
               </span>
-              
+
               {/* Note */}
               {training.averageRating > 0 && (
                 <div className="flex items-center space-x-1">
@@ -129,9 +130,7 @@ const TrainingCard = ({ training, showBookmark = true }) => {
                   <span className="text-sm font-semibold text-gray-700">
                     {training.averageRating.toFixed(1)}
                   </span>
-                  <span className="text-xs text-gray-500">
-                    ({training.reviewCount})
-                  </span>
+                  <span className="text-xs text-gray-500">({training.reviewCount})</span>
                 </div>
               )}
             </div>
@@ -142,9 +141,7 @@ const TrainingCard = ({ training, showBookmark = true }) => {
             </h3>
 
             {/* Description */}
-            <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-              {training.description}
-            </p>
+            <p className="text-sm text-gray-600 mb-4 line-clamp-3">{training.description}</p>
 
             {/* Infos */}
             <div className="space-y-2 mb-4">
@@ -152,7 +149,7 @@ const TrainingCard = ({ training, showBookmark = true }) => {
                 <Clock className="w-4 h-4 mr-2" />
                 <span>{training.duration}</span>
               </div>
-              
+
               {training.schedule && (
                 <div className="flex items-center text-sm text-gray-500">
                   <MapPin className="w-4 h-4 mr-2" />
@@ -177,14 +174,20 @@ const TrainingCard = ({ training, showBookmark = true }) => {
             <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-100">
               <div>
                 <div className="flex items-baseline space-x-2">
-                  <span className={`text-xl font-bold ${training.price === 0 ? 'text-green-600' : 'text-primary-800'}`}>
+                  <span
+                    className={`text-lg font-bold ${
+                      training.price === 0 ? 'text-green-600' : 'text-primary-800'
+                    }`}
+                  >
                     {formatPrice(training.price)}
                   </span>
-                  {training.originalCost && training.originalCost > training.price && training.price > 0 && (
-                    <span className="text-sm text-gray-400 line-through">
-                      {formatPrice(training.originalCost)}
-                    </span>
-                  )}
+                  {training.originalCost &&
+                    training.originalCost > training.price &&
+                    training.price > 0 && (
+                      <span className="text-xs text-gray-400 line-through">
+                        {formatPrice(training.originalCost)}
+                      </span>
+                    )}
                 </div>
               </div>
 

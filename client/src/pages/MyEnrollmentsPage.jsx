@@ -1,19 +1,19 @@
-import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router';
-import { 
-  GraduationCap, 
-  Clock, 
-  Calendar,
-  Download,
-  CheckCircle,
-  XCircle,
+import {
   AlertCircle,
-  CreditCard
+  Calendar,
+  CheckCircle,
+  Clock,
+  CreditCard,
+  Download,
+  GraduationCap,
+  XCircle,
 } from 'lucide-react';
-import { PageHeader, LoadingSpinner, EmptyState, Badge, Button } from '../components/ui';
-import { useEnrollmentStore } from '../stores/enrollmentStore';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router';
+import { Badge, Button, EmptyState, LoadingSpinner, PageHeader } from '../components/ui';
 import { useAuthStore } from '../stores/authStore';
+import { useEnrollmentStore } from '../stores/enrollmentStore';
 
 const MyEnrollmentsPage = () => {
   const { user } = useAuthStore();
@@ -30,8 +30,9 @@ const MyEnrollmentsPage = () => {
     const statusConfig = {
       PENDING: { variant: 'warning', label: 'En attente', icon: AlertCircle },
       ACTIVE: { variant: 'primary', label: 'En cours', icon: CheckCircle },
+      CONFIRMED: { variant: 'primary', label: 'Confirmée', icon: CheckCircle },
       COMPLETED: { variant: 'success', label: 'Terminée', icon: CheckCircle },
-      CANCELLED: { variant: 'default', label: 'Annulée', icon: XCircle }
+      CANCELLED: { variant: 'default', label: 'Annulée', icon: XCircle },
     };
 
     const config = statusConfig[status] || statusConfig.PENDING;
@@ -44,29 +45,24 @@ const MyEnrollmentsPage = () => {
       </Badge>
     );
   };
-
   const getPaymentBadge = (paymentStatus) => {
     const paymentConfig = {
       UNPAID: { variant: 'danger', label: 'Non payé' },
       PENDING: { variant: 'warning', label: 'En attente' },
       PAID: { variant: 'success', label: 'Payé' },
-      REFUNDED: { variant: 'default', label: 'Remboursé' }
+      REFUNDED: { variant: 'default', label: 'Remboursé' },
     };
 
     const config = paymentConfig[paymentStatus] || paymentConfig.UNPAID;
 
-    return (
-      <Badge variant={config.variant}>
-        {config.label}
-      </Badge>
-    );
+    return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
   const formatDate = (dateString) => {
     return new Intl.DateTimeFormat('fr-FR', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     }).format(new Date(dateString));
   };
 
@@ -74,34 +70,21 @@ const MyEnrollmentsPage = () => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'XOF',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(price);
   };
-
-  const filteredEnrollments = enrollments.filter(enrollment => {
-    if (filter === 'all') return true;
-    if (filter === 'active') return enrollment.status === 'ACTIVE';
-    if (filter === 'completed') return enrollment.status === 'COMPLETED';
-    if (filter === 'cancelled') return enrollment.status === 'CANCELLED';
-    return true;
-  });
 
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <PageHeader 
-          title="Mes Inscriptions"
-          subtitle="Gérez vos formations"
-        />
+        <PageHeader title="Mes Inscriptions" subtitle="Gérez vos formations" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <EmptyState
             icon={GraduationCap}
             title="Connexion requise"
             description="Vous devez être connecté pour voir vos inscriptions."
             action={
-              <Button onClick={() => window.location.href = '/connexion'}>
-                Se connecter
-              </Button>
+              <Button onClick={() => (window.location.href = '/connexion')}>Se connecter</Button>
             }
           />
         </div>
@@ -113,15 +96,20 @@ const MyEnrollmentsPage = () => {
     return <LoadingSpinner fullScreen />;
   }
 
+  const filteredEnrollments = enrollments.filter((e) => {
+    if (filter === 'all') return true;
+    if (filter === 'active') return e.status === 'ACTIVE' || e.status === 'CONFIRMED';
+    if (filter === 'completed') return e.status === 'COMPLETED';
+    if (filter === 'cancelled') return e.status === 'CANCELLED';
+    return false;
+  });
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <PageHeader 
+      <PageHeader
         title="Mes Inscriptions"
         subtitle="Gérez vos formations et téléchargez vos certificats"
-        breadcrumbs={[
-          { label: 'Accueil', href: '/' },
-          { label: 'Mes Inscriptions' }
-        ]}
+        breadcrumbs={[{ label: 'Accueil', href: '/' }, { label: 'Mes Inscriptions' }]}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -131,7 +119,7 @@ const MyEnrollmentsPage = () => {
             { id: 'all', label: 'Toutes' },
             { id: 'active', label: 'En cours' },
             { id: 'completed', label: 'Terminées' },
-            { id: 'cancelled', label: 'Annulées' }
+            { id: 'cancelled', label: 'Annulées' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -144,13 +132,18 @@ const MyEnrollmentsPage = () => {
             >
               {tab.label}
               <span className="ml-2 text-sm">
-                ({enrollments.filter(e => {
-                  if (tab.id === 'all') return true;
-                  if (tab.id === 'active') return e.status === 'ACTIVE';
-                  if (tab.id === 'completed') return e.status === 'COMPLETED';
-                  if (tab.id === 'cancelled') return e.status === 'CANCELLED';
-                  return false;
-                }).length})
+                (
+                {
+                  enrollments.filter((e) => {
+                    if (tab.id === 'all') return true;
+                    if (tab.id === 'active')
+                      return e.status === 'ACTIVE' || e.status === 'CONFIRMED';
+                    if (tab.id === 'completed') return e.status === 'COMPLETED';
+                    if (tab.id === 'cancelled') return e.status === 'CANCELLED';
+                    return false;
+                  }).length
+                }
+                )
               </span>
             </button>
           ))}
@@ -164,13 +157,17 @@ const MyEnrollmentsPage = () => {
             description={
               filter === 'all'
                 ? "Vous n'êtes inscrit à aucune formation pour le moment."
-                : `Vous n'avez aucune formation ${filter === 'active' ? 'en cours' : filter === 'completed' ? 'terminée' : 'annulée'}.`
+                : `Vous n'avez aucune formation ${
+                    filter === 'active'
+                      ? 'en cours'
+                      : filter === 'completed'
+                      ? 'terminée'
+                      : 'annulée'
+                  }.`
             }
             action={
               <Link to="/formations">
-                <Button>
-                  Parcourir les formations
-                </Button>
+                <Button>Parcourir les formations</Button>
               </Link>
             }
           />
@@ -190,7 +187,7 @@ const MyEnrollmentsPage = () => {
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-3">
                         <div>
-                          <Link 
+                          <Link
                             to={`/formations/${enrollment.training.id}`}
                             className="text-xl font-bold text-gray-900 hover:text-primary-800 transition-colors"
                           >
@@ -209,7 +206,8 @@ const MyEnrollmentsPage = () => {
                         </div>
                         <div className="flex items-center">
                           <Clock className="w-4 h-4 mr-2" />
-                          {enrollment.training.duration} {enrollment.training.durationUnit === 'hours' ? 'heures' : 'jours'}
+                          {enrollment.training.duration}{' '}
+                          {enrollment.training.durationUnit === 'hours' ? 'heures' : 'jours'}
                         </div>
                         <div className="flex items-center">
                           <CreditCard className="w-4 h-4 mr-2" />
@@ -225,7 +223,7 @@ const MyEnrollmentsPage = () => {
 
                     {/* Actions */}
                     <div className="flex flex-col gap-2 lg:w-48">
-                      <Link to={`/trainings/${enrollment.training.id}`}>
+                      <Link to={`/formations/${enrollment.training.id}`}>
                         <Button variant="outline" size="sm" className="w-full">
                           Voir la formation
                         </Button>
@@ -243,16 +241,17 @@ const MyEnrollmentsPage = () => {
                         </Button>
                       )}
 
-                      {enrollment.paymentStatus === 'UNPAID' && enrollment.status !== 'CANCELLED' && (
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          className="w-full"
-                          onClick={() => window.location.href = `/payment/${enrollment.id}`}
-                        >
-                          Payer maintenant
-                        </Button>
-                      )}
+                      {enrollment.paymentStatus === 'UNPAID' &&
+                        enrollment.status !== 'CANCELLED' && (
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => (window.location.href = `/inscription/${enrollment.id}`)}
+                          >
+                            Payer maintenant
+                          </Button>
+                        )}
                     </div>
                   </div>
 
@@ -264,7 +263,7 @@ const MyEnrollmentsPage = () => {
                         <span className="font-semibold">75%</span>
                       </div>
                       <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="h-full bg-gradient-to-r from-primary-600 to-secondary-500 transition-all duration-300"
                           style={{ width: '75%' }}
                         />

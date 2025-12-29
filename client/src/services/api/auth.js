@@ -1,21 +1,23 @@
-import axios from 'axios';
+import { createApiInstance } from '../apiConfig';
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+// Create instance with custom refresh logic for auth
+const api = createApiInstance();
 
-// Instance axios avec configuration
-const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true, // Important pour les cookies
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
-
-// Intercepteur pour gérer les erreurs et refresh token
+// Override response interceptor to add refresh token logic
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    // Handle CSRF errors first (from base config)
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.error?.includes('CSRF') &&
+      !originalRequest._retryCSRF
+    ) {
+      // This is handled by base apiConfig, but we need to account for it
+      return Promise.reject(error);
+    }
 
     // Handle 401 - try to refresh token
     if (
@@ -30,12 +32,16 @@ api.interceptors.response.use(
         await api.post('/auth/refresh');
         return api(originalRequest);
       } catch (refreshError) {
-        // Clear cookies and redirect
+        // Clear cookies
         if (typeof window !== 'undefined') {
           document.cookie = 'auth_token=; Max-Age=0; path=/;';
           document.cookie = 'refresh_token=; Max-Age=0; path=/;';
-          
-          if (!originalRequest.url.includes('/auth/me')) {
+
+          // Only redirect if not already on login/register pages
+          const currentPath = window.location.pathname;
+          const authPages = ['/connexion', '/inscription', '/mot-de-passe-oublie'];
+
+          if (!authPages.includes(currentPath) && !originalRequest.url.includes('/auth/me')) {
             window.location.href = '/connexion';
           }
         }
@@ -172,5 +178,5 @@ export default {
   checkEmail,
   requestPasswordReset,
   resetPassword,
-  verifyEmail
+  verifyEmail,
 };

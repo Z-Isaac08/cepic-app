@@ -1,12 +1,12 @@
-import { create } from "zustand";
-import * as authAPI from "../services/api/auth";
+import { create } from 'zustand';
+import * as authAPI from '../services/api/auth';
 
 export const useAuthStore = create((set, get) => ({
   // State
   user: null,
   loading: false,
   error: null,
-  tempToken: "", // For 2FA flow
+  tempToken: '', // For 2FA flow
   awaitingTwoFA: false,
 
   // Actions
@@ -14,13 +14,7 @@ export const useAuthStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await authAPI.loginExistingUser(email, password);
-      
-      console.log('=== LOGIN RESPONSE ===');
-      console.log('Full response:', response);
-      console.log('Response data:', response.data);
-      console.log('User from response:', response.data?.user);
-      console.log('=====================');
-      
+
       // If 2FA required
       if (response.data.tempToken) {
         set({
@@ -30,20 +24,17 @@ export const useAuthStore = create((set, get) => ({
         });
         return { requiresTwoFA: true };
       }
-      
+
       // Direct login (no 2FA)
       set({
         user: response.data.user,
         loading: false,
       });
-      
-      console.log('User set in store:', response.data.user);
-      console.log('Current store state:', get());
-      
+
       return { success: true };
     } catch (error) {
       console.error('Login error:', error);
-      const errorMessage = error.response?.data?.error || "Login failed";
+      const errorMessage = error.response?.data?.error || 'Login failed';
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
@@ -59,7 +50,7 @@ export const useAuthStore = create((set, get) => ({
         password,
         phone,
       });
-      
+
       // If 2FA required after registration
       if (response.data.tempToken) {
         set({
@@ -69,7 +60,7 @@ export const useAuthStore = create((set, get) => ({
         });
         return { requiresTwoFA: true };
       }
-      
+
       // Direct registration
       set({
         user: response.data.user,
@@ -77,7 +68,7 @@ export const useAuthStore = create((set, get) => ({
       });
       return { success: true };
     } catch (error) {
-      const errorMessage = error.response?.data?.error || "Registration failed";
+      const errorMessage = error.response?.data?.error || 'Registration failed';
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
@@ -88,16 +79,16 @@ export const useAuthStore = create((set, get) => ({
     try {
       const { tempToken } = get();
       const response = await authAPI.verify2FA(tempToken, code);
-      
+
       set({
         user: response.data.user,
         awaitingTwoFA: false,
-        tempToken: "",
+        tempToken: '',
         loading: false,
       });
       return { success: true };
     } catch (error) {
-      const errorMessage = error.response?.data?.error || "Invalid code";
+      const errorMessage = error.response?.data?.error || 'Invalid code';
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
@@ -111,7 +102,7 @@ export const useAuthStore = create((set, get) => ({
       set({ loading: false });
       return { success: true };
     } catch (error) {
-      const errorMessage = error.response?.data?.error || "Failed to resend code";
+      const errorMessage = error.response?.data?.error || 'Failed to resend code';
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
@@ -121,11 +112,11 @@ export const useAuthStore = create((set, get) => ({
     try {
       await authAPI.logout();
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error('Logout error:', error);
     } finally {
       set({
         user: null,
-        tempToken: "",
+        tempToken: '',
         awaitingTwoFA: false,
         error: null,
       });
@@ -151,10 +142,11 @@ export const useAuthStore = create((set, get) => ({
   },
 
   clearError: () => set({ error: null }),
-  
-  cancelTwoFA: () => set({ 
-    awaitingTwoFA: false, 
-    tempToken: "", 
-    error: null 
-  }),
+
+  cancelTwoFA: () =>
+    set({
+      awaitingTwoFA: false,
+      tempToken: '',
+      error: null,
+    }),
 }));

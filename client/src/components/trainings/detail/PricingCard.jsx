@@ -1,27 +1,16 @@
 import { motion } from 'framer-motion';
-import { toast } from 'sonner';
-import { 
-  GraduationCap, 
-  Clock, 
-  Users, 
-  Award, 
-  Download, 
-  Share2,
-  Bookmark,
-  BookmarkCheck,
-  CheckCircle,
-  Infinity
-} from 'lucide-react';
-import { Button, Badge } from '../../ui';
+import { Bookmark, BookmarkCheck, CheckCircle, Download, Share2, Users } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { useAuthStore } from '../../../stores/authStore';
 import { useTrainingStore } from '../../../stores/trainingStore';
+import { Badge, Button } from '../../ui';
 
 const PricingCard = ({ training }) => {
   const { user } = useAuthStore();
   const { toggleBookmark, trainings } = useTrainingStore();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Récupérer le statut de bookmark depuis le store
   const isBookmarked = training.isBookmarked || false;
 
@@ -30,7 +19,7 @@ const PricingCard = ({ training }) => {
       e.preventDefault();
       e.stopPropagation();
     }
-    
+
     if (!user) {
       window.location.href = '/connexion';
       return;
@@ -39,14 +28,14 @@ const PricingCard = ({ training }) => {
     setIsLoading(true);
     try {
       const response = await toggleBookmark(training.id);
-      
+
       // Le toast est géré dans le store
       if (response.bookmarked) {
         toast.success('Formation ajoutée aux favoris');
       } else {
         toast.info('Formation retirée des favoris');
       }
-      
+
       return response;
     } catch (error) {
       console.error('Erreur bookmark:', error);
@@ -61,7 +50,7 @@ const PricingCard = ({ training }) => {
       navigator.share({
         title: training.title,
         text: training.description,
-        url: window.location.href
+        url: window.location.href,
       });
     } else {
       // Fallback: copy to clipboard
@@ -76,7 +65,7 @@ const PricingCard = ({ training }) => {
       return;
     }
     // Navigate to enrollment page or open modal
-    window.location.href = `/enroll/${training.id}`;
+    window.location.href = `/inscription/${training.id}`;
   };
 
   // Format price (en FCFA)
@@ -88,14 +77,15 @@ const PricingCard = ({ training }) => {
       style: 'currency',
       currency: 'XOF',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(price);
   };
 
   // Calculate discount (only if originalCost is defined and greater than current price)
-  const discount = training.originalCost && training.originalCost > training.price && training.price > 0
-    ? Math.round(((training.originalCost - training.price) / training.originalCost) * 100)
-    : 0;
+  const discount =
+    training.originalCost && training.originalCost > training.price && training.price > 0
+      ? Math.round(((training.originalCost - training.price) / training.originalCost) * 100)
+      : 0;
 
   return (
     <motion.div
@@ -108,14 +98,20 @@ const PricingCard = ({ training }) => {
       <div className="p-6 bg-gradient-to-br from-primary-50 to-white">
         <div className="flex items-baseline justify-between mb-4">
           <div className="flex flex-col">
-            <span className={`text-4xl font-bold ${training.price === 0 ? 'text-green-600' : 'text-primary-800'}`}>
+            <span
+              className={`text-4xl font-bold ${
+                training.price === 0 ? 'text-green-600' : 'text-primary-800'
+              }`}
+            >
               {formatPrice(training.price)}
             </span>
-            {training.originalCost && training.originalCost > training.price && training.price > 0 && (
-              <span className="text-lg text-gray-400 line-through">
-                {formatPrice(training.originalCost)}
-              </span>
-            )}
+            {training.originalCost &&
+              training.originalCost > training.price &&
+              training.price > 0 && (
+                <span className="text-lg text-gray-400 line-through">
+                  {formatPrice(training.originalCost)}
+                </span>
+              )}
           </div>
           {discount > 0 && (
             <Badge variant="accent" className="text-lg px-3 py-1">
@@ -126,14 +122,10 @@ const PricingCard = ({ training }) => {
 
         {/* CTA Buttons */}
         <div className="space-y-3">
-          <Button 
-            size="lg" 
-            className="w-full"
-            onClick={handleEnroll}
-          >
+          <Button size="lg" className="w-full" onClick={handleEnroll}>
             S'inscrire maintenant
           </Button>
-          
+
           <div className="grid grid-cols-2 gap-2">
             <Button
               variant="outline"
@@ -149,12 +141,7 @@ const PricingCard = ({ training }) => {
               )}
               {isBookmarked ? 'Sauvegardé' : 'Sauvegarder'}
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleShare}
-              className="w-full"
-            >
+            <Button variant="outline" size="sm" onClick={handleShare} className="w-full">
               <Share2 className="w-4 h-4 mr-1" />
               Partager
             </Button>
@@ -163,47 +150,31 @@ const PricingCard = ({ training }) => {
       </div>
 
       {/* Features */}
-      <div className="p-6 border-t border-gray-200">
-        <h4 className="font-semibold text-gray-900 mb-4">Cette formation inclut :</h4>
+      <div className="p-6 bg-white border-t border-gray-100">
+        <h4 className="text-sm font-medium text-gray-900 mb-4">Ce qui est inclus :</h4>
         <ul className="space-y-3">
           <li className="flex items-start">
             <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
-            <span className="text-sm text-gray-700">
-              {training.duration} {training.durationUnit === 'hours' ? 'heures' : 'jours'} de contenu
-            </span>
+            <span className="text-sm text-gray-700">Accès illimité au contenu</span>
           </li>
           <li className="flex items-start">
             <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
-            <span className="text-sm text-gray-700">
-              Accès à vie au contenu
-            </span>
+            <span className="text-sm text-gray-700">Certificat de fin de formation</span>
           </li>
           <li className="flex items-start">
             <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
-            <span className="text-sm text-gray-700">
-              Certificat de fin de formation
-            </span>
-          </li>
-          <li className="flex items-start">
-            <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
-            <span className="text-sm text-gray-700">
-              Support et assistance
-            </span>
+            <span className="text-sm text-gray-700">Support et assistance</span>
           </li>
           {training.hasDownloadableResources && (
             <li className="flex items-start">
               <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
-              <span className="text-sm text-gray-700">
-                Ressources téléchargeables
-              </span>
+              <span className="text-sm text-gray-700">Ressources téléchargeables</span>
             </li>
           )}
           {training.deliveryMode === 'ONLINE' && (
             <li className="flex items-start">
               <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
-              <span className="text-sm text-gray-700">
-                Accessible sur mobile et tablette
-              </span>
+              <span className="text-sm text-gray-700">Accessible sur mobile et tablette</span>
             </li>
           )}
         </ul>
@@ -222,29 +193,12 @@ const PricingCard = ({ training }) => {
             </span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600 flex items-center">
-              <Clock className="w-4 h-4 mr-2" />
-              Durée
-            </span>
-            <span className="font-semibold text-gray-900">
-              {training.duration} {training.durationUnit === 'hours' ? 'h' : 'j'}
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600 flex items-center">
-              <Award className="w-4 h-4 mr-2" />
-              Niveau
-            </span>
-            <span className="font-semibold text-gray-900">
-              {training.level}
-            </span>
+            <span className="font-semibold text-gray-900">{training.level}</span>
           </div>
           {training.language && (
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600">Langue</span>
-              <span className="font-semibold text-gray-900">
-                {training.language}
-              </span>
+              <span className="font-semibold text-gray-900">{training.language}</span>
             </div>
           )}
         </div>

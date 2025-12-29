@@ -18,24 +18,24 @@ class EmailService {
       this.isConfigured = false;
       console.log('📧 Email Service: Development mode - emails will be logged to console');
     }
-    
+
     // Informations CEPIC
     this.cepicInfo = {
       name: 'CEPIC',
-      fullName: 'Centre d\'Expertise et de Perfectionnement Ivoire Compétences',
+      fullName: "Centre d'Expertise et de Perfectionnement Ivoire Compétences",
       email: process.env.EMAIL_USER || 'contact@cepic.ci',
       phone: '+225 07 00 00 00 00',
-      address: 'Cocody M\'Badon village, Abidjan, Côte d\'Ivoire',
+      address: "Cocody M'Badon village, Abidjan, Côte d'Ivoire",
       website: 'https://cepic.ci',
       colors: {
         primary: '#1e3a5f',
         secondary: '#f59e0b',
         success: '#10b981',
-        danger: '#ef4444'
-      }
+        danger: '#ef4444',
+      },
     };
   }
-  
+
   // Template HTML de base
   getEmailTemplate(content, title = '') {
     return `
@@ -53,11 +53,15 @@ class EmailService {
               <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <!-- Header -->
                 <tr>
-                  <td style="background: linear-gradient(135deg, ${this.cepicInfo.colors.primary} 0%, #2563eb 100%); padding: 40px 30px; text-align: center;">
+                  <td style="background: linear-gradient(135deg, ${
+                    this.cepicInfo.colors.primary
+                  } 0%, #2563eb 100%); padding: 40px 30px; text-align: center;">
                     <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">
                       ${this.cepicInfo.name}
                     </h1>
-                    <p style="color: ${this.cepicInfo.colors.secondary}; margin: 5px 0 0 0; font-size: 14px;">
+                    <p style="color: ${
+                      this.cepicInfo.colors.secondary
+                    }; margin: 5px 0 0 0; font-size: 14px;">
                       ${this.cepicInfo.fullName}
                     </p>
                   </td>
@@ -117,8 +121,12 @@ class EmailService {
       <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
         Voici votre code de vérification pour finaliser votre inscription :
       </p>
-      <div style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); padding: 30px; text-align: center; margin: 30px 0; border-radius: 8px; border: 2px dashed ${this.cepicInfo.colors.primary};">
-        <h1 style="color: ${this.cepicInfo.colors.primary}; margin: 0; font-size: 48px; letter-spacing: 10px; font-weight: bold;">${code}</h1>
+      <div style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); padding: 30px; text-align: center; margin: 30px 0; border-radius: 8px; border: 2px dashed ${
+        this.cepicInfo.colors.primary
+      };">
+        <h1 style="color: ${
+          this.cepicInfo.colors.primary
+        }; margin: 0; font-size: 48px; letter-spacing: 10px; font-weight: bold;">${code}</h1>
       </div>
       <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 0 0 10px 0;">
         ⏰ Ce code expire dans <strong>10 minutes</strong>.
@@ -136,7 +144,7 @@ class EmailService {
       from: `${this.cepicInfo.name} <${process.env.EMAIL_USER}>`,
       to: email,
       subject: `Code de vérification ${this.cepicInfo.name}`,
-      html: this.getEmailTemplate(content, 'Code de vérification')
+      html: this.getEmailTemplate(content, 'Code de vérification'),
     };
 
     try {
@@ -198,7 +206,7 @@ class EmailService {
       from: `${this.cepicInfo.name} <${process.env.EMAIL_USER}>`,
       to: email,
       subject: `Bienvenue au ${this.cepicInfo.name}!`,
-      html: this.getEmailTemplate(content, 'Bienvenue')
+      html: this.getEmailTemplate(content, 'Bienvenue'),
     };
 
     try {
@@ -233,24 +241,38 @@ class EmailService {
       <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
         Nous avons le plaisir de confirmer votre inscription à la formation suivante :
       </p>
-      <div style="background-color: #f9fafb; border-left: 4px solid ${this.cepicInfo.colors.primary}; padding: 20px; margin: 20px 0; border-radius: 4px;">
-        <h3 style="color: ${this.cepicInfo.colors.primary}; margin: 0 0 15px 0; font-size: 20px;">${trainingData.title}</h3>
+      <div style="background-color: #f9fafb; border-left: 4px solid ${
+        this.cepicInfo.colors.primary
+      }; padding: 20px; margin: 20px 0; border-radius: 4px;">
+        <h3 style="color: ${this.cepicInfo.colors.primary}; margin: 0 0 15px 0; font-size: 20px;">${
+      trainingData.title
+    }</h3>
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
             <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">📅 Durée :</td>
-            <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600;">${trainingData.duration} ${trainingData.durationUnit === 'hours' ? 'heures' : 'jours'}</td>
+            <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600;">${
+              trainingData.duration
+            } ${trainingData.durationUnit === 'hours' ? 'heures' : 'jours'}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">📍 Lieu :</td>
-            <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600;">${trainingData.location || 'À définir'}</td>
+            <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600;">${
+              trainingData.location || 'À définir'
+            }</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">💰 Montant :</td>
-            <td style="padding: 8px 0; color: ${this.cepicInfo.colors.success}; font-size: 16px; font-weight: bold;">${(trainingData.cost / 100).toLocaleString()} FCFA</td>
+            <td style="padding: 8px 0; color: ${
+              this.cepicInfo.colors.success
+            }; font-size: 16px; font-weight: bold;">${(
+      trainingData.cost / 100
+    ).toLocaleString()} FCFA</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">👨‍🏫 Formateur :</td>
-            <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600;">${trainingData.instructor || 'À définir'}</td>
+            <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600;">${
+              trainingData.instructor || 'À définir'
+            }</td>
           </tr>
         </table>
       </div>
@@ -262,13 +284,19 @@ class EmailService {
         <li>Préparez vos documents et matériels nécessaires</li>
         <li>Connectez-vous à votre espace personnel pour suivre votre progression</li>
       </ol>
-      <div style="background-color: #fef3c7; border-left: 4px solid ${this.cepicInfo.colors.secondary}; padding: 15px; margin: 20px 0; border-radius: 4px;">
+      <div style="background-color: #fef3c7; border-left: 4px solid ${
+        this.cepicInfo.colors.secondary
+      }; padding: 15px; margin: 20px 0; border-radius: 4px;">
         <p style="color: #92400e; font-size: 14px; line-height: 1.6; margin: 0;">
           <strong>💡 Conseil :</strong> Consultez régulièrement votre espace personnel pour ne manquer aucune information importante concernant votre formation.
         </p>
       </div>
       <div style="text-align: center; margin: 30px 0;">
-        <a href="${this.cepicInfo.website}/mes-inscriptions" style="display: inline-block; background-color: ${this.cepicInfo.colors.primary}; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">Voir mes inscriptions</a>
+        <a href="${
+          this.cepicInfo.website
+        }/mes-inscriptions" style="display: inline-block; background-color: ${
+      this.cepicInfo.colors.primary
+    }; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">Voir mes inscriptions</a>
       </div>
       <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 30px 0 0 0;">
         Nous sommes impatients de vous accompagner dans votre parcours de formation!<br><br>
@@ -281,7 +309,7 @@ class EmailService {
       from: `${this.cepicInfo.name} <${process.env.EMAIL_USER}>`,
       to: email,
       subject: `Confirmation d'inscription - ${trainingData.title}`,
-      html: this.getEmailTemplate(content, 'Confirmation d\'inscription')
+      html: this.getEmailTemplate(content, "Confirmation d'inscription"),
     };
 
     try {

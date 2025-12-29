@@ -13,7 +13,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { useAuthStore } from '../../stores/authStore';
 
 const NavBar = () => {
@@ -21,6 +21,7 @@ const NavBar = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, logout } = useAuthStore();
 
   const navigation = [
@@ -163,7 +164,7 @@ const NavBar = () => {
                           onClick={async () => {
                             await logout();
                             setUserMenuOpen(false);
-                            window.location.href = '/';
+                            navigate('/connexion');
                           }}
                           className="flex items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors w-full text-left"
                         >

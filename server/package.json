@@ -6,6 +6,10 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
+    "seed": "node prisma/seed-cepic.js",
+    "db:push": "npx prisma db push",
+    "db:seed": "npx prisma db push && node prisma/seed-cepic.js",
+    "prod": "npx prisma db push --skip-generate && node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

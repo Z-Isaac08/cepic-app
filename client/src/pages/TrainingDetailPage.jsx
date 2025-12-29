@@ -19,9 +19,11 @@ import ReviewSection from '../components/trainings/detail/ReviewSection';
 import TrainingHero from '../components/trainings/detail/TrainingHero';
 import { LoadingSpinner } from '../components/ui';
 import { useTrainingStore } from '../stores/trainingStore';
+import { useAuthStore } from '../stores/authStore';
 
 export default function TrainingDetailPage() {
   const { id } = useParams();
+  const { user } = useAuthStore();
   const { currentTraining, loading, fetchTrainingById } = useTrainingStore();
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export default function TrainingDetailPage() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <TrainingHero training={currentTraining} />
+      <TrainingHero training={currentTraining} user={user} />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

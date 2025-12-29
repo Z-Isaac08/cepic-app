@@ -216,6 +216,15 @@ POST /api/auth/forgot-password   # Mot de passe oublié
 POST /api/auth/reset-password    # Réinitialiser mot de passe
 ```
 
+### 🛡️ Sécurité & Monitoring
+
+```
+GET /api/csrf-token              # Obtenir token CSRF (v2.0)
+GET /health                      # Status serveur
+GET /health/live                 # Liveness probe (v2.0)
+GET /health/ready                # Readiness probe avec DB check (v2.0)
+```
+
 ### 📚 Library
 
 ```
@@ -295,14 +304,31 @@ Le système est prêt pour l'intégration avec :
 
 ## 🔒 Sécurité
 
+### Améliorations Récentes (v2.0 - Nov 2025)
+
+- **Protection CSRF renforcée** avec tokens cryptographiques
+- **Traçage des requêtes** via Request ID unique
+- **Validation stricte des fichiers** uploadés (whitelist + limites taille)
+- **Masquage des données sensibles** dans les logs
+- **En-têtes de sécurité avancés** (X-Frame-Options, Permissions-Policy, etc.)
+- **Health checks améliorés** (`/health/live`, `/health/ready`)
+
+### Mesures de Sécurité
+
 - **HTTPS uniquement** en production
 - **Cookies HTTP-only** et Secure
-- **Protection CSRF** intégrée
-- **Sanitisation XSS** automatique
-- **Limitation de taux** par IP
+- **Protection CSRF** avec tokens (endpoint `/api/csrf-token`)
+- **Sanitisation XSS** automatique via DOMPurify
+- **Limitation de taux** multi-niveaux (global, auth, strict)
 - **Hashage bcrypt** (12 rounds)
 - **Validation Zod** côté serveur
 - **Headers sécurisés** avec Helmet
+- **Request ID** pour traçage distribué
+- **Logs masqués** (mots de passe, tokens, emails)
+
+> 📖 Voir [docs/SECURITE_NOUVELLES_FONCTIONNALITES.md](./docs/SECURITE_NOUVELLES_FONCTIONNALITES.md) pour les détails techniques
+>
+> 👥 Guide admin non-technique: [docs/GUIDE_ADMINISTRATEUR.md](./docs/GUIDE_ADMINISTRATEUR.md)
 
 ## 📊 Monitoring & Logs
 

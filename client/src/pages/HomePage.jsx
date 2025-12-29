@@ -1,23 +1,14 @@
-import { motion } from "framer-motion";
-import {
-  Award,
-  GraduationCap,
-  Heart,
-  Lightbulb,
-  Target,
-  TrendingUp,
-  Users,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link } from "react-router";
-import { CategoryCard, TrainingCard } from "../components/trainings";
-import { Button, LoadingSpinner } from "../components/ui";
-import { CEPIC_INFO, VALUES } from "../config/cepic";
-import { useTrainingStore } from "../stores/trainingStore";
+import { motion } from 'framer-motion';
+import { Award, GraduationCap, Heart, Lightbulb, Target, TrendingUp, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router';
+import { CategoryCard, TrainingCard } from '../components/trainings';
+import { Button, LoadingSpinner } from '../components/ui';
+import { CEPIC_INFO, VALUES } from '../config/cepic';
+import { useTrainingStore } from '../stores/trainingStore';
 
 const HomePage = () => {
-  const { trainings, categories, loading, fetchTrainings, fetchCategories } =
-    useTrainingStore();
+  const { trainings, categories, loading, fetchTrainings, fetchCategories } = useTrainingStore();
   const [stats] = useState({
     trainings: 23,
     students: 500,
@@ -48,28 +39,6 @@ const HomePage = () => {
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
-          {/* Indicateur de défilement à droite */}
-          <div className="fixed right-8 bottom-1/2 transform translate-y-1/2 z-50">
-            <div className="flex flex-col items-center space-y-4">
-              <span className="text-sm font-medium text-white bg-primary-600/80 backdrop-blur-sm px-3 py-1 rounded-full">
-                Défiler
-              </span>
-              <div className="w-px h-16 bg-gradient-to-b from-primary-400 to-transparent"></div>
-              <svg 
-                className="w-5 h-5 text-white animate-bounce" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M19 14l-7 7m0 0l-7-7m7 7V3" 
-                />
-              </svg>
-            </div>
-          </div>
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <motion.div
@@ -84,33 +53,23 @@ const HomePage = () => {
               </div>
 
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                Développez vos{" "}
-                <span className="text-secondary-500">compétences</span> avec
-                CEPIC
+                Développez vos <span className="text-secondary-500">compétences</span> avec CEPIC
               </h1>
 
               <p className="text-xl text-white/90 mb-8 leading-relaxed">
-                {CEPIC_INFO.fullName} - Votre partenaire pour une formation de
-                qualité en Côte d'Ivoire
+                {CEPIC_INFO.fullName} - Votre partenaire pour une formation de qualité en Côte
+                d'Ivoire
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/formations">
-                  <Button
-                    size="lg"
-                    variant="secondary"
-                    className="w-full sm:w-auto"
-                  >
+                  <Button size="lg" variant="secondary" className="w-full sm:w-auto">
                     Découvrir nos formations
                     {/* <ArrowRight className="w-5 h-5" /> */}
                   </Button>
                 </Link>
                 <Link to="/a-propos">
-                  <Button
-                    size="lg"
-                    variant="outline-white"
-                    className="w-full sm:w-auto"
-                  >
+                  <Button size="lg" variant="outline-white" className="w-full sm:w-auto">
                     En savoir plus
                   </Button>
                 </Link>
@@ -119,21 +78,15 @@ const HomePage = () => {
               {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-6 mt-12">
                 <div>
-                  <div className="text-3xl font-bold text-secondary-500">
-                    {stats.trainings}+
-                  </div>
+                  <div className="text-3xl font-bold text-secondary-500">{stats.trainings}+</div>
                   <div className="text-sm text-white/80">Formations</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-secondary-500">
-                    {stats.students}+
-                  </div>
+                  <div className="text-3xl font-bold text-secondary-500">{stats.students}+</div>
                   <div className="text-sm text-white/80">Participants</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-secondary-500">
-                    {stats.satisfaction}%
-                  </div>
+                  <div className="text-3xl font-bold text-secondary-500">{stats.satisfaction}%</div>
                   <div className="text-sm text-white/80">Satisfaction</div>
                 </div>
               </div>
@@ -156,13 +109,48 @@ const HomePage = () => {
           </div>
         </div>
 
+        {/* Modern Scroll Indicator */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1, duration: 0.6 }}
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 cursor-pointer"
+          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+        >
+          <div className="flex flex-col items-center gap-3 group">
+            <span className="text-xs font-medium text-secondary-500 uppercase tracking-wider group-hover:text-secondary-400 transition-colors drop-shadow-lg">
+              Défiler
+            </span>
+            {/* Mouse Icon */}
+            <div className="relative w-6 h-10 border-2 border-secondary-500 rounded-full group-hover:border-secondary-400 transition-colors shadow-lg">
+              <motion.div
+                animate={{ y: [0, 12, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute top-2 left-1/2 transform -translate-x-1/2 w-1 h-2 bg-secondary-500 rounded-full"
+              />
+            </div>
+            {/* Down Arrow */}
+            <motion.svg
+              animate={{ y: [0, 5, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }}
+              className="w-4 h-4 text-secondary-500 group-hover:text-secondary-400 transition-colors drop-shadow-lg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </motion.svg>
+          </div>
+        </motion.div>
+
         {/* Wave Divider */}
         <div className="absolute bottom-0 left-0 right-0">
-          <svg
-            viewBox="0 0 1440 120"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
               fill="white"
@@ -184,8 +172,7 @@ const HomePage = () => {
               Formations à la une
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Découvrez nos formations les plus populaires et développez vos
-              compétences
+              Découvrez nos formations les plus populaires et développez vos compétences
             </p>
           </motion.div>
 
@@ -200,7 +187,7 @@ const HomePage = () => {
           )}
 
           <div className="text-center">
-            <Link to="/trainings">
+            <Link to="/formations">
               <Button variant="outline" size="lg">
                 Voir toutes les formations
                 {/* <ArrowRight className="ml-2 w-5 h-5" /> */}
@@ -228,12 +215,8 @@ const HomePage = () => {
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {categories.map((category, index) => (
-              <CategoryCard
-                key={category.id}
-                category={category}
-                index={index}
-              />
+            {categories.slice(0, 4).map((category, index) => (
+              <CategoryCard key={category.id} category={category} index={index} />
             ))}
           </div>
         </div>
@@ -278,9 +261,7 @@ const HomePage = () => {
                   <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <IconComponent className="w-8 h-8 text-primary-800" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    {value.title}
-                  </h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{value.title}</h3>
                   <p className="text-gray-600">{value.description}</p>
                 </motion.div>
               );
@@ -321,9 +302,7 @@ const HomePage = () => {
               transition={{ delay: 0.2 }}
             >
               <Target className="w-12 h-12 text-secondary-500 mx-auto mb-4" />
-              <div className="text-4xl font-bold mb-2">
-                {stats.satisfaction}%
-              </div>
+              <div className="text-4xl font-bold mb-2">{stats.satisfaction}%</div>
               <div className="text-white/80">Taux de satisfaction</div>
             </motion.div>
 
@@ -353,8 +332,8 @@ const HomePage = () => {
               Prêt à développer vos compétences ?
             </h2>
             <p className="text-lg text-gray-600 mb-8">
-              Rejoignez des centaines de professionnels qui ont fait confiance à
-              CEPIC pour leur formation
+              Rejoignez des centaines de professionnels qui ont fait confiance à CEPIC pour leur
+              formation
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -378,13 +357,13 @@ const HomePage = () => {
                   href={`tel:${CEPIC_INFO.phone.primary}`}
                   className="text-primary-800 hover:text-primary-900 font-medium"
                 >
-                  📞 {CEPIC_INFO.phone.primary}
+                  {CEPIC_INFO.phone.primary}
                 </a>
                 <a
                   href={`mailto:${CEPIC_INFO.email}`}
                   className="text-primary-800 hover:text-primary-900 font-medium"
                 >
-                  ✉️ {CEPIC_INFO.email}
+                  {CEPIC_INFO.email}
                 </a>
               </div>
             </div>

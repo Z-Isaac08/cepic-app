@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import * as trainingsAPI from '../services/api/trainings';
-import { useAuthStore } from './authStore';
 
 const useTrainingStore = create(
   devtools(
@@ -16,7 +15,7 @@ const useTrainingStore = create(
       filters: {
         category: null,
         search: '',
-        featured: false
+        featured: false,
       },
 
       // Actions - Formations
@@ -25,10 +24,10 @@ const useTrainingStore = create(
         try {
           // Récupérer les formations
           const response = await trainingsAPI.getAllTrainings(params || get().filters);
-          
+
           // Récupérer les favoris de l'utilisateur connecté
           let bookmarks = [];
-          
+
           // Vérifier si l'utilisateur est connecté via l'API
           try {
             const bookmarksResponse = await trainingsAPI.getMyBookmarks();
@@ -38,22 +37,21 @@ const useTrainingStore = create(
           } catch (err) {
             console.error('Erreur lors du chargement des favoris:', err);
           }
-          
+
           // Mettre à jour l'état avec les formations et les favoris
           set({
-            trainings: response.data.map(training => ({
+            trainings: response.data.map((training) => ({
               ...training,
-              isBookmarked: bookmarks.some(b => b.trainingId === training.id)
+              isBookmarked: bookmarks.some((b) => b.trainingId === training.id),
             })),
             bookmarks,
-            loading: false
+            loading: false,
           });
-          
         } catch (error) {
           console.error('Erreur lors du chargement des formations:', error);
-          set({ 
+          set({
             error: error.response?.data?.error || 'Erreur lors du chargement des formations',
-            loading: false 
+            loading: false,
           });
         }
       },
@@ -63,36 +61,36 @@ const useTrainingStore = create(
         try {
           // Récupérer les détails de la formation
           const response = await trainingsAPI.getTrainingById(id);
-          
+
           // Vérifier si l'utilisateur a mis en favori cette formation
           try {
             const bookmarksResponse = await trainingsAPI.getMyBookmarks();
-            const isBookmarked = bookmarksResponse?.data?.some(b => b.trainingId === id) || false;
-            
+            const isBookmarked = bookmarksResponse?.data?.some((b) => b.trainingId === id) || false;
+
             // Mettre à jour la formation avec le statut de bookmark
-            set({ 
-              currentTraining: { 
-                ...response.data, 
-                isBookmarked 
-              }, 
-              loading: false 
+            set({
+              currentTraining: {
+                ...response.data,
+                isBookmarked,
+              },
+              loading: false,
             });
           } catch (bookmarkError) {
             console.error('Erreur lors du chargement des favoris:', bookmarkError);
             // Si erreur, charger la formation sans le statut de bookmark
-            set({ 
-              currentTraining: { 
-                ...response.data, 
-                isBookmarked: false 
-              }, 
-              loading: false 
+            set({
+              currentTraining: {
+                ...response.data,
+                isBookmarked: false,
+              },
+              loading: false,
             });
           }
         } catch (error) {
           console.error('Erreur lors du chargement de la formation:', error);
-          set({ 
+          set({
             error: error.response?.data?.error || 'Formation non trouvée',
-            loading: false 
+            loading: false,
           });
         }
       },
@@ -102,8 +100,8 @@ const useTrainingStore = create(
           const response = await trainingsAPI.getCategories();
           set({ categories: response.data });
         } catch (error) {
-          set({ 
-            error: error.response?.data?.error || 'Erreur lors du chargement des catégories'
+          set({
+            error: error.response?.data?.error || 'Erreur lors du chargement des catégories',
           });
         }
       },
@@ -112,34 +110,36 @@ const useTrainingStore = create(
       toggleBookmark: async (id) => {
         try {
           const response = await trainingsAPI.toggleBookmark(id);
-          
+
           // Mettre à jour la liste des favoris
           if (response.bookmarked) {
             set((state) => ({
               bookmarks: [...state.bookmarks, { trainingId: id }],
               // Mettre à jour le statut de bookmark dans la liste des formations
-              trainings: state.trainings.map(training =>
+              trainings: state.trainings.map((training) =>
                 training.id === id ? { ...training, isBookmarked: true } : training
               ),
               // Mettre à jour la formation courante si c'est celle qui est affichée
-              currentTraining: state.currentTraining?.id === id 
-                ? { ...state.currentTraining, isBookmarked: true }
-                : state.currentTraining
+              currentTraining:
+                state.currentTraining?.id === id
+                  ? { ...state.currentTraining, isBookmarked: true }
+                  : state.currentTraining,
             }));
           } else {
             set((state) => ({
-              bookmarks: state.bookmarks.filter(b => b.trainingId !== id),
+              bookmarks: state.bookmarks.filter((b) => b.trainingId !== id),
               // Mettre à jour le statut de bookmark dans la liste des formations
-              trainings: state.trainings.map(training =>
+              trainings: state.trainings.map((training) =>
                 training.id === id ? { ...training, isBookmarked: false } : training
               ),
               // Mettre à jour la formation courante si c'est celle qui est affichée
-              currentTraining: state.currentTraining?.id === id
-                ? { ...state.currentTraining, isBookmarked: false }
-                : state.currentTraining
+              currentTraining:
+                state.currentTraining?.id === id
+                  ? { ...state.currentTraining, isBookmarked: false }
+                  : state.currentTraining,
             }));
           }
-          
+
           return response;
         } catch (error) {
           console.error('Erreur lors de la mise à jour du favori:', error);
@@ -153,9 +153,9 @@ const useTrainingStore = create(
           const response = await trainingsAPI.getMyBookmarks();
           set({ bookmarks: response.data, loading: false });
         } catch (error) {
-          set({ 
+          set({
             error: error.response?.data?.error || 'Erreur lors du chargement des favoris',
-            loading: false 
+            loading: false,
           });
         }
       },
@@ -164,17 +164,17 @@ const useTrainingStore = create(
       addReview: async (id, reviewData) => {
         try {
           const response = await trainingsAPI.addReview(id, reviewData);
-          
+
           // Mettre à jour la formation actuelle avec le nouvel avis
           if (get().currentTraining?.id === id) {
             set((state) => ({
               currentTraining: {
                 ...state.currentTraining,
-                reviews: [...(state.currentTraining.reviews || []), response.data]
-              }
+                reviews: [...(state.currentTraining.reviews || []), response.data],
+              },
             }));
           }
-          
+
           return response;
         } catch (error) {
           throw error;
@@ -188,12 +188,12 @@ const useTrainingStore = create(
       },
 
       resetFilters: () => {
-        set({ 
+        set({
           filters: {
             category: null,
             search: '',
-            featured: false
-          }
+            featured: false,
+          },
         });
         get().fetchTrainings();
       },
@@ -203,7 +203,7 @@ const useTrainingStore = create(
         try {
           const response = await trainingsAPI.createTraining(trainingData);
           set((state) => ({
-            trainings: [response.data, ...state.trainings]
+            trainings: [response.data, ...state.trainings],
           }));
           return response;
         } catch (error) {
@@ -215,10 +215,9 @@ const useTrainingStore = create(
         try {
           const response = await trainingsAPI.updateTraining(id, trainingData);
           set((state) => ({
-            trainings: state.trainings.map(t => 
-              t.id === id ? response.data : t
-            ),
-            currentTraining: state.currentTraining?.id === id ? response.data : state.currentTraining
+            trainings: state.trainings.map((t) => (t.id === id ? response.data : t)),
+            currentTraining:
+              state.currentTraining?.id === id ? response.data : state.currentTraining,
           }));
           return response;
         } catch (error) {
@@ -230,8 +229,8 @@ const useTrainingStore = create(
         try {
           await trainingsAPI.deleteTraining(id);
           set((state) => ({
-            trainings: state.trainings.filter(t => t.id !== id),
-            currentTraining: state.currentTraining?.id === id ? null : state.currentTraining
+            trainings: state.trainings.filter((t) => t.id !== id),
+            currentTraining: state.currentTraining?.id === id ? null : state.currentTraining,
           }));
         } catch (error) {
           throw error;
@@ -240,7 +239,7 @@ const useTrainingStore = create(
 
       // Utilitaires
       clearError: () => set({ error: null }),
-      clearCurrentTraining: () => set({ currentTraining: null })
+      clearCurrentTraining: () => set({ currentTraining: null }),
     }),
     { name: 'TrainingStore' }
   )

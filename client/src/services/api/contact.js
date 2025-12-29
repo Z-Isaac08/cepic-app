@@ -1,15 +1,4 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
-
-// Instance axios avec configuration
-const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
+import api from '../apiConfig';
 
 // ============================================
 // CONTACT
@@ -76,5 +65,5 @@ export default {
   getAllMessages,
   getMessageById,
   updateMessageStatus,
-  deleteMessage
+  deleteMessage,
 };

@@ -1,36 +1,39 @@
-import { lazy, Suspense, useEffect } from "react";
-import { Route, Routes } from "react-router";
-import { Toaster } from "sonner";
-import ErrorBoundary from "./components/errorboundary/ErrorBoundary";
-import Layout from "./components/layout/Layout";
-import { useAuthStore } from "./stores/authStore";
+import { lazy, Suspense, useEffect } from 'react';
+import { Route, Routes } from 'react-router';
+import { Toaster } from 'sonner';
+import ErrorBoundary from './components/errorboundary/ErrorBoundary';
+import Layout from './components/layout/Layout';
+import { useAuthStore } from './stores/authStore';
 
 // Pages dynamiques
-const HomePage = lazy(() => import("@pages/HomePage"));
-const MyBooksPage = lazy(() => import("@pages/MyBooksPage"));
-const AdminPage = lazy(() => import("@pages/AdminPage"));
+const HomePage = lazy(() => import('@pages/HomePage'));
+const MyBooksPage = lazy(() => import('@pages/MyBooksPage'));
+const AdminPage = lazy(() => import('@pages/AdminPage'));
 
 // Pages CEPIC
-const TrainingsPage = lazy(() => import("@pages/TrainingsPage"));
-const TrainingDetailPage = lazy(() => import("@pages/TrainingDetailPage"));
-const AboutPage = lazy(() => import("@pages/AboutPage"));
-const GalleryPage = lazy(() => import("@pages/GalleryPage"));
-const ContactPage = lazy(() => import("@pages/ContactPage"));
-const MyEnrollmentsPage = lazy(() => import("@pages/MyEnrollmentsPage"));
-const EnrollPage = lazy(() => import("@pages/EnrollPage"));
-const FavoritesPage = lazy(() => import("@pages/FavoritesPage"));
+const TrainingsPage = lazy(() => import('@pages/TrainingsPage'));
+const TrainingDetailPage = lazy(() => import('@pages/TrainingDetailPage'));
+const AboutPage = lazy(() => import('@pages/AboutPage'));
+const GalleryPage = lazy(() => import('@pages/GalleryPage'));
+const ContactPage = lazy(() => import('@pages/ContactPage'));
+const MyEnrollmentsPage = lazy(() => import('@pages/MyEnrollmentsPage'));
+const EnrollPage = lazy(() => import('@pages/EnrollPage'));
+const FavoritesPage = lazy(() => import('@pages/FavoritesPage'));
 
 // Auth Pages
-const LoginPage = lazy(() => import("@pages/LoginPage"));
-const RegisterPage = lazy(() => import("@pages/RegisterPage"));
+const LoginPage = lazy(() => import('@pages/LoginPage'));
+const RegisterPage = lazy(() => import('@pages/RegisterPage'));
+const LegalPage = lazy(() => import('@pages/LegalPage'));
+const ForgotPasswordPage = lazy(() => import('@pages/ForgotPasswordPage'));
 
 const AppContent = () => {
   const { checkAuth, loading } = useAuthStore();
 
   useEffect(() => {
-    // Check authentication on app startup
+    // Check authentication on app startup (only once)
     checkAuth();
-  }, [checkAuth]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Show loading spinner while checking auth status
   if (loading) {
@@ -60,7 +63,7 @@ const AppContent = () => {
               </Layout>
             }
           />
-          
+
           {/* Routes CEPIC - Formations */}
           <Route
             path="/formations"
@@ -78,7 +81,7 @@ const AppContent = () => {
               </Layout>
             }
           />
-          
+
           {/* Routes CEPIC - Pages */}
           <Route
             path="/a-propos"
@@ -104,13 +107,40 @@ const AppContent = () => {
               </Layout>
             }
           />
-          
+
           {/* Routes Auth (sans layout) */}
           <Route path="/connexion" element={<LoginPage />} />
           <Route path="/inscription" element={<RegisterPage />} />
-          
+          <Route path="/mot-de-passe-oublie" element={<ForgotPasswordPage />} />
+
+          {/* Routes légales */}
+          <Route
+            path="/conditions"
+            element={
+              <Layout>
+                <LegalPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/confidentialite"
+            element={
+              <Layout>
+                <LegalPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/mentions-legales"
+            element={
+              <Layout>
+                <LegalPage />
+              </Layout>
+            }
+          />
+
           {/* Routes protégées */}
-          <Route path="/enroll/:id" element={<EnrollPage />} />
+          <Route path="/inscription/:id" element={<EnrollPage />} />
           <Route
             path="/mes-inscriptions"
             element={

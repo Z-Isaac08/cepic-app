@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import {
+  ArrowLeft,
   BarChart3,
   BookOpen,
   GraduationCap,
@@ -8,13 +9,10 @@ import {
   LogOut,
   Menu,
   MessageSquare,
-  Settings,
   Users,
   X,
-  Home,
-  ArrowLeft
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router';
 import { useAuthStore } from '../stores/authStore';
 
@@ -44,7 +42,7 @@ const AdminPage = () => {
 
     // Ajouter l'écouteur d'événement
     window.addEventListener('resize', handleResize);
-    
+
     // Nettoyer l'écouteur d'événement lors du démontage du composant
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -96,18 +94,19 @@ const AdminPage = () => {
       <motion.aside
         initial={{ x: -300 }}
         animate={{ x: sidebarOpen ? 0 : -300 }}
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-primary-900 to-primary-800 text-white shadow-xl transition-transform duration-300`}
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-primary-900 to-primary-800 text-white shadow-xl transition-transform duration-300 flex flex-col h-screen max-h-screen`}
       >
         {/* Bouton de retour au site */}
         <a
           href="/"
-          className="flex items-center px-6 py-4 text-sm font-medium text-white hover:bg-primary-700 transition-colors duration-200"
+          className="flex items-center px-6 py-4 text-sm font-medium text-white hover:bg-primary-700 transition-colors duration-200 flex-shrink-0"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
           Retour au site
         </a>
+
         {/* Logo */}
-        <div className="p-6 border-b border-primary-700">
+        <div className="p-6 border-b border-primary-700 flex-shrink-0">
           <div className="flex items-center space-x-3">
             <img src="/logo_cepic.jpg" alt="CEPIC" className="w-10 h-10 rounded-lg object-cover" />
             <div>
@@ -117,8 +116,8 @@ const AdminPage = () => {
           </div>
         </div>
 
-        {/* Menu Items */}
-        <nav className="p-4 space-y-2">
+        {/* Menu Items - Scrollable */}
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -140,8 +139,8 @@ const AdminPage = () => {
           })}
         </nav>
 
-        {/* User Info & Logout */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-primary-700 overflow-hidden">
+        {/* User Info & Logout - Fixed at bottom */}
+        <div className="p-4 border-t border-primary-700 bg-primary-900/50 flex-shrink-0">
           <div className="flex items-center space-x-3 mb-3">
             <div className="w-10 h-10 bg-primary-700 rounded-full flex items-center justify-center">
               <span className="text-sm font-bold">
@@ -158,7 +157,7 @@ const AdminPage = () => {
           </div>
           <button
             onClick={handleLogout}
-            className="inline-flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+            className="w-full inline-flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
           >
             <LogOut className="w-4 h-4" />
             <span className="text-sm font-medium">Déconnexion</span>

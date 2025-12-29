@@ -1,27 +1,4 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
-
-// Instance axios avec configuration
-const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true, // Important pour les cookies
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
-
-// Intercepteur pour gérer les erreurs
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Rediriger vers connexion si non authentifié
-      window.location.href = '/connexion';
-    }
-    return Promise.reject(error);
-  }
-);
+import api from '../apiConfig';
 
 // ============================================
 // FORMATIONS
@@ -130,5 +107,5 @@ export default {
   addReview,
   createTraining,
   updateTraining,
-  deleteTraining
+  deleteTraining,
 };

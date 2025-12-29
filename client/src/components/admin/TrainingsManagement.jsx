@@ -13,7 +13,8 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import FocusLock from 'react-focus-lock';
 import { toast } from 'sonner';
 import { useAdminStore } from '../../stores/adminStore';
 
@@ -35,6 +36,7 @@ const TrainingsManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingTraining, setEditingTraining] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const previousFocusRef = useRef(null);
 
   // Formulaire simplifié selon le nouveau schéma
   const [formData, setFormData] = useState({
@@ -76,6 +78,9 @@ const TrainingsManagement = () => {
   }, [fetchTrainings, fetchCategories]);
 
   const handleOpenModal = (training = null) => {
+    // Sauvegarder l'élément qui a le focus actuellement
+    previousFocusRef.current = document.activeElement;
+
     if (training) {
       setEditingTraining(training);
       setFormData({
@@ -132,6 +137,11 @@ const TrainingsManagement = () => {
     setShowModal(false);
     setEditingTraining(null);
     setImagePreview(null);
+
+    // Retourner le focus à l'élément précédent
+    if (previousFocusRef.current) {
+      previousFocusRef.current.focus();
+    }
   };
 
   const handleImageChange = (e) => {
@@ -264,20 +274,22 @@ const TrainingsManagement = () => {
     try {
       // Mettre à jour le store
       const response = await toggleTrainingPublish(trainingId, currentStatus);
-      
+
       // Utiliser le statut de la réponse du serveur pour le message
       const isNowPublished = response.data?.isPublished;
-      
+
       // Afficher le message de succès avec le bon état
-      const message = isNowPublished ? 'Formation publiée avec succès' : 'Formation dépubliée avec succès';
+      const message = isNowPublished
+        ? 'Formation publiée avec succès'
+        : 'Formation dépubliée avec succès';
       toast.success(message);
-      
+
       // Rafraîchir les données pour s'assurer de la cohérence
       await fetchTrainings();
     } catch (error) {
       console.error('Error toggling publish:', error);
       toast.error(error.message || 'Erreur lors de la modification du statut de publication');
-      
+
       // En cas d'erreur, recharger les données pour revenir à l'état précédent
       await fetchTrainings();
     }
@@ -340,12 +352,15 @@ const TrainingsManagement = () => {
             onChange={(e) => setCategoryFilter(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           >
-            <option key="all" value="all">Toutes les catégories</option>
-            {Array.isArray(categories) && categories.map((cat) => (
-              <option key={`cat-${cat.id}`} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
+            <option key="all" value="all">
+              Toutes les catégories
+            </option>
+            {Array.isArray(categories) &&
+              categories.map((cat) => (
+                <option key={`cat-${cat.id}`} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
           </select>
         </div>
       </div>
@@ -469,26 +484,37 @@ const TrainingsManagement = () => {
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
             onClick={handleCloseModal}
+            aria-hidden="true"
           >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
-            >
-              {/* Modal Header */}
-              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-                <h3 className="text-xl font-bold text-gray-900">
-                  {editingTraining ? 'Éditer la formation' : 'Nouvelle formation'}
-                </h3>
-                <button
-                  onClick={handleCloseModal}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+            <FocusLock returnFocus>
+              <motion.div
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-title"
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    handleCloseModal();
+                  }
+                }}
+              >
+                {/* Modal Header */}
+                <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+                  <h3 id="modal-title" className="text-xl font-bold text-gray-900">
+                    {editingTraining ? 'Éditer la formation' : 'Nouvelle formation'}
+                  </h3>
+                  <button
+                    onClick={handleCloseModal}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    aria-label="Fermer la fenêtre"
+                  >
+                    <X className="w-5 h-5" aria-hidden="true" />
+                  </button>
+                </div>
 
               {/* Modal Body */}
               <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -501,12 +527,14 @@ const TrainingsManagement = () => {
 
                   {/* Titre */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
                       Titre <span className="text-red-500">*</span>
                     </label>
                     <input
+                      id="title"
                       type="text"
                       required
+                      autoFocus
                       value={formData.title}
                       onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
@@ -546,7 +574,7 @@ const TrainingsManagement = () => {
                       >
                         <option value="">Sélectionner...</option>
                         {categories.map((cat) => (
-                          <option key={cat.id} value={cat.id}>
+                          <option key={`form-cat-${cat.id}`} value={cat.id}>
                             {cat.name}
                           </option>
                         ))}
@@ -852,7 +880,8 @@ const TrainingsManagement = () => {
                   </button>
                 </div>
               </form>
-            </motion.div>
+              </motion.div>
+            </FocusLock>
           </motion.div>
         )}
       </AnimatePresence>

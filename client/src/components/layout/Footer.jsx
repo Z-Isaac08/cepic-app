@@ -145,7 +145,6 @@ const Footer = () => {
           <p className="text-gray-400 text-sm">
             © {new Date().getFullYear()} {CEPIC_INFO.shortName}. Tous droits réservés.
           </p>
-          <p className="text-gray-500 text-xs">Développé avec ❤️ pour l'excellence en formation</p>
         </div>
       </div>
     </footer>

@@ -161,6 +161,10 @@ const TwoFactorForm = () => {
                 error ? "border-red-400 ring-1 ring-red-400" : ""
               } ${digit ? "bg-white/30" : ""}`}
               disabled={loading}
+              aria-label={`Chiffre ${index + 1} sur 6`}
+              aria-invalid={error ? "true" : "false"}
+              inputMode="numeric"
+              pattern="[0-9]"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: index * 0.1 }}

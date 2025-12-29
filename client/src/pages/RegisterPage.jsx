@@ -1,44 +1,28 @@
-import { motion } from "framer-motion";
-import { toast } from "sonner";
-import {
-  Check,
-  Eye,
-  EyeOff,
-  GraduationCap,
-  Lock,
-  Mail,
-  Phone,
-  Shield,
-  User,
-} from "lucide-react";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router";
-import { Button } from "../components/ui";
-import { useAuthStore } from "../stores/authStore";
+import { motion } from 'framer-motion';
+import { Check, Eye, EyeOff, Lock, Mail, Phone, Shield, User } from 'lucide-react';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router';
+import { toast } from 'sonner';
+import { Button } from '../components/ui';
+import { CEPIC_INFO } from '../config/cepic';
+import { useAuthStore } from '../stores/authStore';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const {
-    register,
-    verifyTwoFA,
-    resendTwoFA,
-    cancelTwoFA,
-    loading,
-    error,
-    awaitingTwoFA,
-  } = useAuthStore();
+  const { register, verifyTwoFA, resendTwoFA, cancelTwoFA, loading, error, awaitingTwoFA } =
+    useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
   });
   const [formErrors, setFormErrors] = useState({});
-  const [twoFACode, setTwoFACode] = useState("");
+  const [twoFACode, setTwoFACode] = useState('');
 
   const handleChange = (e) => {
     setFormData({
@@ -49,7 +33,7 @@ const RegisterPage = () => {
     if (formErrors[e.target.name]) {
       setFormErrors({
         ...formErrors,
-        [e.target.name]: "",
+        [e.target.name]: '',
       });
     }
   };
@@ -58,11 +42,11 @@ const RegisterPage = () => {
     const errors = {};
 
     if (formData.password.length < 8) {
-      errors.password = "Le mot de passe doit contenir au moins 8 caractères";
+      errors.password = 'Le mot de passe doit contenir au moins 8 caractères';
     }
 
     if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = "Les mots de passe ne correspondent pas";
+      errors.confirmPassword = 'Les mots de passe ne correspondent pas';
     }
 
     setFormErrors(errors);
@@ -87,12 +71,12 @@ const RegisterPage = () => {
 
       // 2FA form will show automatically via awaitingTwoFA state
       if (result.requiresTwoFA) {
-        console.log("2FA required - showing verification form");
+        console.log('2FA required - showing verification form');
       } else if (result.success) {
-        navigate("/");
+        navigate('/');
       }
     } catch (err) {
-      console.error("Register error:", err);
+      console.error('Register error:', err);
     }
   };
 
@@ -100,32 +84,32 @@ const RegisterPage = () => {
     e.preventDefault();
     try {
       await verifyTwoFA(twoFACode);
-      navigate("/");
+      navigate('/');
     } catch (err) {
-      console.error("2FA verification error:", err);
+      console.error('2FA verification error:', err);
     }
   };
 
   const handleResendCode = async () => {
     try {
       await resendTwoFA();
-      toast.success("Code renvoyé avec succès!");
+      toast.success('Code renvoyé avec succès!');
     } catch (err) {
-      console.error("Resend error:", err);
-      toast.error("Erreur lors du renvoi du code");
+      console.error('Resend error:', err);
+      toast.error('Erreur lors du renvoi du code');
     }
   };
 
   const handleCancelTwoFA = () => {
     cancelTwoFA();
-    setTwoFACode("");
+    setTwoFACode('');
     setFormData({
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      password: "",
-      confirmPassword: "",
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      password: '',
+      confirmPassword: '',
     });
   };
 
@@ -140,24 +124,21 @@ const RegisterPage = () => {
             transition={{ delay: 0.2 }}
             className="text-center text-white"
           >
-            <img 
-              src="/logo_cepic.jpg" 
-              alt="Logo CEPIC" 
+            <img
+              src="/logo_cepic.jpg"
+              alt="Logo CEPIC"
               className="w-32 h-32 mx-auto mb-6 rounded-full border-4 border-secondary-500 shadow-lg"
             />
             <h1 className="text-4xl font-bold mb-4">Rejoignez {CEPIC_INFO.shortName}</h1>
             <p className="text-xl text-primary-100 mb-8 max-w-md mx-auto">
-              Commencez votre parcours de formation professionnelle dès
-              aujourd'hui
+              Commencez votre parcours de formation professionnelle dès aujourd'hui
             </p>
             <div className="space-y-4 text-left max-w-md mx-auto">
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-1">
                   <Check className="w-4 h-4 text-primary-900" />
                 </div>
-                <p className="text-primary-100">
-                  Accès à plus de 50 formations
-                </p>
+                <p className="text-primary-100">Accès à plus de 50 formations</p>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-1">
@@ -169,9 +150,7 @@ const RegisterPage = () => {
                 <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-1">
                   <Check className="w-4 h-4 text-primary-900" />
                 </div>
-                <p className="text-primary-100">
-                  Support et accompagnement personnalisé
-                </p>
+                <p className="text-primary-100">Support et accompagnement personnalisé</p>
               </div>
             </div>
           </motion.div>
@@ -185,30 +164,15 @@ const RegisterPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-md w-full space-y-8 py-12"
         >
-          {/* Logo */}
-          <div className="text-center">
-            <Link to="/" className="inline-flex items-center space-x-2">
-              <div className="w-12 h-12 bg-primary-800 rounded-lg flex items-center justify-center">
-                <GraduationCap className="w-7 h-7 text-secondary-500" />
-              </div>
-              <div className="text-left">
-                <div className="text-2xl font-bold text-primary-800">CEPIC</div>
-                <div className="text-xs text-gray-500">
-                  Formation professionnelle
-                </div>
-              </div>
-            </Link>
-          </div>
-
           {/* Title */}
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900">
-              {awaitingTwoFA ? "Vérification 2FA" : "Créer un compte"}
+              {awaitingTwoFA ? 'Vérification 2FA' : 'Créer un compte'}
             </h2>
             <p className="mt-2 text-gray-600">
               {awaitingTwoFA
-                ? "Entrez le code de vérification envoyé à votre email"
-                : "Inscrivez-vous gratuitement pour commencer"}
+                ? 'Entrez le code de vérification envoyé à votre email'
+                : 'Inscrivez-vous gratuitement pour commencer'}
             </p>
           </div>
 
@@ -244,9 +208,7 @@ const RegisterPage = () => {
                   id="twoFACode"
                   type="text"
                   value={twoFACode}
-                  onChange={(e) =>
-                    setTwoFACode(e.target.value.replace(/\D/g, "").slice(0, 6))
-                  }
+                  onChange={(e) => setTwoFACode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   className="block w-full px-4 py-3 text-center text-2xl tracking-widest border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors"
                   placeholder="000000"
                   maxLength={6}
@@ -345,10 +307,7 @@ const RegisterPage = () => {
 
               {/* Email */}
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                   Adresse email *
                 </label>
                 <div className="relative">
@@ -370,10 +329,7 @@ const RegisterPage = () => {
 
               {/* Phone */}
               <div>
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
                   Téléphone
                 </label>
                 <div className="relative">
@@ -394,10 +350,7 @@ const RegisterPage = () => {
 
               {/* Password */}
               <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                   Mot de passe *
                 </label>
                 <div className="relative">
@@ -407,12 +360,12 @@ const RegisterPage = () => {
                   <input
                     id="password"
                     name="password"
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     required
                     value={formData.password}
                     onChange={handleChange}
                     className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors ${
-                      formErrors.password ? "border-red-300" : "border-gray-300"
+                      formErrors.password ? 'border-red-300' : 'border-gray-300'
                     }`}
                     placeholder="••••••••"
                   />
@@ -429,9 +382,7 @@ const RegisterPage = () => {
                   </button>
                 </div>
                 {formErrors.password && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {formErrors.password}
-                  </p>
+                  <p className="mt-1 text-sm text-red-600">{formErrors.password}</p>
                 )}
               </div>
 
@@ -450,14 +401,12 @@ const RegisterPage = () => {
                   <input
                     id="confirmPassword"
                     name="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
+                    type={showConfirmPassword ? 'text' : 'password'}
                     required
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors ${
-                      formErrors.confirmPassword
-                        ? "border-red-300"
-                        : "border-gray-300"
+                      formErrors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                     }`}
                     placeholder="••••••••"
                   />
@@ -474,9 +423,7 @@ const RegisterPage = () => {
                   </button>
                 </div>
                 {formErrors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {formErrors.confirmPassword}
-                  </p>
+                  <p className="mt-1 text-sm text-red-600">{formErrors.confirmPassword}</p>
                 )}
               </div>
 
@@ -489,18 +436,15 @@ const RegisterPage = () => {
                   required
                   className="h-4 w-4 text-primary-800 focus:ring-primary-600 border-gray-300 rounded mt-1"
                 />
-                <label
-                  htmlFor="terms"
-                  className="ml-2 block text-sm text-gray-700"
-                >
-                  J'accepte les{" "}
+                <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
+                  J'accepte les{' '}
                   <Link
                     to="/conditions"
                     className="text-primary-800 hover:text-primary-900 font-medium"
                   >
                     conditions d'utilisation
-                  </Link>{" "}
-                  et la{" "}
+                  </Link>{' '}
+                  et la{' '}
                   <Link
                     to="/confidentialite"
                     className="text-primary-800 hover:text-primary-900 font-medium"
@@ -511,12 +455,7 @@ const RegisterPage = () => {
               </div>
 
               {/* Submit Button */}
-              <Button
-                type="submit"
-                size="lg"
-                disabled={loading}
-                className="w-full"
-              >
+              <Button type="submit" size="lg" disabled={loading} className="w-full">
                 {loading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
@@ -530,7 +469,7 @@ const RegisterPage = () => {
               {/* Login Link */}
               <div className="text-center">
                 <p className="text-sm text-gray-600">
-                  Vous avez déjà un compte ?{" "}
+                  Vous avez déjà un compte ?{' '}
                   <Link
                     to="/connexion"
                     className="font-medium text-primary-800 hover:text-primary-900"

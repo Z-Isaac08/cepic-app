@@ -1,14 +1,4 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
-
-const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
+import api from '../apiConfig';
 
 // ============================================
 // PAIEMENTS CINETPAY
@@ -19,8 +9,8 @@ const api = axios.create({
  * @param {string} enrollmentId - ID de l'inscription
  * @returns {Promise}
  */
-export const initiatePayment = async (enrollmentId) => {
-  const response = await api.post('/payments/initiate', { enrollmentId });
+export const initiatePayment = async (enrollmentId, paymentData = {}) => {
+  const response = await api.post('/payments/initiate', { enrollmentId, ...paymentData });
   return response.data;
 };
 
@@ -36,5 +26,5 @@ export const verifyPayment = async (transactionId) => {
 
 export default {
   initiatePayment,
-  verifyPayment
+  verifyPayment,
 };

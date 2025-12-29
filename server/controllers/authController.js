@@ -1,13 +1,13 @@
-const bcrypt = require("bcryptjs");
-const crypto = require("crypto");
-const prisma = require("../lib/prisma");
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const prisma = require('../lib/prisma');
 const {
   createSendToken,
   generateTempToken,
   generate2FACode,
   clearAuthCookies,
-} = require("../utils/jwt");
-const emailService = require("../utils/email");
+} = require('../utils/jwt');
+const emailService = require('../utils/email');
 
 // Check if email exists
 const checkEmail = async (req, res, next) => {
@@ -44,7 +44,7 @@ const loginExistingUser = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        error: "Email ou mot de passe incorrect",
+        error: 'Email ou mot de passe incorrect',
       });
     }
 
@@ -53,13 +53,13 @@ const loginExistingUser = async (req, res, next) => {
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        error: "Email ou mot de passe incorrect",
+        error: 'Email ou mot de passe incorrect',
       });
     }
 
     // Login directly without 2FA
     // Create session and send token
-    await createSendToken(user, 200, res, req, "Connexion réussie");
+    await createSendToken(user, 200, res, req, 'Connexion réussie');
   } catch (error) {
     next(error);
   }
@@ -78,7 +78,7 @@ const registerNewUser = async (req, res, next) => {
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        error: "Un compte avec cet email existe déjà",
+        error: 'Un compte avec cet email existe déjà',
       });
     }
 
@@ -93,7 +93,7 @@ const registerNewUser = async (req, res, next) => {
         firstName,
         lastName,
         phone: phone || null,
-        role: "USER",
+        role: 'USER',
         isVerified: false, // Will be verified after 2FA
       },
     });
@@ -108,13 +108,13 @@ const registerNewUser = async (req, res, next) => {
         userId: newUser.id,
         code,
         tempToken,
-        type: "REGISTRATION",
+        type: 'REGISTRATION',
         expiresAt,
       },
     });
 
     // Send verification email
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV === 'production') {
       await emailService.send2FACode(email, code, `${firstName} ${lastName}`);
     } else {
       console.log(`Verification Code for ${email}: ${code}`);
@@ -122,7 +122,7 @@ const registerNewUser = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: "Compte créé avec succès. Veuillez vérifier votre email.",
+      message: 'Compte créé avec succès. Veuillez vérifier votre email.',
       data: {
         tempToken,
         requires2FA: true,
@@ -144,21 +144,17 @@ const verify2FA = async (req, res, next) => {
       include: { user: true },
     });
 
-    if (
-      !twoFARecord ||
-      twoFARecord.isUsed ||
-      twoFARecord.expiresAt < new Date()
-    ) {
+    if (!twoFARecord || twoFARecord.isUsed || twoFARecord.expiresAt < new Date()) {
       return res.status(400).json({
         success: false,
-        error: "Code de vérification invalide ou expiré",
+        error: 'Code de vérification invalide ou expiré',
       });
     }
 
     if (twoFARecord.code !== code) {
       return res.status(400).json({
         success: false,
-        error: "Code de vérification incorrect",
+        error: 'Code de vérification incorrect',
       });
     }
 
@@ -178,10 +174,7 @@ const verify2FA = async (req, res, next) => {
     });
 
     // Send welcome email for new registrations
-    if (
-      process.env.NODE_ENV === "production" &&
-      twoFARecord.type === "REGISTRATION"
-    ) {
+    if (process.env.NODE_ENV === 'production' && twoFARecord.type === 'REGISTRATION') {
       await emailService.sendWelcomeEmail(
         updatedUser.email,
         `${updatedUser.firstName} ${updatedUser.lastName}`
@@ -189,7 +182,7 @@ const verify2FA = async (req, res, next) => {
     }
 
     // Generate JWT and send response with cookies
-    await createSendToken(updatedUser, 200, res, req, "Connexion réussie");
+    await createSendToken(updatedUser, 200, res, req, 'Connexion réussie');
   } catch (error) {
     next(error);
   }
@@ -209,7 +202,7 @@ const resend2FA = async (req, res, next) => {
     if (!existingRecord || existingRecord.isUsed) {
       return res.status(400).json({
         success: false,
-        error: "Token invalide",
+        error: 'Token invalide',
       });
     }
 
@@ -227,7 +220,7 @@ const resend2FA = async (req, res, next) => {
     });
 
     // Send new code
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV === 'production') {
       await emailService.send2FACode(
         existingRecord.user.email,
         newCode,
@@ -239,7 +232,7 @@ const resend2FA = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "Nouveau code de vérification envoyé",
+      message: 'Nouveau code de vérification envoyé',
     });
   } catch (error) {
     next(error);
@@ -267,7 +260,7 @@ const getCurrentUser = async (req, res, next) => {
     if (!user || !user.isActive) {
       return res.status(404).json({
         success: false,
-        error: "Utilisateur non trouvé",
+        error: 'Utilisateur non trouvé',
       });
     }
 
@@ -302,7 +295,7 @@ const logout = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "Déconnexion réussie",
+      message: 'Déconnexion réussie',
     });
   } catch (error) {
     // Still clear cookies even if database operation fails
@@ -319,7 +312,7 @@ const refreshToken = async (req, res, next) => {
     if (!refreshTokenValue) {
       return res.status(401).json({
         success: false,
-        error: "Aucun token de rafraîchissement fourni",
+        error: 'Aucun token de rafraîchissement fourni',
       });
     }
 
@@ -332,12 +325,12 @@ const refreshToken = async (req, res, next) => {
     if (!session || session.isRevoked || session.expiresAt < new Date()) {
       return res.status(401).json({
         success: false,
-        error: "Token de rafraîchissement invalide ou expiré",
+        error: 'Token de rafraîchissement invalide ou expiré',
       });
     }
 
     // Generate new tokens
-    await createSendToken(session.user, 200, res, req, "Token rafraîchi");
+    await createSendToken(session.user, 200, res, req, 'Token rafraîchi');
 
     // Revoke old session
     await prisma.session.update({

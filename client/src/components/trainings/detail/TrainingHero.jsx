@@ -1,19 +1,28 @@
 // client/src/components/trainings/detail/TrainingHero.jsx
-import { motion } from "framer-motion";
-import { Clock, MapPin, Monitor, Users, Zap } from "lucide-react";
-import { Link } from "react-router";
-import { Badge, Button } from "../../ui";
+import { motion } from 'framer-motion';
+import { Clock, MapPin, Monitor, Users, Zap } from 'lucide-react';
+import { Link } from 'react-router';
+import { Badge, Button } from '../../ui';
 
-const TrainingHero = ({ training }) => {
+const TrainingHero = ({ training, user }) => {
   const getDeliveryIcon = (mode) => {
     switch (mode) {
-      case "ONLINE":
+      case 'ONLINE':
         return <Monitor className="w-5 h-5" />;
-      case "HYBRID":
+      case 'HYBRID':
         return <Zap className="w-5 h-5" />;
       default:
         return <MapPin className="w-5 h-5" />;
     }
+  };
+
+  const handleEnroll = () => {
+    if (!user) {
+      window.location.href = '/connexion';
+      return;
+    }
+    // Navigate to enrollment page or open modal
+    window.location.href = `/inscription/${training.id}`;
   };
 
   return (
@@ -23,10 +32,7 @@ const TrainingHero = ({ training }) => {
         <nav className="flex mb-6" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2 text-sm">
             <li>
-              <Link
-                to="/"
-                className="text-primary-200 hover:text-white transition-colors"
-              >
+              <Link to="/" className="text-primary-200 hover:text-white transition-colors">
                 Accueil
               </Link>
             </li>
@@ -44,10 +50,7 @@ const TrainingHero = ({ training }) => {
             <li>
               <span className="mx-2 text-primary-300">/</span>
             </li>
-            <li
-              className="text-white font-medium truncate max-w-xs"
-              title={training.title}
-            >
+            <li className="text-white font-medium truncate max-w-xs" title={training.title}>
               {training.title}
             </li>
           </ol>
@@ -63,13 +66,10 @@ const TrainingHero = ({ training }) => {
               {training.isNew && <Badge variant="accent">Nouveau</Badge>}
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">
-              {training.title}
-            </h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">{training.title}</h1>
 
             <p className="text-lg text-primary-100 mb-6">
-              {training.shortDescription ||
-                training.description.substring(0, 180)}
+              {training.shortDescription || training.description.substring(0, 180)}
               ...
             </p>
 
@@ -77,8 +77,7 @@ const TrainingHero = ({ training }) => {
               <div className="flex items-center text-sm">
                 <Clock className="w-5 h-5 mr-2 text-primary-200" />
                 <span>
-                  {training.duration}{" "}
-                  {training.durationUnit === "hours" ? "heures" : "jours"}
+                  {training.duration} {training.durationUnit === 'hours' ? 'heures' : 'jours'}
                 </span>
               </div>
 
@@ -90,24 +89,25 @@ const TrainingHero = ({ training }) => {
               <div className="flex items-center text-sm">
                 {getDeliveryIcon(training.deliveryMode)}
                 <span className="ml-2 capitalize">
-                  {training.deliveryMode === "ONLINE"
-                    ? "En ligne"
-                    : training.deliveryMode === "HYBRID"
-                      ? "Hybride"
-                      : "Présentiel"}
+                  {training.deliveryMode === 'ONLINE'
+                    ? 'En ligne'
+                    : training.deliveryMode === 'HYBRID'
+                    ? 'Hybride'
+                    : 'Présentiel'}
                 </span>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" variant="primary" className="w-full sm:w-auto">
+              <Button
+                size="lg"
+                variant="primary"
+                className="w-full sm:w-auto"
+                onClick={handleEnroll}
+              >
                 S'inscrire maintenant
               </Button>
-              <Button
-                variant="outline-white"
-                size="lg"
-                className="w-full sm:w-auto"
-              >
+              <Button variant="outline-white" size="lg" className="w-full sm:w-auto">
                 Voir la vidéo
               </Button>
             </div>
@@ -136,23 +136,29 @@ const TrainingHero = ({ training }) => {
               <div className="p-6">
                 <div className="flex items-baseline justify-between mb-4">
                   <div className="flex flex-col">
-                    <span className={`text-3xl font-bold ${training.price === 0 ? 'text-green-600' : 'text-primary-800'}`}>
-                      {training.price === 0 ? 'Gratuit' : new Intl.NumberFormat("fr-FR", {
-                        style: "currency",
-                        currency: "XOF",
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
-                      }).format(training.price)}
+                    <span
+                      className={`text-3xl font-bold ${
+                        training.price === 0 ? 'text-green-600' : 'text-primary-800'
+                      }`}
+                    >
+                      {training.price === 0
+                        ? 'Gratuit'
+                        : new Intl.NumberFormat('fr-FR', {
+                            style: 'currency',
+                            currency: 'XOF',
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0,
+                          }).format(training.price)}
                     </span>
                     {training.originalCost &&
                       training.originalCost > training.price &&
                       training.price > 0 && (
                         <span className="text-sm text-gray-400 line-through">
-                          {new Intl.NumberFormat("fr-FR", {
-                            style: "currency",
-                            currency: "XOF",
+                          {new Intl.NumberFormat('fr-FR', {
+                            style: 'currency',
+                            currency: 'XOF',
                             minimumFractionDigits: 0,
-                            maximumFractionDigits: 0
+                            maximumFractionDigits: 0,
                           }).format(training.originalCost)}
                         </span>
                       )}
@@ -161,10 +167,11 @@ const TrainingHero = ({ training }) => {
                     training.originalCost > training.price &&
                     training.price > 0 && (
                       <Badge variant="accent">
-                        -{Math.round(
-                          ((training.originalCost - training.price) /
-                            training.originalCost) * 100
-                        )}%
+                        -
+                        {Math.round(
+                          ((training.originalCost - training.price) / training.originalCost) * 100
+                        )}
+                        %
                       </Badge>
                     )}
                 </div>
@@ -172,25 +179,22 @@ const TrainingHero = ({ training }) => {
                 <div className="space-y-3 border-t border-gray-200 pt-4">
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Niveau</span>
-                    <span className="font-semibold text-gray-900">
-                      {training.level}
-                    </span>
+                    <span className="font-semibold text-gray-900">{training.level}</span>
                   </div>
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Durée</span>
                     <span className="font-semibold text-gray-900">
-                      {training.duration}{" "}
-                      {training.durationUnit === "hours" ? "heures" : "jours"}
+                      {training.duration} {training.durationUnit === 'hours' ? 'heures' : 'jours'}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Format</span>
                     <span className="font-semibold text-gray-900">
-                      {training.deliveryMode === "ONLINE"
-                        ? "En ligne"
-                        : training.deliveryMode === "HYBRID"
-                          ? "Hybride"
-                          : "Présentiel"}
+                      {training.deliveryMode === 'ONLINE'
+                        ? 'En ligne'
+                        : training.deliveryMode === 'HYBRID'
+                        ? 'Hybride'
+                        : 'Présentiel'}
                     </span>
                   </div>
                 </div>

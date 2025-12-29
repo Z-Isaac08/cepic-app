@@ -87,11 +87,12 @@ const LoginForm = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Email Field */}
         <div>
-          <label className="block text-sm font-medium text-white mb-2">
-            <Mail className="w-4 h-4 inline mr-2" />
+          <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
+            <Mail className="w-4 h-4 inline mr-2" aria-hidden="true" />
             Adresse email
           </label>
           <input
+            id="email"
             type="email"
             value={formData.email}
             onChange={(e) => handleInputChange("email", e.target.value)}
@@ -100,9 +101,13 @@ const LoginForm = () => {
             }`}
             placeholder="votre@email.com"
             disabled={loading}
+            aria-invalid={formErrors.email ? "true" : "false"}
+            aria-describedby={formErrors.email ? "email-error" : undefined}
           />
           {formErrors.email && (
             <motion.p
+              id="email-error"
+              role="alert"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-red-300 text-sm mt-1"
@@ -114,12 +119,13 @@ const LoginForm = () => {
 
         {/* Password Field */}
         <div>
-          <label className="block text-sm font-medium text-white mb-2">
-            <Lock className="w-4 h-4 inline mr-2" />
+          <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
+            <Lock className="w-4 h-4 inline mr-2" aria-hidden="true" />
             Mot de passe
           </label>
           <div className="relative">
             <input
+              id="password"
               type={showPassword ? "text" : "password"}
               value={formData.password}
               onChange={(e) => handleInputChange("password", e.target.value)}
@@ -128,22 +134,27 @@ const LoginForm = () => {
               }`}
               placeholder="Votre mot de passe"
               disabled={loading}
+              aria-invalid={formErrors.password ? "true" : "false"}
+              aria-describedby={formErrors.password ? "password-error" : undefined}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white transition-colors"
               disabled={loading}
+              aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
             >
               {showPassword ? (
-                <EyeOff className="w-5 h-5" />
+                <EyeOff className="w-5 h-5" aria-hidden="true" />
               ) : (
-                <Eye className="w-5 h-5" />
+                <Eye className="w-5 h-5" aria-hidden="true" />
               )}
             </button>
           </div>
           {formErrors.password && (
             <motion.p
+              id="password-error"
+              role="alert"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-red-300 text-sm mt-1"

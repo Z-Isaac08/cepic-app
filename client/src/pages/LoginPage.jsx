@@ -1,18 +1,18 @@
-import { motion } from "framer-motion";
-import { Check, Eye, EyeOff, GraduationCap, Lock, Mail } from "lucide-react";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router";
-import { Button } from "../components/ui";
-import { CEPIC_INFO } from "../config/cepic";
-import { useAuthStore } from "../stores/authStore";
+import { motion } from 'framer-motion';
+import { Check, Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router';
+import { Button } from '../components/ui';
+import { CEPIC_INFO } from '../config/cepic';
+import { useAuthStore } from '../stores/authStore';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login, loading, error, awaitingTwoFA } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
 
   const handleChange = (e) => {
@@ -27,9 +27,9 @@ const LoginPage = () => {
     try {
       await login(formData.email, formData.password);
       // Login always succeeds directly (no 2FA for login)
-      navigate("/");
+      navigate('/');
     } catch (err) {
-      console.error("Login error:", err);
+      console.error('Login error:', err);
       // Error is already in store
     }
   };
@@ -43,29 +43,10 @@ const LoginPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-md w-full space-y-8"
         >
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <Link to="/" className="inline-flex flex-col items-center">
-              <img 
-                src="/logo_cepic.jpg" 
-                alt="Logo CEPIC" 
-                className="w-32 h-32 object-contain mb-4 rounded-full border-2 border-primary-100 shadow-md"
-              />
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary-800">{CEPIC_INFO.shortName}</div>
-                <div className="text-sm text-gray-500">
-                  {CEPIC_INFO.fullName}
-                </div>
-              </div>
-            </Link>
-          </div>
-
           {/* Title */}
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900">Bon retour !</h2>
-            <p className="mt-2 text-gray-600">
-              Connectez-vous pour accéder à vos formations
-            </p>
+            <p className="mt-2 text-gray-600">Connectez-vous pour accéder à vos formations</p>
           </div>
 
           {/* Error Message */}
@@ -84,10 +65,7 @@ const LoginPage = () => {
             <div className="space-y-4">
               {/* Email */}
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                   Adresse email
                 </label>
                 <div className="relative">
@@ -109,10 +87,7 @@ const LoginPage = () => {
 
               {/* Password */}
               <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                   Mot de passe
                 </label>
                 <div className="relative">
@@ -122,7 +97,7 @@ const LoginPage = () => {
                   <input
                     id="password"
                     name="password"
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     required
                     value={formData.password}
                     onChange={handleChange}
@@ -153,10 +128,7 @@ const LoginPage = () => {
                   type="checkbox"
                   className="h-4 w-4 text-primary-800 focus:ring-primary-600 border-gray-300 rounded"
                 />
-                <label
-                  htmlFor="remember-me"
-                  className="ml-2 block text-sm text-gray-700"
-                >
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                   Se souvenir de moi
                 </label>
               </div>
@@ -170,12 +142,7 @@ const LoginPage = () => {
             </div>
 
             {/* Submit Button */}
-            <Button
-              type="submit"
-              size="lg"
-              disabled={loading}
-              className="w-full"
-            >
+            <Button type="submit" size="lg" disabled={loading} className="w-full">
               {loading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
@@ -189,7 +156,7 @@ const LoginPage = () => {
             {/* Register Link */}
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                Vous n'avez pas de compte ?{" "}
+                Vous n'avez pas de compte ?{' '}
                 <Link
                   to="/inscription"
                   className="font-medium text-primary-800 hover:text-primary-900"
@@ -211,35 +178,31 @@ const LoginPage = () => {
             transition={{ delay: 0.2 }}
             className="text-center text-white"
           >
-            <GraduationCap className="w-24 h-24 mx-auto mb-8 text-secondary-500" />
+            <img
+              src="/logo_cepic.jpg"
+              alt="Logo CEPIC"
+              className="w-32 h-32 mx-auto mb-6 rounded-full border-4 border-secondary-500 shadow-lg"
+            />
             <h1 className="text-4xl font-bold mb-4">Bienvenue sur CEPIC</h1>
-            <p className="text-xl text-primary-100 mb-8 max-w-md mx-auto">
-              {CEPIC_INFO.fullName}
-            </p>
+            <p className="text-xl text-primary-100 mb-8 max-w-md mx-auto">{CEPIC_INFO.fullName}</p>
             <div className="space-y-4 text-left max-w-md mx-auto">
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-1">
                   <Check className="w-4 h-4 text-primary-900" />
                 </div>
-                <p className="text-primary-100">
-                  Formations certifiantes reconnues
-                </p>
+                <p className="text-primary-100">Formations certifiantes reconnues</p>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-1">
                   <Check className="w-4 h-4 text-primary-900" />
                 </div>
-                <p className="text-primary-100">
-                  Formateurs experts et certifiés
-                </p>
+                <p className="text-primary-100">Formateurs experts et certifiés</p>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-1">
                   <Check className="w-4 h-4 text-primary-900" />
                 </div>
-                <p className="text-primary-100">
-                  Suivi personnalisé de votre progression
-                </p>
+                <p className="text-primary-100">Suivi personnalisé de votre progression</p>
               </div>
             </div>
           </motion.div>
