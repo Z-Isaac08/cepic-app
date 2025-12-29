@@ -125,7 +125,7 @@ const RegisterPage = () => {
             className="text-center text-white"
           >
             <img
-              src="/logo_cepic.jpg"
+              src="/logo.jpg"
               alt="Logo CEPIC"
               className="w-32 h-32 mx-auto mb-6 rounded-full border-4 border-secondary-500 shadow-lg"
             />

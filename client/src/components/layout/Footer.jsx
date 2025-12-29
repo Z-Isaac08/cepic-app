@@ -37,11 +37,7 @@ const Footer = () => {
           {/* Brand & Contact */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-2">
-              <img
-                src="/logo_cepic.jpeg"
-                alt="CEPIC"
-                className="w-10 h-10 rounded-lg object-cover"
-              />
+              <img src="/logo.jpg" alt="CEPIC" className="w-10 h-10 rounded-lg object-cover" />
               <span className="text-xl font-bold text-white">CEPIC</span>
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed">{CEPIC_INFO.fullName}</p>

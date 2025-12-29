@@ -108,7 +108,7 @@ const AdminPage = () => {
         {/* Logo */}
         <div className="p-6 border-b border-primary-700 flex-shrink-0">
           <div className="flex items-center space-x-3">
-            <img src="/logo_cepic.jpg" alt="CEPIC" className="w-10 h-10 rounded-lg object-cover" />
+            <img src="/logo.jpg" alt="CEPIC" className="w-10 h-10 rounded-lg object-cover" />
             <div>
               <h1 className="text-xl font-bold">CEPIC Admin</h1>
               <p className="text-xs text-primary-200">Gestion de la plateforme</p>

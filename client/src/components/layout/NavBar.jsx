@@ -80,7 +80,7 @@ const NavBar = () => {
               <Link to="/" className="flex items-center space-x-2">
                 <motion.img
                   whileHover={{ scale: 1.05 }}
-                  src="/logo_cepic.jpeg"
+                  src="/logo.jpg"
                   alt="CEPIC"
                   className="w-10 h-10 rounded-lg object-cover"
                 />
