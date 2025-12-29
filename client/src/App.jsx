@@ -7,7 +7,6 @@ import { useAuthStore } from './stores/authStore';
 
 // Pages dynamiques
 const HomePage = lazy(() => import('@pages/HomePage'));
-const MyBooksPage = lazy(() => import('@pages/MyBooksPage'));
 const AdminPage = lazy(() => import('@pages/AdminPage'));
 
 // Pages CEPIC

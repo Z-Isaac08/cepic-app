@@ -130,6 +130,15 @@ app.use('/uploads', (req, res, next) => {
 app.use(inputValidation);
 app.use(xssProtection);
 
+// Root health check for hosting services (Render, Railway, etc.)
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    service: 'CEPIC API',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Health check routes (exempted from CSRF - must be before csrfProtection middleware)
 app.get('/health', (req, res) => {
   res.status(200).json({
