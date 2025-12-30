@@ -69,7 +69,7 @@ const loginExistingUser = async (req, res, next) => {
 // Register new user
 const registerNewUser = async (req, res, next) => {
   try {
-    const { email, firstName, lastName, password, phone } = req.validatedData;
+    const { email, firstName, lastName, password } = req.validatedData;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -94,7 +94,6 @@ const registerNewUser = async (req, res, next) => {
           password: hashedPassword,
           firstName,
           lastName,
-          phone: phone || null,
           role: 'USER',
           isVerified: true,
         },
@@ -110,7 +109,6 @@ const registerNewUser = async (req, res, next) => {
         password: hashedPassword,
         firstName,
         lastName,
-        phone: phone || null,
         role: 'USER',
         isVerified: false,
       },

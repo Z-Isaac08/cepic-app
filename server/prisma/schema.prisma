@@ -21,7 +21,6 @@ model User {
   password   String
   firstName  String
   lastName   String
-  phone      String?
   role       Role      @default(USER)
   isVerified Boolean   @default(false)
   isActive   Boolean   @default(true)
@@ -199,7 +198,7 @@ model TrainingEnrollment {
   // Notes
   notes      String?
   adminNotes String?
-  
+
   // Relations
   payment    Payment?
 
@@ -231,7 +230,7 @@ model TrainingReview {
   id         String   @id @default(cuid())
   rating     Int // 1-5 étoiles
   comment    String?  @db.Text
-  isPublic   Boolean  
+  isPublic   Boolean
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   trainingId String
@@ -287,7 +286,7 @@ model Payment {
   id           String             @id @default(cuid())
   enrollmentId String             @unique
   enrollment   TrainingEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  
+
   // Relations
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)

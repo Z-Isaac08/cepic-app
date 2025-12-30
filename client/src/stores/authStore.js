@@ -1,17 +1,55 @@
 import { create } from 'zustand';
 import * as authAPI from '../services/api/auth';
 
+// Helper pour parser les erreurs de validation Zod
+const parseValidationErrors = (error) => {
+  const data = error.response?.data;
+  console.log('=== DEBUG parseValidationErrors ===');
+  console.log('Full error:', error);
+  console.log('Error response data:', data);
+  console.log('Details:', data?.details);
+
+  // Si c'est une erreur de validation avec des détails par champ
+  if (data?.details && Array.isArray(data.details)) {
+    const fieldErrors = {};
+    data.details.forEach((detail) => {
+      console.log('Processing detail:', detail);
+      if (detail.field) {
+        fieldErrors[detail.field] = detail.message;
+      }
+    });
+
+    console.log('Parsed fieldErrors:', fieldErrors);
+
+    // Retourne les erreurs par champ + un message général
+    if (Object.keys(fieldErrors).length > 0) {
+      return {
+        message: 'Veuillez corriger les erreurs ci-dessous',
+        fieldErrors,
+      };
+    }
+  }
+
+  // Message d'erreur simple
+  console.log('No field errors found, returning simple message');
+  return {
+    message: data?.error || 'Une erreur est survenue',
+    fieldErrors: {},
+  };
+};
+
 export const useAuthStore = create((set, get) => ({
   // State
   user: null,
   loading: false,
   error: null,
+  fieldErrors: {}, // Erreurs par champ
   tempToken: '', // For 2FA flow
   awaitingTwoFA: false,
 
   // Actions
   login: async (email, password) => {
-    set({ loading: true, error: null });
+    set({ loading: true, error: null, fieldErrors: {} });
     try {
       const response = await authAPI.loginExistingUser(email, password);
 
@@ -34,21 +72,20 @@ export const useAuthStore = create((set, get) => ({
       return { success: true };
     } catch (error) {
       console.error('Login error:', error);
-      const errorMessage = error.response?.data?.error || 'Login failed';
-      set({ error: errorMessage, loading: false });
-      throw new Error(errorMessage);
+      const { message, fieldErrors } = parseValidationErrors(error);
+      set({ error: message, fieldErrors, loading: false });
+      throw { message, fieldErrors };
     }
   },
 
-  register: async ({ email, firstName, lastName, password, phone }) => {
-    set({ loading: true, error: null });
+  register: async ({ email, firstName, lastName, password }) => {
+    set({ loading: true, error: null, fieldErrors: {} });
     try {
       const response = await authAPI.registerNewUser({
         email,
         firstName,
         lastName,
         password,
-        phone,
       });
 
       // If 2FA required after registration
@@ -68,9 +105,9 @@ export const useAuthStore = create((set, get) => ({
       });
       return { success: true };
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Registration failed';
-      set({ error: errorMessage, loading: false });
-      throw new Error(errorMessage);
+      const { message, fieldErrors } = parseValidationErrors(error);
+      set({ error: message, fieldErrors, loading: false });
+      throw { message, fieldErrors };
     }
   },
 
@@ -141,7 +178,7 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  clearError: () => set({ error: null }),
+  clearError: () => set({ error: null, fieldErrors: {} }),
 
   cancelTwoFA: () =>
     set({

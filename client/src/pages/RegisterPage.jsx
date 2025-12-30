@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft, Check, Eye, EyeOff, Lock, Mail, Phone, Shield, User } from 'lucide-react';
+import { ArrowLeft, Check, Eye, EyeOff, Lock, Mail, Shield, User } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -9,20 +9,30 @@ import { useAuthStore } from '../stores/authStore';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const { register, verifyTwoFA, resendTwoFA, cancelTwoFA, loading, error, awaitingTwoFA } =
-    useAuthStore();
+  const {
+    register,
+    verifyTwoFA,
+    resendTwoFA,
+    cancelTwoFA,
+    loading,
+    error,
+    fieldErrors,
+    awaitingTwoFA,
+  } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
     password: '',
     confirmPassword: '',
   });
   const [formErrors, setFormErrors] = useState({});
   const [twoFACode, setTwoFACode] = useState('');
+
+  // Combine local formErrors avec fieldErrors du store
+  const allErrors = { ...fieldErrors, ...formErrors };
 
   const handleChange = (e) => {
     setFormData({
@@ -65,7 +75,6 @@ const RegisterPage = () => {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
-        phone: formData.phone,
         password: formData.password,
       });
 
@@ -107,7 +116,6 @@ const RegisterPage = () => {
       firstName: '',
       lastName: '',
       email: '',
-      phone: '',
       password: '',
       confirmPassword: '',
     });
@@ -125,10 +133,16 @@ const RegisterPage = () => {
           <ArrowLeft className="w-6 h-6" />
         </button>
         <Link to="/" className="inline-flex items-center justify-center space-x-2 mb-4">
-          <img src="/logo.jpg" alt="CEPIC" className="w-16 h-16 rounded-full border-2 border-secondary-500 shadow-lg" />
+          <img
+            src="/logo.jpg"
+            alt="CEPIC"
+            className="w-16 h-16 rounded-full border-2 border-secondary-500 shadow-lg"
+          />
         </Link>
         <h1 className="text-xl font-bold text-white mb-2">Rejoignez {CEPIC_INFO.shortName}</h1>
-        <p className="text-sm text-primary-100 max-w-xs mx-auto">Commencez votre parcours de formation professionnelle</p>
+        <p className="text-sm text-primary-100 max-w-xs mx-auto">
+          Commencez votre parcours de formation professionnelle
+        </p>
       </div>
 
       {/* Left Side - Image/Branding (Desktop only) */}
@@ -145,7 +159,9 @@ const RegisterPage = () => {
               alt="Logo CEPIC"
               className="w-24 xl:w-32 h-24 xl:h-32 mx-auto mb-4 xl:mb-6 rounded-full border-4 border-secondary-500 shadow-lg"
             />
-            <h1 className="text-3xl xl:text-4xl font-bold mb-3 xl:mb-4">Rejoignez {CEPIC_INFO.shortName}</h1>
+            <h1 className="text-3xl xl:text-4xl font-bold mb-3 xl:mb-4">
+              Rejoignez {CEPIC_INFO.shortName}
+            </h1>
             <p className="text-lg xl:text-xl text-primary-100 mb-6 xl:mb-8 max-w-md mx-auto">
               Commencez votre parcours de formation professionnelle dès aujourd'hui
             </p>
@@ -154,7 +170,9 @@ const RegisterPage = () => {
                 <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-0.5">
                   <Check className="w-4 h-4 text-primary-900" />
                 </div>
-                <p className="text-primary-100 text-sm xl:text-base">Accès à plus de 50 formations</p>
+                <p className="text-primary-100 text-sm xl:text-base">
+                  Accès à plus de 50 formations
+                </p>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-0.5">
@@ -166,7 +184,9 @@ const RegisterPage = () => {
                 <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-0.5">
                   <Check className="w-4 h-4 text-primary-900" />
                 </div>
-                <p className="text-primary-100 text-sm xl:text-base">Support et accompagnement personnalisé</p>
+                <p className="text-primary-100 text-sm xl:text-base">
+                  Support et accompagnement personnalisé
+                </p>
               </div>
             </div>
           </motion.div>
@@ -296,10 +316,15 @@ const RegisterPage = () => {
                       required
                       value={formData.firstName}
                       onChange={handleChange}
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px]"
+                      className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
+                        allErrors.firstName ? 'border-red-300' : 'border-gray-300'
+                      }`}
                       placeholder="Jean"
                     />
                   </div>
+                  {allErrors.firstName && (
+                    <p className="mt-1 text-xs sm:text-sm text-red-600">{allErrors.firstName}</p>
+                  )}
                 </div>
 
                 <div>
@@ -316,15 +341,23 @@ const RegisterPage = () => {
                     required
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px]"
+                    className={`block w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
+                      allErrors.lastName ? 'border-red-300' : 'border-gray-300'
+                    }`}
                     placeholder="Dupont"
                   />
+                  {allErrors.lastName && (
+                    <p className="mt-1 text-xs sm:text-sm text-red-600">{allErrors.lastName}</p>
+                  )}
                 </div>
               </div>
 
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2"
+                >
                   Adresse email *
                 </label>
                 <div className="relative">
@@ -338,36 +371,23 @@ const RegisterPage = () => {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px]"
+                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
+                      allErrors.email ? 'border-red-300' : 'border-gray-300'
+                    }`}
                     placeholder="votre@email.com"
                   />
                 </div>
-              </div>
-
-              {/* Phone */}
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-                  Téléphone
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Phone className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px]"
-                    placeholder="+225 XX XX XX XX XX"
-                  />
-                </div>
+                {allErrors.email && (
+                  <p className="mt-1 text-xs sm:text-sm text-red-600">{allErrors.email}</p>
+                )}
               </div>
 
               {/* Password */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2"
+                >
                   Mot de passe *
                 </label>
                 <div className="relative">
@@ -382,7 +402,7 @@ const RegisterPage = () => {
                     value={formData.password}
                     onChange={handleChange}
                     className={`block w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
-                      formErrors.password ? 'border-red-300' : 'border-gray-300'
+                      allErrors.password ? 'border-red-300' : 'border-gray-300'
                     }`}
                     placeholder="••••••••"
                   />
@@ -399,8 +419,8 @@ const RegisterPage = () => {
                     )}
                   </button>
                 </div>
-                {formErrors.password && (
-                  <p className="mt-1 text-xs sm:text-sm text-red-600">{formErrors.password}</p>
+                {allErrors.password && (
+                  <p className="mt-1 text-xs sm:text-sm text-red-600">{allErrors.password}</p>
                 )}
               </div>
 
@@ -424,7 +444,7 @@ const RegisterPage = () => {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     className={`block w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
-                      formErrors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                      allErrors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                     }`}
                     placeholder="••••••••"
                   />
@@ -441,8 +461,10 @@ const RegisterPage = () => {
                     )}
                   </button>
                 </div>
-                {formErrors.confirmPassword && (
-                  <p className="mt-1 text-xs sm:text-sm text-red-600">{formErrors.confirmPassword}</p>
+                {allErrors.confirmPassword && (
+                  <p className="mt-1 text-xs sm:text-sm text-red-600">
+                    {allErrors.confirmPassword}
+                  </p>
                 )}
               </div>
 
@@ -455,7 +477,10 @@ const RegisterPage = () => {
                   required
                   className="h-5 w-5 text-primary-800 focus:ring-primary-600 border-gray-300 rounded mt-0.5"
                 />
-                <label htmlFor="terms" className="ml-2 block text-xs sm:text-sm text-gray-700 leading-relaxed">
+                <label
+                  htmlFor="terms"
+                  className="ml-2 block text-xs sm:text-sm text-gray-700 leading-relaxed"
+                >
                   J'accepte les{' '}
                   <Link
                     to="/conditions"

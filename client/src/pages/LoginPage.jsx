@@ -8,7 +8,7 @@ import { useAuthStore } from '../stores/authStore';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login, loading, error, awaitingTwoFA } = useAuthStore();
+  const { login, loading, error, fieldErrors } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -95,10 +95,15 @@ const LoginPage = () => {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-3 sm:py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px]"
+                    className={`block w-full pl-10 pr-3 py-3 sm:py-3.5 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
+                      fieldErrors?.email ? 'border-red-300' : 'border-gray-300'
+                    }`}
                     placeholder="votre@email.com"
                   />
                 </div>
+                {fieldErrors?.email && (
+                  <p className="mt-1 text-xs sm:text-sm text-red-600">{fieldErrors.email}</p>
+                )}
               </div>
 
               {/* Password */}
@@ -117,7 +122,9 @@ const LoginPage = () => {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-12 py-3 sm:py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px]"
+                    className={`block w-full pl-10 pr-12 py-3 sm:py-3.5 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
+                      fieldErrors?.password ? 'border-red-300' : 'border-gray-300'
+                    }`}
                     placeholder="••••••••"
                   />
                   <button
@@ -133,6 +140,9 @@ const LoginPage = () => {
                     )}
                   </button>
                 </div>
+                {fieldErrors?.password && (
+                  <p className="mt-1 text-xs sm:text-sm text-red-600">{fieldErrors.password}</p>
+                )}
               </div>
             </div>
 

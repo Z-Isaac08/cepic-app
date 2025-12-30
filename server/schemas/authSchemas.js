@@ -2,31 +2,32 @@ const { z } = require("zod");
 
 // Common validation patterns
 const emailSchema = z
-  .email("Invalid email format")
-  .min(1, "Email is required")
-  .max(255, "Email too long")
+  .string({ required_error: "L'email est requis" })
+  .email("Format d'email invalide")
+  .min(1, "L'email est requis")
+  .max(255, "L'email est trop long (max 255 caractères)")
   .transform((email) => email.toLowerCase().trim());
 
 const passwordSchema = z
-  .string()
-  .min(8, "Password must be at least 8 characters")
-  .max(128, "Password too long")
+  .string({ required_error: "Le mot de passe est requis" })
+  .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+  .max(128, "Le mot de passe est trop long")
   .regex(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/,
-    "Password must contain at least one lowercase letter, one uppercase letter, and one number"
+    "Le mot de passe doit contenir au moins une minuscule, une majuscule et un chiffre"
   );
 
 const nameSchema = z
-  .string()
-  .min(2, "Name must be at least 2 characters")
-  .max(50, "Name too long")
-  .regex(/^[a-zA-ZÀ-ÿ\s'-]+$/, "Name contains invalid characters")
+  .string({ required_error: "Ce champ est requis" })
+  .min(2, "Le nom doit contenir au moins 2 caractères")
+  .max(50, "Le nom est trop long (max 50 caractères)")
+  .regex(/^[a-zA-ZÀ-ÿ\s'-]+$/, "Le nom contient des caractères invalides")
   .transform((name) => name.trim());
 
 const codeSchema = z
-  .string()
-  .length(6, "Code must be exactly 6 digits")
-  .regex(/^\d{6}$/, "Code must contain only numbers");
+  .string({ required_error: "Le code est requis" })
+  .length(6, "Le code doit contenir exactement 6 chiffres")
+  .regex(/^\d{6}$/, "Le code doit contenir uniquement des chiffres");
 
 const tempTokenSchema = z
   .string()
@@ -40,7 +41,7 @@ const checkEmailSchema = z.object({
 
 const loginSchema = z.object({
   email: emailSchema,
-  password: z.string().min(1, "Password is required"),
+  password: z.string().min(1, "Le mot de passe est requis"),
 });
 
 const registerSchema = z.object({
