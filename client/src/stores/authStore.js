@@ -4,22 +4,17 @@ import * as authAPI from '../services/api/auth';
 // Helper pour parser les erreurs de validation Zod
 const parseValidationErrors = (error) => {
   const data = error.response?.data;
-  console.log('=== DEBUG parseValidationErrors ===');
-  console.log('Full error:', error);
-  console.log('Error response data:', data);
-  console.log('Details:', data?.details);
 
   // Si c'est une erreur de validation avec des détails par champ
   if (data?.details && Array.isArray(data.details)) {
     const fieldErrors = {};
     data.details.forEach((detail) => {
-      console.log('Processing detail:', detail);
-      if (detail.field) {
-        fieldErrors[detail.field] = detail.message;
+      // Utilise 'path' (nouveau format) ou 'field' (ancien format)
+      const fieldName = detail.path || detail.field;
+      if (fieldName) {
+        fieldErrors[fieldName] = detail.message;
       }
     });
-
-    console.log('Parsed fieldErrors:', fieldErrors);
 
     // Retourne les erreurs par champ + un message général
     if (Object.keys(fieldErrors).length > 0) {
@@ -31,7 +26,6 @@ const parseValidationErrors = (error) => {
   }
 
   // Message d'erreur simple
-  console.log('No field errors found, returning simple message');
   return {
     message: data?.error || 'Une erreur est survenue',
     fieldErrors: {},
