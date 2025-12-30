@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router';
 import { Toaster } from 'sonner';
 import ErrorBoundary from './components/errorboundary/ErrorBoundary';
 import Layout from './components/layout/Layout';
+import ScrollToTop from './components/utils/ScrollToTop';
 import { useAuthStore } from './stores/authStore';
 
 // Pages dynamiques
@@ -45,6 +46,7 @@ const AppContent = () => {
 
   return (
     <ErrorBoundary>
+      <ScrollToTop />
       <Suspense
         fallback={
           <div className="flex justify-center items-center min-h-screen">
