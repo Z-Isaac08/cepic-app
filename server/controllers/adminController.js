@@ -642,7 +642,7 @@ const getAllEnrollments = async (req, res, next) => {
           training: {
             select: {
               title: true,
-              cost: true,
+              price: true,
             },
           },
           payment: true,
