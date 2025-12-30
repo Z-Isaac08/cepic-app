@@ -295,6 +295,40 @@ export const deleteMessage = async (id) => {
   return response.data;
 };
 
+// ============================================
+// ANALYTICS & SYSTEM
+// ============================================
+
+/**
+ * Récupérer les analytics
+ * @param {string} timeRange - Période (24h, 7d, 30d, 90d, 1y)
+ * @param {string} metric - Métrique (users, revenue, transactions, events)
+ * @returns {Promise}
+ */
+export const getAnalytics = async (timeRange = '7d', metric = 'users') => {
+  const response = await api.get('/admin/analytics', { params: { timeRange, metric } });
+  return response.data;
+};
+
+/**
+ * Récupérer la santé du système
+ * @returns {Promise}
+ */
+export const getSystemHealth = async () => {
+  const response = await api.get('/admin/system/health');
+  return response.data;
+};
+
+/**
+ * Récupérer les logs de sécurité
+ * @param {Object} params - Paramètres de filtrage
+ * @returns {Promise}
+ */
+export const getSecurityLogs = async (params = {}) => {
+  const response = await api.get('/admin/security/logs', { params });
+  return response.data;
+};
+
 export default {
   getDashboardStats,
   getAllUsers,
@@ -320,4 +354,7 @@ export default {
   getAllMessages,
   markMessageAsRead,
   deleteMessage,
+  getAnalytics,
+  getSystemHealth,
+  getSecurityLogs,
 };

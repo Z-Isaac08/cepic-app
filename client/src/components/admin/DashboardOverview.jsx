@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Users,
@@ -9,16 +9,40 @@ import {
   UserCheck,
   BookOpen,
   MessageSquare,
-  RefreshCw
+  RefreshCw,
+  AlertCircle,
 } from 'lucide-react';
 import { useAdminStore } from '../../stores/adminStore';
 
 const DashboardOverview = () => {
-  const { dashboardData, loading, fetchDashboardData } = useAdminStore();
+  const {
+    dashboardData,
+    loading,
+    trainings,
+    enrollments,
+    fetchDashboardData,
+    fetchTrainings,
+    fetchEnrollments,
+  } = useAdminStore();
 
   useEffect(() => {
     fetchDashboardData();
-  }, [fetchDashboardData]);
+    fetchTrainings();
+    // Ne charger que les 5 dernières inscriptions pour l'affichage
+    fetchEnrollments({ limit: 5, page: 1 });
+  }, [fetchDashboardData, fetchTrainings, fetchEnrollments]);
+
+  // Les inscriptions récentes viennent directement du store (déjà limitées à 5)
+  const recentEnrollments = enrollments;
+
+  // Formations populaires (triées par nombre d'inscriptions)
+  const popularTrainings = useMemo(() => {
+    return [...trainings]
+      .sort((a, b) => (b._count?.enrollments_rel || 0) - (a._count?.enrollments_rel || 0))
+      .slice(0, 5);
+  }, [trainings]);
+
+  const loadingExtra = loading && !trainings.length;
 
   if (loading && !dashboardData) {
     return (
@@ -158,20 +182,35 @@ const DashboardOverview = () => {
         >
           <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Inscriptions récentes</h3>
           <div className="space-y-2 sm:space-y-3">
-            {[1, 2, 3, 4, 5].map((item) => (
-              <div key={item} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary-800" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">Jean Dupont</p>
-                    <p className="text-xs text-gray-500 truncate">Gestion de projet avancée</p>
-                  </div>
-                </div>
-                <span className="text-xs text-gray-400 flex-shrink-0 ml-2">Il y a 2h</span>
+            {loadingExtra ? (
+              <div className="flex items-center justify-center py-8">
+                <RefreshCw className="w-5 h-5 text-gray-400 animate-spin" />
               </div>
-            ))}
+            ) : recentEnrollments.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                <AlertCircle className="w-8 h-8 mb-2" />
+                <p className="text-sm">Aucune inscription récente</p>
+              </div>
+            ) : (
+              recentEnrollments.map((enrollment) => (
+                <div key={enrollment.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                  <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary-800" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
+                        {enrollment.user?.firstName} {enrollment.user?.lastName}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">{enrollment.training?.title || 'Formation'}</p>
+                    </div>
+                  </div>
+                  <span className="text-xs text-gray-400 flex-shrink-0 ml-2">
+                    {formatTimeAgo(enrollment.enrolledAt)}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </motion.div>
 
@@ -184,26 +223,58 @@ const DashboardOverview = () => {
         >
           <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Formations populaires</h3>
           <div className="space-y-2 sm:space-y-3">
-            {[1, 2, 3, 4, 5].map((item) => (
-              <div key={item} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-secondary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-secondary-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">Management de projet</p>
-                    <p className="text-xs text-gray-500">245 inscrits</p>
-                  </div>
-                </div>
-                <span className="text-xs font-semibold text-green-600 flex-shrink-0 ml-2">+15%</span>
+            {loadingExtra ? (
+              <div className="flex items-center justify-center py-8">
+                <RefreshCw className="w-5 h-5 text-gray-400 animate-spin" />
               </div>
-            ))}
+            ) : popularTrainings.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                <AlertCircle className="w-8 h-8 mb-2" />
+                <p className="text-sm">Aucune formation disponible</p>
+              </div>
+            ) : (
+              popularTrainings.map((training, index) => (
+                <div key={training.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                  <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-secondary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm font-bold text-secondary-600">#{index + 1}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{training.title}</p>
+                      <p className="text-xs text-gray-500">
+                        {training._count?.enrollments_rel || 0} inscrits
+                      </p>
+                    </div>
+                  </div>
+                  <span className={`text-xs font-semibold flex-shrink-0 ml-2 ${training.isPublished ? 'text-green-600' : 'text-orange-500'}`}>
+                    {training.isPublished ? 'Publié' : 'Brouillon'}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </motion.div>
       </div>
 
     </div>
   );
+};
+
+// Helper pour formater le temps relatif
+const formatTimeAgo = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'À l\'instant';
+  if (diffMins < 60) return `Il y a ${diffMins}min`;
+  if (diffHours < 24) return `Il y a ${diffHours}h`;
+  if (diffDays < 7) return `Il y a ${diffDays}j`;
+  return date.toLocaleDateString('fr-FR');
 };
 
 export default DashboardOverview;

@@ -42,7 +42,8 @@ const parseValidationErrors = (error) => {
 export const useAuthStore = create((set, get) => ({
   // State
   user: null,
-  loading: false,
+  loading: false, // Pour les opérations auth (login, register, etc.)
+  initializing: true, // Pour le checkAuth initial uniquement
   error: null,
   fieldErrors: {}, // Erreurs par champ
   tempToken: '', // For 2FA flow
@@ -162,18 +163,18 @@ export const useAuthStore = create((set, get) => ({
   },
 
   checkAuth: async () => {
-    set({ loading: true });
+    set({ initializing: true });
     try {
       const response = await authAPI.getCurrentUser();
       set({
         user: response.data.user,
-        loading: false,
+        initializing: false,
       });
       return response.data.user;
     } catch (error) {
       set({
         user: null,
-        loading: false,
+        initializing: false,
       });
       return null;
     }

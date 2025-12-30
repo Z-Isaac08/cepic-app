@@ -5,34 +5,48 @@ const fs = require('fs');
 // Obtenir les statistiques du dashboard
 const getDashboardStats = async (req, res, next) => {
   try {
-    // Statistiques utilisateurs
-    const totalUsers = await prisma.user.count();
-    const activeUsers = await prisma.user.count({
-      where: {
-        isActive: true,
-        lastLogin: {
-          gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 jours
+    // Statistiques utilisateurs et formations en parallèle
+    const [
+      totalUsers,
+      activeUsers,
+      verifiedUsers,
+      totalTrainings,
+      totalEnrollments,
+      recentEnrollments,
+    ] = await Promise.all([
+      prisma.user.count(),
+      prisma.user.count({
+        where: {
+          isActive: true,
+          lastLogin: {
+            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 jours
+          },
         },
-      },
-    });
-    const verifiedUsers = await prisma.user.count({
-      where: { isVerified: true },
-    });
+      }),
+      prisma.user.count({
+        where: { isVerified: true },
+      }),
+      prisma.training.count(),
+      prisma.trainingEnrollment.count(),
+      prisma.trainingEnrollment.count({
+        where: {
+          enrolledAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+        },
+      }),
+    ]);
 
     // Croissance utilisateurs (30 derniers jours vs 30 jours précédents)
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
 
-    const newUsersLast30 = await prisma.user.count({
-      where: {
-        createdAt: { gte: thirtyDaysAgo },
-      },
-    });
-    const newUsersPrev30 = await prisma.user.count({
-      where: {
-        createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
-      },
-    });
+    const [newUsersLast30, newUsersPrev30] = await Promise.all([
+      prisma.user.count({
+        where: { createdAt: { gte: thirtyDaysAgo } },
+      }),
+      prisma.user.count({
+        where: { createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } },
+      }),
+    ]);
 
     const userGrowth = calculateGrowthRate(newUsersLast30, newUsersPrev30);
 
@@ -50,11 +64,13 @@ const getDashboardStats = async (req, res, next) => {
       activeConnections: Math.floor(Math.random() * 100) + 50,
     };
 
-    // Activité récente
+    // Activité récente avec vraies données
     const recentActivity = {
       newUsers: newUsersLast30,
-      completedTransactions: Math.floor(Math.random() * 150) + 50, // À remplacer par vraies données
-      eventRegistrations: Math.floor(Math.random() * 80) + 20,
+      totalTrainings,
+      totalEnrollments,
+      eventRegistrations: recentEnrollments,
+      completedTransactions: Math.floor(Math.random() * 150) + 50, // TODO: Remplacer par vraies données paiements
     };
 
     res.status(200).json({
@@ -256,10 +272,10 @@ const deleteUser = async (req, res, next) => {
         where: { userId },
       });
 
-      // Supprimer les logs d'audit (optionnel)
-      await tx.auditLog.deleteMany({
-        where: { userId },
-      });
+      // TODO: Supprimer les logs d'audit quand AuditLog sera implémenté
+      // await tx.auditLog.deleteMany({
+      //   where: { userId },
+      // });
 
       // Supprimer l'utilisateur
       await tx.user.delete({
@@ -277,55 +293,22 @@ const deleteUser = async (req, res, next) => {
 };
 
 // Obtenir les statistiques de sécurité
-const getSecurityLogs = async (req, res, next) => {
-  try {
-    const { page = 1, limit = 50, type, userId, startDate, endDate } = req.query;
+// TODO: Implement when AuditLog model is added to schema
+const getSecurityLogs = async (req, res) => {
+  const { page = 1, limit = 50 } = req.query;
 
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-
-    // Construction des filtres
-    const where = {};
-    if (type) where.action = { contains: type };
-    if (userId) where.userId = userId;
-    if (startDate || endDate) {
-      where.createdAt = {};
-      if (startDate) where.createdAt.gte = new Date(startDate);
-      if (endDate) where.createdAt.lte = new Date(endDate);
-    }
-
-    const [logs, totalCount] = await Promise.all([
-      prisma.auditLog.findMany({
-        where,
-        include: {
-          user: {
-            select: {
-              email: true,
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
-        skip,
-        take: parseInt(limit),
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.auditLog.count({ where }),
-    ]);
-
-    res.status(200).json({
-      success: true,
-      data: {
-        logs,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(totalCount / parseInt(limit)),
-          totalCount,
-        },
+  // AuditLog model not yet in schema - return empty data
+  res.status(200).json({
+    success: true,
+    data: {
+      logs: [],
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: 0,
+        totalCount: 0,
       },
-    });
-  } catch (error) {
-    next(error);
-  }
+    },
+  });
 };
 
 // Obtenir les statistiques du système
@@ -410,42 +393,43 @@ const calculateGrowthRate = (current, previous) => {
 };
 
 const getSecurityStats = async () => {
-  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
-  const [totalLogins, failedAttempts] = await Promise.all([
-    prisma.auditLog.count({
-      where: {
-        action: { contains: 'login_success' },
-        createdAt: { gte: oneDayAgo },
-      },
-    }),
-    prisma.auditLog.count({
-      where: {
-        action: { contains: 'login_failed' },
-        createdAt: { gte: oneDayAgo },
-      },
-    }),
-  ]);
+  // TODO: Implement when AuditLog model is added to schema
+  // const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  // const [totalLogins, failedAttempts] = await Promise.all([
+  //   prisma.auditLog.count({
+  //     where: {
+  //       action: { contains: 'login_success' },
+  //       createdAt: { gte: oneDayAgo },
+  //     },
+  //   }),
+  //   prisma.auditLog.count({
+  //     where: {
+  //       action: { contains: 'login_failed' },
+  //       createdAt: { gte: oneDayAgo },
+  //     },
+  //   }),
+  // ]);
 
   return {
-    totalLogins,
-    failedAttempts,
-    blockedIPs: Math.floor(Math.random() * 10), // À implémenter avec un vrai système de blocage
-    suspiciousActivity: Math.floor(Math.random() * 5),
+    totalLogins: 0,
+    failedAttempts: 0,
+    blockedIPs: 0, // À implémenter avec un vrai système de blocage
+    suspiciousActivity: 0,
   };
 };
 
 const getDatabaseStats = async () => {
-  const [userCount, sessionCount, auditLogCount] = await Promise.all([
+  // TODO: Add auditLog count when AuditLog model is added to schema
+  const [userCount, sessionCount] = await Promise.all([
     prisma.user.count(),
     prisma.session.count(),
-    prisma.auditLog.count(),
+    // prisma.auditLog.count(),
   ]);
 
   return {
     totalUsers: userCount,
     activeSessions: sessionCount,
-    auditLogs: auditLogCount,
+    auditLogs: 0,
     connectionStatus: 'connected',
   };
 };

@@ -13,8 +13,8 @@ const passwordSchema = z
   .min(8, "Le mot de passe doit contenir au moins 8 caractères")
   .max(128, "Le mot de passe est trop long")
   .regex(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/,
-    "Le mot de passe doit contenir au moins une minuscule, une majuscule et un chiffre"
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\\/`~]).*$/,
+    "Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractère spécial"
   );
 
 const nameSchema = z

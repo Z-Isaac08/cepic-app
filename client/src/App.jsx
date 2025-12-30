@@ -27,7 +27,7 @@ const LegalPage = lazy(() => import('@pages/LegalPage'));
 const ForgotPasswordPage = lazy(() => import('@pages/ForgotPasswordPage'));
 
 const AppContent = () => {
-  const { checkAuth, loading } = useAuthStore();
+  const { checkAuth, initializing } = useAuthStore();
 
   useEffect(() => {
     // Check authentication on app startup (only once)
@@ -35,8 +35,8 @@ const AppContent = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Show loading spinner while checking auth status
-  if (loading) {
+  // Show loading spinner only during initial auth check (not during login/register)
+  if (initializing) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="w-8 h-8 border-4 border-normal-blue border-t-transparent rounded-full animate-spin"></div>

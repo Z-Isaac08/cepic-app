@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft, Check, Eye, EyeOff, Lock, Mail, Shield, User } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowLeft, Check, Eye, EyeOff, Lock, Mail, Shield, User, X } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { Button } from '../components/ui';
 import { CEPIC_INFO } from '../config/cepic';
 import { useAuthStore } from '../stores/authStore';
+import { getPasswordCriteria, isFormValid, validateField, validatePasswordMatch } from '../utils/validation';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -34,39 +35,79 @@ const RegisterPage = () => {
   // Combine local formErrors avec fieldErrors du store
   const allErrors = { ...fieldErrors, ...formErrors };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    // Clear error for this field
-    if (formErrors[e.target.name]) {
-      setFormErrors({
-        ...formErrors,
-        [e.target.name]: '',
-      });
-    }
-  };
+  // Champs qui ont été touchés (pour afficher les erreurs seulement après interaction)
+  const [touched, setTouched] = useState({});
 
-  const validateForm = () => {
-    const errors = {};
+  const handleChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
 
-    if (formData.password.length < 8) {
-      errors.password = 'Le mot de passe doit contenir au moins 8 caractères';
-    }
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
 
-    if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = 'Les mots de passe ne correspondent pas';
-    }
+      // Valider en temps réel si le champ a été touché
+      if (touched[name]) {
+        if (name === 'confirmPassword') {
+          const { error } = validatePasswordMatch(formData.password, value);
+          setFormErrors((prev) => ({ ...prev, confirmPassword: error }));
+        } else {
+          const { error } = validateField(name, value);
+          setFormErrors((prev) => ({ ...prev, [name]: error }));
+        }
+      }
 
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
+      // Revalider confirmPassword si on change le password
+      if (name === 'password' && touched.confirmPassword && formData.confirmPassword) {
+        const { error } = validatePasswordMatch(value, formData.confirmPassword);
+        setFormErrors((prev) => ({ ...prev, confirmPassword: error }));
+      }
+    },
+    [touched, formData.password, formData.confirmPassword]
+  );
+
+  const handleBlur = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+
+      // Marquer comme touché
+      setTouched((prev) => ({ ...prev, [name]: true }));
+
+      // Valider au blur
+      if (name === 'confirmPassword') {
+        const { error } = validatePasswordMatch(formData.password, value);
+        setFormErrors((prev) => ({ ...prev, confirmPassword: error }));
+      } else {
+        const { error } = validateField(name, value);
+        setFormErrors((prev) => ({ ...prev, [name]: error }));
+      }
+    },
+    [formData.password]
+  );
+
+  // Vérifier si le formulaire est valide pour activer/désactiver le bouton
+  const canSubmit = isFormValid(formData, [
+    'firstName',
+    'lastName',
+    'email',
+    'password',
+    'confirmPassword',
+  ]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    // Marquer tous les champs comme touchés pour afficher les erreurs
+    setTouched({
+      firstName: true,
+      lastName: true,
+      email: true,
+      password: true,
+      confirmPassword: true,
+    });
+
+    if (!canSubmit) {
       return;
     }
 
@@ -316,13 +357,16 @@ const RegisterPage = () => {
                       required
                       value={formData.firstName}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
-                        allErrors.firstName ? 'border-red-300' : 'border-gray-300'
+                        allErrors.firstName && touched.firstName
+                          ? 'border-red-300'
+                          : 'border-gray-300'
                       }`}
                       placeholder="Jean"
                     />
                   </div>
-                  {allErrors.firstName && (
+                  {allErrors.firstName && touched.firstName && (
                     <p className="mt-1 text-xs sm:text-sm text-red-600">{allErrors.firstName}</p>
                   )}
                 </div>
@@ -341,12 +385,13 @@ const RegisterPage = () => {
                     required
                     value={formData.lastName}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     className={`block w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
-                      allErrors.lastName ? 'border-red-300' : 'border-gray-300'
+                      allErrors.lastName && touched.lastName ? 'border-red-300' : 'border-gray-300'
                     }`}
                     placeholder="Dupont"
                   />
-                  {allErrors.lastName && (
+                  {allErrors.lastName && touched.lastName && (
                     <p className="mt-1 text-xs sm:text-sm text-red-600">{allErrors.lastName}</p>
                   )}
                 </div>
@@ -371,13 +416,14 @@ const RegisterPage = () => {
                     required
                     value={formData.email}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
-                      allErrors.email ? 'border-red-300' : 'border-gray-300'
+                      allErrors.email && touched.email ? 'border-red-300' : 'border-gray-300'
                     }`}
                     placeholder="votre@email.com"
                   />
                 </div>
-                {allErrors.email && (
+                {allErrors.email && touched.email && (
                   <p className="mt-1 text-xs sm:text-sm text-red-600">{allErrors.email}</p>
                 )}
               </div>
@@ -399,10 +445,12 @@ const RegisterPage = () => {
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     required
+                    minLength={8}
                     value={formData.password}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     className={`block w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
-                      allErrors.password ? 'border-red-300' : 'border-gray-300'
+                      allErrors.password && touched.password ? 'border-red-300' : 'border-gray-300'
                     }`}
                     placeholder="••••••••"
                   />
@@ -419,8 +467,32 @@ const RegisterPage = () => {
                     )}
                   </button>
                 </div>
-                {allErrors.password && (
-                  <p className="mt-1 text-xs sm:text-sm text-red-600">{allErrors.password}</p>
+                {/* Indicateur des critères du mot de passe */}
+                {formData.password && (
+                  <div className="mt-2 space-y-1">
+                    {(() => {
+                      const criteria = getPasswordCriteria(formData.password);
+                      const items = [
+                        { key: 'length', label: '8 caractères minimum', valid: criteria.length },
+                        { key: 'lowercase', label: 'Une lettre minuscule', valid: criteria.lowercase },
+                        { key: 'uppercase', label: 'Une lettre majuscule', valid: criteria.uppercase },
+                        { key: 'number', label: 'Un chiffre', valid: criteria.number },
+                        { key: 'special', label: 'Un caractère spécial (!@#$...)', valid: criteria.special },
+                      ];
+                      return items.map((item) => (
+                        <div key={item.key} className="flex items-center gap-1.5 text-xs">
+                          {item.valid ? (
+                            <Check className="w-3.5 h-3.5 text-green-500" />
+                          ) : (
+                            <X className="w-3.5 h-3.5 text-red-400" />
+                          )}
+                          <span className={item.valid ? 'text-green-600' : 'text-red-500'}>
+                            {item.label}
+                          </span>
+                        </div>
+                      ));
+                    })()}
+                  </div>
                 )}
               </div>
 
@@ -443,8 +515,11 @@ const RegisterPage = () => {
                     required
                     value={formData.confirmPassword}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     className={`block w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
-                      allErrors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                      allErrors.confirmPassword && touched.confirmPassword
+                        ? 'border-red-300'
+                        : 'border-gray-300'
                     }`}
                     placeholder="••••••••"
                   />
@@ -460,8 +535,18 @@ const RegisterPage = () => {
                       <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                     )}
                   </button>
+                  {/* Indicateur de correspondance */}
+                  {formData.confirmPassword && (
+                    <div className="absolute inset-y-0 right-10 flex items-center pointer-events-none">
+                      {formData.password === formData.confirmPassword ? (
+                        <Check className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <X className="h-5 w-5 text-red-400" />
+                      )}
+                    </div>
+                  )}
                 </div>
-                {allErrors.confirmPassword && (
+                {allErrors.confirmPassword && touched.confirmPassword && (
                   <p className="mt-1 text-xs sm:text-sm text-red-600">
                     {allErrors.confirmPassword}
                   </p>
@@ -499,7 +584,12 @@ const RegisterPage = () => {
               </div>
 
               {/* Submit Button */}
-              <Button type="submit" size="lg" disabled={loading} className="w-full min-h-[48px]">
+              <Button
+                type="submit"
+                size="lg"
+                disabled={loading || !canSubmit}
+                className="w-full min-h-[48px]"
+              >
                 {loading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />

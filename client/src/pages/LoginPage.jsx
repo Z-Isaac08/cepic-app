@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
 import { ArrowLeft, Check, Eye, EyeOff, Lock, Mail } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Button } from '../components/ui';
 import { CEPIC_INFO } from '../config/cepic';
 import { useAuthStore } from '../stores/authStore';
+import { validateField } from '../utils/validation';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -14,23 +15,71 @@ const LoginPage = () => {
     email: '',
     password: '',
   });
+  const [formErrors, setFormErrors] = useState({});
+  const [touched, setTouched] = useState({});
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  // Combiner les erreurs locales et du store
+  const allErrors = { ...fieldErrors, ...formErrors };
+
+  // Validation simplifiée pour login (email valide + password non vide)
+  const validateLoginField = useCallback((name, value) => {
+    if (name === 'email') {
+      return validateField('email', value);
+    }
+    // Pour le password en login, juste vérifier qu'il n'est pas vide
+    if (name === 'password') {
+      return { isValid: value.length > 0, error: value.length > 0 ? null : 'Le mot de passe est requis' };
+    }
+    return { isValid: true, error: null };
+  }, []);
+
+  const handleChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+
+      // Valider en temps réel si le champ a été touché
+      if (touched[name]) {
+        const { error: validationError } = validateLoginField(name, value);
+        setFormErrors((prev) => ({ ...prev, [name]: validationError }));
+      }
+    },
+    [touched, validateLoginField]
+  );
+
+  const handleBlur = useCallback((e) => {
+    const { name, value } = e.target;
+
+    // Marquer comme touché
+    setTouched((prev) => ({ ...prev, [name]: true }));
+
+    // Valider au blur
+    const { error: validationError } = validateLoginField(name, value);
+    setFormErrors((prev) => ({ ...prev, [name]: validationError }));
+  }, [validateLoginField]);
+
+  // Vérifier si le formulaire est valide (email valide + password non vide)
+  const canSubmit = validateLoginField('email', formData.email).isValid && formData.password.length > 0;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Marquer tous les champs comme touchés
+    setTouched({ email: true, password: true });
+
+    if (!canSubmit) {
+      return;
+    }
+
     try {
       await login(formData.email, formData.password);
-      // Login always succeeds directly (no 2FA for login)
       navigate('/');
     } catch (err) {
       console.error('Login error:', err);
-      // Error is already in store
     }
   };
 
@@ -46,7 +95,11 @@ const LoginPage = () => {
           <ArrowLeft className="w-6 h-6" />
         </button>
         <Link to="/" className="inline-flex items-center justify-center space-x-2 mb-4">
-          <img src="/logo.jpg" alt="CEPIC" className="w-16 h-16 rounded-full border-2 border-secondary-500 shadow-lg" />
+          <img
+            src="/logo.jpg"
+            alt="CEPIC"
+            className="w-16 h-16 rounded-full border-2 border-secondary-500 shadow-lg"
+          />
         </Link>
         <h1 className="text-xl font-bold text-white mb-2">Bienvenue sur CEPIC</h1>
         <p className="text-sm text-primary-100 max-w-xs mx-auto">{CEPIC_INFO.fullName}</p>
@@ -62,7 +115,9 @@ const LoginPage = () => {
           {/* Title */}
           <div className="text-center">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Bon retour !</h2>
-            <p className="mt-2 text-sm sm:text-base text-gray-600">Connectez-vous pour accéder à vos formations</p>
+            <p className="mt-2 text-sm sm:text-base text-gray-600">
+              Connectez-vous pour accéder à vos formations
+            </p>
           </div>
 
           {/* Error Message */}
@@ -81,7 +136,10 @@ const LoginPage = () => {
             <div className="space-y-4">
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2"
+                >
                   Adresse email
                 </label>
                 <div className="relative">
@@ -95,20 +153,24 @@ const LoginPage = () => {
                     required
                     value={formData.email}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     className={`block w-full pl-10 pr-3 py-3 sm:py-3.5 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
-                      fieldErrors?.email ? 'border-red-300' : 'border-gray-300'
+                      allErrors?.email && touched.email ? 'border-red-300' : 'border-gray-300'
                     }`}
                     placeholder="votre@email.com"
                   />
                 </div>
-                {fieldErrors?.email && (
-                  <p className="mt-1 text-xs sm:text-sm text-red-600">{fieldErrors.email}</p>
+                {allErrors?.email && touched.email && (
+                  <p className="mt-1 text-xs sm:text-sm text-red-600">{allErrors.email}</p>
                 )}
               </div>
 
               {/* Password */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2"
+                >
                   Mot de passe
                 </label>
                 <div className="relative">
@@ -120,10 +182,12 @@ const LoginPage = () => {
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     required
+                    minLength={8}
                     value={formData.password}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     className={`block w-full pl-10 pr-12 py-3 sm:py-3.5 border rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors text-base min-h-[48px] ${
-                      fieldErrors?.password ? 'border-red-300' : 'border-gray-300'
+                      allErrors?.password && touched.password ? 'border-red-300' : 'border-gray-300'
                     }`}
                     placeholder="••••••••"
                   />
@@ -131,7 +195,9 @@ const LoginPage = () => {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center min-w-[44px] justify-center"
-                    aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                    aria-label={
+                      showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+                    }
                   >
                     {showPassword ? (
                       <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -140,8 +206,8 @@ const LoginPage = () => {
                     )}
                   </button>
                 </div>
-                {fieldErrors?.password && (
-                  <p className="mt-1 text-xs sm:text-sm text-red-600">{fieldErrors.password}</p>
+                {allErrors?.password && touched.password && (
+                  <p className="mt-1 text-xs sm:text-sm text-red-600">{allErrors.password}</p>
                 )}
               </div>
             </div>
@@ -169,7 +235,12 @@ const LoginPage = () => {
             </div>
 
             {/* Submit Button */}
-            <Button type="submit" size="lg" disabled={loading} className="w-full min-h-[48px]">
+            <Button
+              type="submit"
+              size="lg"
+              disabled={loading || !canSubmit}
+              className="w-full min-h-[48px]"
+            >
               {loading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
@@ -211,25 +282,33 @@ const LoginPage = () => {
               className="w-24 xl:w-32 h-24 xl:h-32 mx-auto mb-4 xl:mb-6 rounded-full border-4 border-secondary-500 shadow-lg"
             />
             <h1 className="text-3xl xl:text-4xl font-bold mb-3 xl:mb-4">Bienvenue sur CEPIC</h1>
-            <p className="text-lg xl:text-xl text-primary-100 mb-6 xl:mb-8 max-w-md mx-auto">{CEPIC_INFO.fullName}</p>
+            <p className="text-lg xl:text-xl text-primary-100 mb-6 xl:mb-8 max-w-md mx-auto">
+              {CEPIC_INFO.fullName}
+            </p>
             <div className="space-y-3 xl:space-y-4 text-left max-w-md mx-auto">
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-0.5">
                   <Check className="w-4 h-4 text-primary-900" />
                 </div>
-                <p className="text-primary-100 text-sm xl:text-base">Formations certifiantes reconnues</p>
+                <p className="text-primary-100 text-sm xl:text-base">
+                  Formations certifiantes reconnues
+                </p>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-0.5">
                   <Check className="w-4 h-4 text-primary-900" />
                 </div>
-                <p className="text-primary-100 text-sm xl:text-base">Formateurs experts et certifiés</p>
+                <p className="text-primary-100 text-sm xl:text-base">
+                  Formateurs experts et certifiés
+                </p>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 w-6 h-6 bg-secondary-500 rounded-full flex items-center justify-center mt-0.5">
                   <Check className="w-4 h-4 text-primary-900" />
                 </div>
-                <p className="text-primary-100 text-sm xl:text-base">Suivi personnalisé de votre progression</p>
+                <p className="text-primary-100 text-sm xl:text-base">
+                  Suivi personnalisé de votre progression
+                </p>
               </div>
             </div>
           </motion.div>

@@ -7,6 +7,7 @@ export const useAdminStore = create((set, get) => ({
   users: [],
   trainings: [],
   categories: [],
+  enrollments: [],
   galleryImages: [],
   messages: [],
   messagesLoading: false,
@@ -18,15 +19,20 @@ export const useAdminStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await adminAPI.getDashboardStats();
+      // L'API retourne { success: true, data: {...} }
+      // adminAPI.getDashboardStats retourne response.data donc on reçoit { success: true, data: {...} }
+      // On extrait response.data pour obtenir les vraies données { userStats, recent, ... }
+      const dashboardStats = response?.data || response;
       set({
         dashboardData: {
           ...get().dashboardData,
-          ...response.data,
+          ...dashboardStats,
           lastUpdated: new Date().toISOString(),
         },
         loading: false,
       });
     } catch (error) {
+      console.error('Erreur fetchDashboardData:', error);
       set({
         error: error.response?.data?.error || 'Erreur lors du chargement des données',
         loading: false,
@@ -523,6 +529,21 @@ export const useAdminStore = create((set, get) => ({
       }));
       
       throw error;
+    }
+  },
+
+  // ============================================
+  // GESTION DES INSCRIPTIONS
+  // ============================================
+
+  // Récupérer toutes les inscriptions
+  fetchEnrollments: async (params = {}) => {
+    try {
+      const response = await adminAPI.getAllEnrollments(params);
+      set({ enrollments: response.data?.enrollments || [] });
+      return response;
+    } catch (error) {
+      console.error('Erreur lors du chargement des inscriptions:', error);
     }
   },
 
