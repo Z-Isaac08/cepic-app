@@ -1,17 +1,20 @@
 import { motion } from 'framer-motion';
-import { Bookmark, BookmarkCheck, CheckCircle, Download, Share2, Users } from 'lucide-react';
+import { Bookmark, BookmarkCheck, CheckCircle, Download, Loader2, Share2, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { useAuthStore } from '../../../stores/authStore';
 import { useTrainingStore } from '../../../stores/trainingStore';
+import { useEnrollmentStore } from '../../../stores/enrollmentStore';
 import { Badge, Button } from '../../ui';
 
 const PricingCard = ({ training }) => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { toggleBookmark, trainings } = useTrainingStore();
+  const { createEnrollment } = useEnrollmentStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [isEnrolling, setIsEnrolling] = useState(false);
 
   // Récupérer le statut de bookmark depuis le store
   const isBookmarked = training.isBookmarked || false;
@@ -61,12 +64,31 @@ const PricingCard = ({ training }) => {
     }
   };
 
-  const handleEnroll = () => {
+  const handleEnroll = async () => {
     if (!user) {
       navigate('/connexion');
       return;
     }
-    navigate(`/rejoindre/${training.id}`);
+
+    // Si formation gratuite (strictement price === 0), inscription directe
+    const isFree = training.price === 0;
+
+    if (isFree) {
+      setIsEnrolling(true);
+      try {
+        const response = await createEnrollment(training.id);
+        toast.success(response.message || 'Inscription confirmée !');
+        // Rediriger vers mes formations
+        navigate('/mes-formations');
+      } catch (error) {
+        toast.error(error.response?.data?.error || "Erreur lors de l'inscription");
+      } finally {
+        setIsEnrolling(false);
+      }
+    } else {
+      // Formation payante : redirection vers page de paiement
+      navigate(`/rejoindre/${training.id}`);
+    }
   };
 
   // Format price (en FCFA)
@@ -123,8 +145,20 @@ const PricingCard = ({ training }) => {
 
         {/* CTA Buttons */}
         <div className="space-y-2 sm:space-y-3">
-          <Button size="lg" className="w-full min-h-[48px]" onClick={handleEnroll}>
-            S'inscrire maintenant
+          <Button
+            size="lg"
+            className="w-full min-h-[48px]"
+            onClick={handleEnroll}
+            disabled={isEnrolling}
+          >
+            {isEnrolling ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Inscription en cours...
+              </>
+            ) : (
+              "S'inscrire maintenant"
+            )}
           </Button>
 
           <div className="grid grid-cols-2 gap-2">

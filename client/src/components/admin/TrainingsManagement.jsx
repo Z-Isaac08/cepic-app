@@ -45,6 +45,7 @@ const TrainingsManagement = () => {
     program: '',
     categoryId: '',
     price: '',
+    isFree: false, // Checkbox explicite pour formation gratuite
     duration: '',
     level: 'DEBUTANT',
     capacity: '',
@@ -83,12 +84,15 @@ const TrainingsManagement = () => {
 
     if (training) {
       setEditingTraining(training);
+      // Déterminer si la formation est gratuite (price === 0 explicitement)
+      const trainingIsFree = training.price === 0;
       setFormData({
         title: training.title || '',
         description: training.description || '',
         program: training.program || '',
         categoryId: training.categoryId || '',
-        price: training.price || '',
+        price: trainingIsFree ? '0' : (training.price || ''),
+        isFree: trainingIsFree,
         duration: training.duration || '',
         level: training.level || 'DEBUTANT',
         capacity: training.capacity || '',
@@ -115,6 +119,7 @@ const TrainingsManagement = () => {
         program: '',
         categoryId: '',
         price: '',
+        isFree: false,
         duration: '',
         level: 'DEBUTANT',
         capacity: '20',
@@ -179,6 +184,11 @@ const TrainingsManagement = () => {
       toast.error('La durée est obligatoire');
       return;
     }
+    // Validation du prix : obligatoire si pas gratuit
+    if (!formData.isFree && !formData.price) {
+      toast.error('Le prix est obligatoire (ou cochez "Formation gratuite")');
+      return;
+    }
 
     try {
       // Préparer les données selon le nouveau schéma simplifié
@@ -197,7 +207,8 @@ const TrainingsManagement = () => {
         // Champs simples
         duration: formData.duration.trim(), // String: "24h", "2 jours", etc.
         level: formData.level,
-        price: formData.price ? parseInt(formData.price) : 0,
+        // Prix : 0 uniquement si checkbox "gratuit" cochée, sinon valeur saisie
+        price: formData.isFree ? 0 : parseInt(formData.price),
         capacity: formData.capacity ? parseInt(formData.capacity) : null,
 
         // Champs optionnels
@@ -630,7 +641,7 @@ const TrainingsManagement = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Prix (FCFA)
+                        Prix (FCFA) {!formData.isFree && <span className="text-red-500">*</span>}
                       </label>
                       <input
                         type="number"
@@ -639,10 +650,29 @@ const TrainingsManagement = () => {
                         onChange={(e) =>
                           setFormData((prev) => ({ ...prev, price: e.target.value }))
                         }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        disabled={formData.isFree}
+                        className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                          formData.isFree ? 'bg-gray-100 cursor-not-allowed' : ''
+                        }`}
                         placeholder="150000"
                       />
-                      <p className="text-xs text-gray-500 mt-1">0 = Gratuit</p>
+                      {/* Checkbox formation gratuite */}
+                      <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.isFree}
+                          onChange={(e) => {
+                            const isChecked = e.target.checked;
+                            setFormData((prev) => ({
+                              ...prev,
+                              isFree: isChecked,
+                              price: isChecked ? '0' : prev.price === '0' ? '' : prev.price,
+                            }));
+                          }}
+                          className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                        />
+                        <span className="text-sm text-gray-700">Formation gratuite</span>
+                      </label>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">

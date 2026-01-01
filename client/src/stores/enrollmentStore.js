@@ -25,11 +25,12 @@ const useEnrollmentStore = create(
             currentEnrollment: response.data,
             loading: false
           }));
-          return response.data;
+          // Retourner la réponse complète (inclut isFree et message)
+          return response;
         } catch (error) {
-          set({ 
+          set({
             error: error.response?.data?.error || 'Erreur lors de l\'inscription',
-            loading: false 
+            loading: false
           });
           throw error;
         }

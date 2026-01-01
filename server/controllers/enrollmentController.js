@@ -41,14 +41,19 @@ exports.createEnrollment = async (req, res, next) => {
       });
     }
 
+    // Vérifier si la formation est gratuite (strictement price === 0)
+    // Ne pas utiliser !training.price car null/undefined ne doit pas être considéré gratuit
+    const isFree = training.price === 0;
+
     // Créer l'inscription
     const enrollment = await prisma.trainingEnrollment.create({
       data: {
         userId,
         trainingId,
         amount: training.price || 0,
-        status: 'PENDING',
-        paymentStatus: 'UNPAID',
+        // Si gratuit : inscription confirmée directement
+        status: isFree ? 'CONFIRMED' : 'PENDING',
+        paymentStatus: isFree ? 'FREE' : 'UNPAID',
       },
       include: {
         training: {
@@ -59,16 +64,16 @@ exports.createEnrollment = async (req, res, next) => {
       },
     });
 
-    // Incrémenter le compteur d'inscriptions - SUPPRIMÉ car le champ n'existe pas dans le schéma
-    // await prisma.training.update({
-    //   where: { id: trainingId },
-    //   data: { enrollmentCount: { increment: 1 } },
-    // });
+    // Message différent selon gratuit ou payant
+    const message = isFree
+      ? 'Inscription confirmée ! Vous avez accès à cette formation gratuite.'
+      : 'Inscription créée avec succès. Procédez au paiement pour confirmer.';
 
     res.json({
       success: true,
       data: enrollment,
-      message: 'Inscription créée avec succès. Procédez au paiement pour confirmer.',
+      isFree,
+      message,
     });
   } catch (error) {
     next(error);

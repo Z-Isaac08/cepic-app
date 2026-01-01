@@ -1,11 +1,17 @@
 // client/src/components/trainings/detail/TrainingHero.jsx
 import { motion } from 'framer-motion';
-import { Clock, MapPin, Monitor, Users, Zap } from 'lucide-react';
+import { Clock, Loader2, MapPin, Monitor, Users, Zap } from 'lucide-react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
+import { toast } from 'sonner';
+import { useEnrollmentStore } from '../../../stores/enrollmentStore';
 import { Badge, Button } from '../../ui';
 
 const TrainingHero = ({ training, user }) => {
   const navigate = useNavigate();
+  const { createEnrollment } = useEnrollmentStore();
+  const [isEnrolling, setIsEnrolling] = useState(false);
+
   const getDeliveryIcon = (mode) => {
     switch (mode) {
       case 'ONLINE':
@@ -17,12 +23,29 @@ const TrainingHero = ({ training, user }) => {
     }
   };
 
-  const handleEnroll = () => {
+  const handleEnroll = async () => {
     if (!user) {
       navigate('/connexion');
       return;
     }
-    navigate(`/rejoindre/${training.id}`);
+
+    // Si formation gratuite (strictement price === 0), inscription directe
+    const isFree = training.price === 0;
+
+    if (isFree) {
+      setIsEnrolling(true);
+      try {
+        const response = await createEnrollment(training.id);
+        toast.success(response.message || 'Inscription confirmée !');
+        navigate('/mes-formations');
+      } catch (error) {
+        toast.error(error.response?.data?.error || "Erreur lors de l'inscription");
+      } finally {
+        setIsEnrolling(false);
+      }
+    } else {
+      navigate(`/rejoindre/${training.id}`);
+    }
   };
 
   return (
@@ -104,8 +127,16 @@ const TrainingHero = ({ training, user }) => {
                 variant="primary"
                 className="w-full sm:w-auto min-h-[48px]"
                 onClick={handleEnroll}
+                disabled={isEnrolling}
               >
-                S'inscrire maintenant
+                {isEnrolling ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Inscription en cours...
+                  </>
+                ) : (
+                  "S'inscrire maintenant"
+                )}
               </Button>
               <Button variant="outline-white" size="lg" className="w-full sm:w-auto min-h-[48px]">
                 Voir la vidéo
