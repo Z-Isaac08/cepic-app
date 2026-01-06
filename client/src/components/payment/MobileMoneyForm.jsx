@@ -6,10 +6,10 @@ export const MobileMoneyForm = ({ amount, onSubmit, loading }) => {
   const [phone, setPhone] = useState('');
 
   const operators = [
-    { id: 'wave', name: 'Wave', color: 'bg-cyan-500' },
+    { id: 'wave', name: 'Wave', color: 'bg-sky-600' },
     { id: 'orange', name: 'Orange Money', color: 'bg-orange-500' },
     { id: 'mtn', name: 'MTN Money', color: 'bg-yellow-500' },
-    { id: 'moov', name: 'Moov Money', color: 'bg-blue-500' },
+    { id: 'moov', name: 'Moov Money', color: 'bg-blue-700' },
   ];
 
   const handleSubmit = (e) => {

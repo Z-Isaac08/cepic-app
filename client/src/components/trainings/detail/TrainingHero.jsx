@@ -55,23 +55,23 @@ const TrainingHero = ({ training, user }) => {
         <nav className="flex mb-4 sm:mb-6 overflow-x-auto" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm whitespace-nowrap">
             <li>
-              <Link to="/" className="text-primary-200 hover:text-white transition-colors py-1 min-h-[44px] inline-flex items-center">
+              <Link to="/" className="text-white/80 hover:text-white transition-colors py-1 min-h-[44px] inline-flex items-center">
                 Accueil
               </Link>
             </li>
             <li>
-              <span className="mx-1 sm:mx-2 text-primary-300">/</span>
+              <span className="mx-1 sm:mx-2 text-white/60">/</span>
             </li>
             <li>
               <Link
                 to="/formations"
-                className="text-primary-200 hover:text-white transition-colors py-1 min-h-[44px] inline-flex items-center"
+                className="text-white/80 hover:text-white transition-colors py-1 min-h-[44px] inline-flex items-center"
               >
                 Formations
               </Link>
             </li>
             <li>
-              <span className="mx-1 sm:mx-2 text-primary-300">/</span>
+              <span className="mx-1 sm:mx-2 text-white/60">/</span>
             </li>
             <li className="text-white font-medium truncate max-w-[150px] sm:max-w-xs" title={training.title}>
               {training.title}
@@ -83,7 +83,7 @@ const TrainingHero = ({ training, user }) => {
           {/* Left Column - Content */}
           <div className="lg:col-span-2">
             <div className="flex flex-wrap items-center gap-2 mb-3 sm:mb-4">
-              <Badge variant="secondary" className="bg-white/20 border-0 text-xs sm:text-sm">
+              <Badge variant="secondary" className="bg-white/30 backdrop-blur-sm border-0 text-white font-medium text-xs sm:text-sm">
                 {training.category?.name}
               </Badge>
               {training.isNew && <Badge variant="accent" className="text-xs sm:text-sm">Nouveau</Badge>}
