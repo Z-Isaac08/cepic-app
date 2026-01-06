@@ -2,10 +2,11 @@ import { Smartphone } from 'lucide-react';
 import { useState } from 'react';
 
 export const MobileMoneyForm = ({ amount, onSubmit, loading }) => {
-  const [operator, setOperator] = useState('orange');
+  const [operator, setOperator] = useState('wave');
   const [phone, setPhone] = useState('');
 
   const operators = [
+    { id: 'wave', name: 'Wave', color: 'bg-cyan-500' },
     { id: 'orange', name: 'Orange Money', color: 'bg-orange-500' },
     { id: 'mtn', name: 'MTN Money', color: 'bg-yellow-500' },
     { id: 'moov', name: 'Moov Money', color: 'bg-blue-500' },
@@ -30,7 +31,7 @@ export const MobileMoneyForm = ({ amount, onSubmit, loading }) => {
         <label id="operator-label" className="block text-sm font-medium text-gray-700 mb-2">
           Opérateur Mobile Money
         </label>
-        <div role="radiogroup" aria-labelledby="operator-label" className="grid grid-cols-3 gap-3">
+        <div role="radiogroup" aria-labelledby="operator-label" className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {operators.map((op) => (
             <button
               key={op.id}

@@ -6,7 +6,7 @@ export const PaymentMethodSelector = ({ selected, onSelect }) => {
       id: 'mobile_money',
       name: 'Mobile Money',
       icon: Smartphone,
-      options: ['Orange Money', 'MTN Money', 'Moov Money']
+      options: ['Wave', 'Orange Money', 'MTN Money', 'Moov Money']
     },
     {
       id: 'credit_card',
