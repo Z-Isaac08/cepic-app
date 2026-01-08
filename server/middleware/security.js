@@ -204,12 +204,21 @@ const getCsrfToken = (req, res, next) => {
   const token = generateCsrfToken(sessionId);
 
   // Set in cookie for automatic inclusion in requests
-  res.cookie('XSRF-TOKEN', token, {
-    httpOnly: false, // Allow JavaScript to read it for header inclusion
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
+  const isProduction = process.env.NODE_ENV === 'production';
+  const cookieOptions = {
+    httpOnly: false, // Must be false - JavaScript needs to read it for double-submit pattern
+    secure: isProduction, // HTTPS only in production
+    sameSite: isProduction ? 'none' : 'lax', // 'none' required for cross-origin (different domains)
     maxAge: 3600000, // 1 hour
-  });
+  };
+
+  // Add Partitioned for CHIPS compliance (cross-site cookie partitioning)
+  // This prevents the browser warning about foreign cookies
+  if (isProduction) {
+    cookieOptions.partitioned = true;
+  }
+
+  res.cookie('XSRF-TOKEN', token, cookieOptions);
 
   res.json({
     success: true,

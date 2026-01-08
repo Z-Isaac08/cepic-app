@@ -38,21 +38,28 @@ const createSendToken = async (user, statusCode, res, req, message = 'Success') 
   // Set secure HTTP-only cookies
   // Use sameSite: 'none' for cross-site cookies in production (client and server on different domains)
   const isProduction = process.env.NODE_ENV === 'production';
+
   const cookieOptions = {
     expires: jwtExpires,
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax',
+    httpOnly: true, // CRITICAL: JavaScript cannot access auth tokens
+    secure: isProduction, // HTTPS only in production
+    sameSite: isProduction ? 'none' : 'lax', // 'none' required for cross-origin
     path: '/'
   };
 
   const refreshCookieOptions = {
     expires: refreshExpires,
-    httpOnly: true,
+    httpOnly: true, // CRITICAL: JavaScript cannot access refresh tokens
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
-    path: '/api/auth'
+    path: '/api/auth' // Restricted path for refresh token
   };
+
+  // Add Partitioned for CHIPS compliance (prevents browser warnings)
+  if (isProduction) {
+    cookieOptions.partitioned = true;
+    refreshCookieOptions.partitioned = true;
+  }
 
   res.cookie('auth_token', token, cookieOptions);
   res.cookie('refresh_token', refreshToken, refreshCookieOptions);
@@ -88,19 +95,29 @@ const verifyToken = (token) => {
 
 const clearAuthCookies = (res) => {
   const isProduction = process.env.NODE_ENV === 'production';
-  res.clearCookie('auth_token', {
+
+  const authClearOptions = {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
     path: '/'
-  });
+  };
 
-  res.clearCookie('refresh_token', {
+  const refreshClearOptions = {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
     path: '/api/auth'
-  });
+  };
+
+  // Must include partitioned to properly clear partitioned cookies
+  if (isProduction) {
+    authClearOptions.partitioned = true;
+    refreshClearOptions.partitioned = true;
+  }
+
+  res.clearCookie('auth_token', authClearOptions);
+  res.clearCookie('refresh_token', refreshClearOptions);
 };
 
 module.exports = {
